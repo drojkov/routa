@@ -1,16 +1,20 @@
+"use client";
+
+import { useI18n } from "@/i18n/provider";
 import type { Model } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 const VENDOR_ICON: Record<string, string | null> = {
   OpenAI: null,
   Anthropic: "anthropic",
-  Google: "googlegemini",
+  Google: "gemini",
   DeepSeek: "deepseek",
   Alibaba: "qwen",
 };
 
 /** Карточка модели в стиле «платёжной карты» (реф. 4). */
 export function ModelCard({ model, className }: { model: Model; className?: string }) {
+  const { dict, money } = useI18n();
   const [a, b, c] = model.gradient;
   const icon = VENDOR_ICON[model.vendor];
   const darkStripe = ["#1f2023", "#6d28d9", "#e2177a", "#3b82f6", "#35c23f", "#ff6a00"].includes(model.stripe);
@@ -32,7 +36,7 @@ export function ModelCard({ model, className }: { model: Model; className?: stri
         <div className="flex items-center gap-1.5">
           {icon ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={`https://cdn.simpleicons.org/${icon}/111111`} alt="" className="size-4" />
+            <img src={`/logos/${icon}.svg`} alt="" className="size-4 brightness-0" />
           ) : (
             <span className="grid size-4 place-items-center rounded-full bg-black text-[8px] font-bold text-white">AI</span>
           )}
@@ -47,7 +51,7 @@ export function ModelCard({ model, className }: { model: Model; className?: stri
       </header>
 
       <div className="relative mt-auto px-5 pb-4">
-        <p className="text-[10px] font-medium tracking-wide text-black/50 uppercase">Model ID</p>
+        <p className="text-[10px] font-medium tracking-wide text-black/50 uppercase">{dict.card.modelId}</p>
         <p className="font-mono text-[13px] leading-snug font-medium break-all text-black/85">{model.id}</p>
         <p className="mt-3 text-[22px] leading-none font-semibold tracking-tight text-black">{model.name}</p>
       </div>
@@ -60,11 +64,11 @@ export function ModelCard({ model, className }: { model: Model; className?: stri
         style={{ background: model.stripe }}
       >
         <div>
-          <p className="text-[9px] tracking-wide uppercase opacity-70">Вход / 1M</p>
-          <p className="text-sm font-semibold">{model.priceIn} ₽</p>
+          <p className="text-[9px] tracking-wide uppercase opacity-70">{dict.card.in1m}</p>
+          <p className="text-sm font-semibold">{money(model.priceIn)}</p>
         </div>
         <div className="text-right">
-          <p className="text-[9px] tracking-wide uppercase opacity-70">Контекст</p>
+          <p className="text-[9px] tracking-wide uppercase opacity-70">{dict.card.context}</p>
           <p className="text-sm font-semibold">{model.context}</p>
         </div>
       </footer>

@@ -9,28 +9,36 @@ import {
   FileText,
   KeyRound,
   QrCode,
+  ReceiptText,
   RefreshCw,
-  ShieldCheck,
+  Smartphone,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import * as React from "react";
-import { Eyebrow, Reveal } from "@/components/site/reveal";
+import { OPEN_COOKIE_SETTINGS } from "@/components/site/cookie-banner";
+import { LocaleSwitcher } from "@/components/site/locale-switcher";
 import { PendingButton } from "@/components/site/pending-button";
+import { Eyebrow, Reveal } from "@/components/site/reveal";
 import BeamBorder from "@/components/ui/border-beam";
 import { MarqueeLogoScroller } from "@/components/ui/marquee-logo-scroller";
-import { BRAND, INTEGRATIONS, MODELS } from "@/lib/site";
+import { MIN_TOPUP_USD, USD_RATES } from "@/i18n/config";
+import { fmtNodes } from "@/i18n/fmt";
+import { useI18n } from "@/i18n/provider";
+import { API_BASE, API_HOST, BRAND, COMPANY, INTEGRATIONS, MODELS } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 /* ——— Лента моделей под hero (реф. 1) ——— */
 export function ModelStrip() {
+  const { dict } = useI18n();
   const row = [...MODELS, ...MODELS];
   return (
     <section className="relative border-y border-border bg-card/60">
       <div className="mx-auto flex max-w-6xl items-center">
         <p className="hidden shrink-0 border-r border-border px-6 py-6 text-xs leading-tight text-muted-foreground md:block">
-          Доступно
+          {dict.strip.line1}
           <br />
-          по одному ключу
+          {dict.strip.line2}
         </p>
         <div className="mask-fade-x pause-on-hover overflow-hidden py-6">
           <ul className="animate-marquee flex w-max items-center gap-12 px-6" style={{ "--marquee-duration": "45s" } as React.CSSProperties}>
@@ -53,38 +61,40 @@ export function ModelStrip() {
 
 /* ——— Три шага (реф. 2) ——— */
 export function Steps() {
+  const { dict, money } = useI18n();
+  const s = dict.steps;
   return (
     <section className="mx-auto max-w-6xl px-4 py-24">
       <div className="text-center">
-        <Eyebrow>Как подключить</Eyebrow>
-        <h2 className="mt-4 text-3xl font-semibold tracking-tight text-balance md:text-5xl">Три шага до первого ответа</h2>
+        <Eyebrow>{s.eyebrow}</Eyebrow>
+        <h2 className="mt-4 text-3xl font-semibold tracking-tight text-balance md:text-5xl">{s.title}</h2>
       </div>
       <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-3">
         <Reveal rotate={-3}>
-          <StepCard n={1} title="Создайте ключ." sub="Почта, пароль — готово.">
+          <StepCard n={1} title={s.s1Title} sub={s.s1Sub}>
             <div className="flex items-center gap-2 rounded-2xl bg-card p-2 pl-4 shadow-soft">
               <span className="font-mono text-xs text-muted-foreground">sk-routa-…</span>
               <span className="ml-auto rounded-xl bg-brand px-4 py-2 text-sm font-medium text-white shadow-[0_8px_20px_-8px_var(--brand)]">
-                Создать ключ
+                {s.s1Button}
               </span>
             </div>
           </StepCard>
         </Reveal>
         <Reveal delay={0.1}>
-          <StepCard n={2} title="Замените base_url." sub="SDK OpenAI, Cursor, n8n — без правок кода.">
+          <StepCard n={2} title={s.s2Title} sub={s.s2Sub}>
             <div className="relative space-y-2">
               <div className="ml-8 rounded-2xl rounded-tr-sm bg-card p-2.5 font-mono text-[11px] shadow-soft">
-                base_url = <span className="text-brand-strong">&quot;api.routa.ru/v1&quot;</span>
+                base_url = <span className="text-brand-strong">&quot;{API_BASE.replace("https://", "")}&quot;</span>
               </div>
               <div className="mr-8 flex items-start gap-2 rounded-2xl rounded-tl-sm bg-card p-2.5 text-xs shadow-soft">
                 <span className="grid size-6 shrink-0 place-items-center rounded-full bg-violet-100 text-[10px]">AI</span>
-                Привет! Чем помочь? <span className="ml-auto rounded bg-brand-soft px-1 text-[10px] text-brand-strong">0,04 ₽</span>
+                {s.s2Reply} <span className="ml-auto rounded bg-brand-soft px-1 text-[10px] text-brand-strong">{money(0.0004)}</span>
               </div>
             </div>
           </StepCard>
         </Reveal>
         <Reveal delay={0.2} rotate={3}>
-          <StepCard n={3} title="Следите за расходом." sub="По ключам, моделям и дням.">
+          <StepCard n={3} title={s.s3Title} sub={s.s3Sub}>
             <div className="relative flex h-24 items-end justify-center gap-3">
               <div className="absolute inset-x-0 top-6 border-t-2 border-dashed border-brand/50" />
               {[45, 62, 100, 38].map((h, i) => (
@@ -106,11 +116,12 @@ export function Steps() {
 }
 
 function StepCard({ n, title, sub, children }: { n: number; title: string; sub: string; children: React.ReactNode }) {
+  const { dict, t } = useI18n();
   return (
     <div className="shadow-soft flex h-full flex-col gap-10 rounded-[32px] border-[6px] border-card bg-gradient-to-b from-background to-muted/60 p-6">
       <div className="min-h-28 pt-4">{children}</div>
       <div>
-        <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Шаг {n}</p>
+        <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">{t(dict.steps.step, { n })}</p>
         <p className="mt-2 text-lg leading-snug">
           <span className="font-semibold">{title}</span> <span className="text-muted-foreground">{sub}</span>
         </p>
@@ -120,53 +131,65 @@ function StepCard({ n, title, sub, children }: { n: number; title: string; sub: 
 }
 
 /* ——— Отзыв + «с кем мы работаем» (реф. 2 + marquee-logo-scroller) ——— */
-const QUOTES = [
-  {
-    name: "Анна Крылова",
-    role: "CTO, студия чат-ботов",
-    title: "Переехали с OpenRouter за вечер",
-    text: "Поменяли base_url, и всё заработало. Главное — закрывающие документы: бухгалтерия наконец перестала спрашивать, что это за доллары.",
-    img: "https://i.pravatar.cc/120?img=47",
-  },
-  {
-    name: "Илья Мартынов",
-    role: "Инди-разработчик",
-    title: "Claude Code без VPN",
-    text: "Пишу агентом по 6 часов в день. Резервный источник спасал уже дважды — я узнал об этом только из статус-страницы.",
-    img: "https://i.pravatar.cc/120?img=12",
-  },
-  {
-    name: "Мария Лебедева",
-    role: "Руководитель ML, e-commerce",
-    title: "Лимиты на каждый ключ",
-    text: "Выдали ключи трём командам с разными бюджетами. Никто не сжёг месячный бюджет за выходные — впервые.",
-    img: "https://i.pravatar.cc/120?img=32",
-  },
+// Имена и тексты — заглушки макета. До запуска заменить реальными отзывами (с согласия авторов) или убрать блок.
+/** Кавычки по правилам языка. */
+const QUOTE_MARKS: Record<string, [string, string]> = {
+  en: ["“", "”"],
+  ru: ["«", "»"],
+  es: ["«", "»"],
+  pt: ["“", "”"],
+  de: ["„", "“"],
+  fr: ["« ", " »"],
+  zh: ["“", "”"],
+  ja: ["「", "」"],
+};
+
+const PEOPLE = [
+  { name: "Anna Krylova", tint: "from-amber-200 to-orange-400" },
+  { name: "Lucas Moreau", tint: "from-sky-200 to-blue-500" },
+  { name: "Mei Tanaka", tint: "from-pink-200 to-fuchsia-500" },
 ];
 
 export function Testimonials() {
+  const { dict, t, locale } = useI18n();
+  const quotes = dict.testimonials.quotes;
+  const [open, close] = QUOTE_MARKS[locale];
   const [i, setI] = React.useState(0);
   React.useEffect(() => {
-    const t = setInterval(() => setI((v) => (v + 1) % QUOTES.length), 6000);
-    return () => clearInterval(t);
-  }, []);
-  const q = QUOTES[i];
+    const id = setInterval(() => setI((v) => (v + 1) % quotes.length), 6000);
+    return () => clearInterval(id);
+  }, [quotes.length]);
+  const q = quotes[i];
+  const p = PEOPLE[i];
   return (
     <section className="mx-auto max-w-6xl px-4 pb-24">
       <div className="mx-auto max-w-xl text-center">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img key={q.img} src={q.img} alt="" className="mx-auto size-16 rounded-full object-cover shadow-float" />
+        <div
+          key={p.name}
+          aria-hidden
+          className={cn("mx-auto grid size-16 place-items-center rounded-full bg-gradient-to-br text-lg font-semibold text-white shadow-float", p.tint)}
+        >
+          {p.name
+            .split(" ")
+            .map((w) => w[0])
+            .join("")}
+        </div>
         <p className="mt-4 text-xl font-semibold">{q.title}</p>
-        <p className="mt-2 text-muted-foreground">«{q.text}»</p>
+        <p className="mt-2 text-muted-foreground">
+          {open}
+          {q.text}
+          {close}
+        </p>
         <p className="mt-3 text-sm text-muted-foreground/70">
-          — {q.name}, {q.role}
+          — {p.name}, {q.role}
         </p>
         <div className="mt-6 flex justify-center gap-2">
-          {QUOTES.map((x, k) => (
+          {PEOPLE.map((x, k) => (
             <button
               key={x.name}
               onClick={() => setI(k)}
-              aria-label={`Отзыв ${k + 1}`}
+              aria-label={t(dict.testimonials.review, { n: k + 1 })}
+              aria-pressed={k === i}
               className={cn(
                 "rounded-xl border px-3 py-1.5 text-xs transition",
                 k === i ? "border-foreground/10 bg-card font-medium shadow-soft" : "border-transparent text-muted-foreground",
@@ -180,13 +203,9 @@ export function Testimonials() {
 
       <div className="mt-16">
         <MarqueeLogoScroller
-          title="С кем мы работаем"
-          description="Ключ работает везде, где можно указать OpenAI-совместимый base_url: IDE, агенты, no-code и чат-клиенты."
-          logos={INTEGRATIONS.map((x) => ({
-            src: `https://cdn.simpleicons.org/${x.icon}`,
-            alt: x.name,
-            gradient: x.gradient,
-          }))}
+          title={dict.testimonials.integrationsTitle}
+          description={dict.testimonials.integrationsText}
+          logos={INTEGRATIONS.map((x) => ({ src: x.logo, alt: x.name, gradient: x.gradient }))}
           speed="normal"
         />
       </div>
@@ -196,22 +215,24 @@ export function Testimonials() {
 
 /* ——— Возможности: бенто (реф. 5) ——— */
 export function Features() {
+  const { dict, href, money, t } = useI18n();
+  const f = dict.features;
   return (
     <section className="mx-auto max-w-6xl px-4 py-24">
       <div className="text-center">
-        <Eyebrow>Возможности</Eyebrow>
-        <h2 className="mt-4 text-3xl font-semibold tracking-tight text-balance md:text-5xl">Что {BRAND} берёт на себя</h2>
-        <p className="mt-3 text-muted-foreground">Чтобы вы думали о продукте, а не о доступе к моделям.</p>
+        <Eyebrow>{f.eyebrow}</Eyebrow>
+        <h2 className="mt-4 text-3xl font-semibold tracking-tight text-balance md:text-5xl">{t(f.title, { brand: BRAND })}</h2>
+        <p className="mt-3 text-muted-foreground">{f.sub}</p>
       </div>
 
       <div className="mt-14 grid grid-cols-1 gap-5 md:grid-cols-2">
         <Reveal>
-          <Bento title="Лимиты на каждый ключ" text="Бюджет, белый список моделей и IP. Ключ стажёра не потратит месячный бюджет за ночь.">
+          <Bento title={f.keysTitle} text={f.keysText}>
             <div className="space-y-2">
               {[
-                { n: "prod-backend", b: "20 000 ₽", u: 62, on: true },
-                { n: "intern-cursor", b: "1 500 ₽", u: 91, on: true },
-                { n: "old-bot", b: "—", u: 0, on: false },
+                { n: "prod-backend", b: 200, u: 62, on: true },
+                { n: "intern-cursor", b: 15, u: 91, on: true },
+                { n: "old-bot", b: null, u: 0, on: false },
               ].map((k) => (
                 <div key={k.n} className="flex items-center gap-3 rounded-xl bg-card px-3 py-2 text-xs shadow-soft">
                   <KeyRound className="size-3.5 text-muted-foreground" />
@@ -219,7 +240,7 @@ export function Features() {
                   <div className="ml-auto h-1.5 w-12 rounded-full bg-muted sm:w-20">
                     <div className={cn("h-full rounded-full", k.u > 85 ? "bg-amber-400" : "bg-brand")} style={{ width: `${k.u}%` }} />
                   </div>
-                  <span className="hidden w-16 text-right text-muted-foreground sm:inline">{k.b}</span>
+                  <span className="hidden w-16 text-right text-muted-foreground sm:inline">{k.b ? money(k.b, { compact: true }) : "—"}</span>
                   <span className={cn("size-2 rounded-full", k.on ? "bg-emerald-500" : "bg-muted-foreground/30")} />
                 </div>
               ))}
@@ -228,16 +249,16 @@ export function Features() {
         </Reveal>
 
         <Reveal delay={0.1}>
-          <Bento title="Резервные источники" text="У каждой модели минимум два апстрима. Упал один — запрос уйдёт на другой, вы увидите только 200 OK.">
+          <Bento title={f.fallbackTitle} text={f.fallbackText}>
             <div className="flex items-center justify-center gap-3 text-xs">
-              <div className="rounded-xl bg-card px-3 py-2 font-mono shadow-soft">ваш запрос</div>
+              <div className="rounded-xl bg-card px-3 py-2 font-mono shadow-soft">{f.yourRequest}</div>
               <ArrowRight className="size-4 text-muted-foreground" />
               <div className="space-y-2">
                 <div className="flex items-center gap-2 rounded-xl bg-card px-3 py-2 line-through opacity-50 shadow-soft">
-                  <CircleDot className="size-3 text-red-500" /> источник A · 429
+                  <CircleDot className="size-3 text-red-500" /> {f.sourceA}
                 </div>
                 <div className="flex items-center gap-2 rounded-xl bg-card px-3 py-2 shadow-soft ring-2 ring-brand/40">
-                  <RefreshCw className="size-3 text-brand-strong" /> источник B · 200
+                  <RefreshCw className="size-3 text-brand-strong" /> {f.sourceB}
                 </div>
               </div>
             </div>
@@ -245,22 +266,22 @@ export function Features() {
         </Reveal>
 
         <Reveal>
-          <Bento title="Документы для бизнеса" text="Договор, счёт, акты и ЭДО. Оплата с расчётного счёта, НДС в цене.">
+          <Bento title={f.businessTitle} text={f.businessText}>
             <div className="flex justify-center gap-3">
               {[
-                { i: FileText, t: "Договор", c: "bg-violet-100 text-violet-600" },
-                { i: Building2, t: "Счёт", c: "bg-amber-100 text-amber-600" },
-                { i: ShieldCheck, t: "Акт · ЭДО", c: "bg-brand-soft text-brand-strong" },
-              ].map(({ i: Icon, t, c }, k) => (
+                { i: FileText, t: f.docInvoice, c: "bg-violet-100 text-violet-600" },
+                { i: Building2, t: f.docStatement, c: "bg-amber-100 text-amber-600" },
+                { i: ReceiptText, t: f.docReceipt, c: "bg-brand-soft text-brand-strong" },
+              ].map(({ i: Icon, t: label, c }, k) => (
                 <div
-                  key={t}
-                  className="flex w-24 flex-col items-center gap-2 rounded-2xl bg-card p-3 text-xs shadow-soft"
+                  key={label}
+                  className="flex w-24 flex-col items-center gap-2 rounded-2xl bg-card p-3 text-center text-xs shadow-soft"
                   style={{ rotate: `${(k - 1) * 5}deg` }}
                 >
                   <span className={cn("grid size-10 place-items-center rounded-xl", c)}>
                     <Icon className="size-5" />
                   </span>
-                  {t}
+                  {label}
                 </div>
               ))}
             </div>
@@ -272,29 +293,24 @@ export function Features() {
           <BeamBorder size="md" colorVariant="colorful" theme="dark" active strength={1} duration={3.3} beamWidth={2} className="h-full">
             <div className="relative flex h-full min-h-[300px] flex-col gap-4 rounded-[28px] p-8 text-white" style={{ backgroundColor: "#150321" }}>
               <div className="pointer-events-none absolute -top-10 -right-10 size-56 rounded-full bg-violet-500/30 blur-3xl" />
-              <p className="text-xs font-bold tracking-[0.12em] text-[#66D933] uppercase">Для вайб-кодинга</p>
-              <h3 className="text-2xl leading-tight font-medium">Claude Code, Cursor и Cline — за две минуты.</h3>
-              <p className="text-sm text-white/60">
-                Готовые конфиги для IDE и агентов: копируете одну строку — и модель уже пишет код через наш ключ.
-              </p>
-              <pre className="rounded-xl border border-white/10 bg-white/5 p-3 font-mono text-[11px] text-white/80">
-                export ANTHROPIC_BASE_URL=https://api.routa.ru{"\n"}export ANTHROPIC_AUTH_TOKEN=sk-routa-…
+              <p className="text-xs font-bold tracking-[0.12em] text-[#66D933] uppercase">{f.vibeEyebrow}</p>
+              <h3 className="text-2xl leading-tight font-medium">{f.vibeTitle}</h3>
+              <p className="text-sm text-white/60">{f.vibeText}</p>
+              <pre className="overflow-x-auto rounded-xl border border-white/10 bg-white/5 p-3 font-mono text-[11px] text-white/80">
+                export ANTHROPIC_BASE_URL={API_HOST}{"\n"}export ANTHROPIC_AUTH_TOKEN=sk-routa-…
               </pre>
               <Link
-                href="/models"
+                href={href("/models")}
                 className="mt-auto w-fit rounded-lg bg-white px-4 py-2 text-sm font-medium text-black transition-transform hover:scale-105 active:scale-95"
               >
-                Открыть гайды
+                {f.vibeCta}
               </Link>
             </div>
           </BeamBorder>
         </Reveal>
 
         <Reveal className="md:col-span-2">
-          <Bento
-            title="Подробная аналитика"
-            text="Расход по дням, моделям и ключам, экспорт в CSV. Видно, что работает, а что стоит заменить на модель подешевле."
-          >
+          <Bento title={f.analyticsTitle} text={f.analyticsText}>
             <AnalyticsBars />
           </Bento>
         </Reveal>
@@ -314,8 +330,10 @@ function Bento({ title, text, children }: { title: string; text: string; childre
 }
 
 function AnalyticsBars() {
+  const { money, date } = useI18n();
   const data = [40, 55, 35, 72, 48, 60, 90, 52, 44, 68, 58, 76, 50, 63, 70, 46, 81, 57];
   const [hover, setHover] = React.useState(6);
+  const day = (i: number) => date(new Date(2026, 8, i + 1), { day: "numeric", month: "short" });
   return (
     <div className="relative w-full">
       <div className="absolute inset-x-0 top-[28%] border-t-2 border-dashed border-brand/40" />
@@ -325,7 +343,7 @@ function AnalyticsBars() {
             key={i}
             onMouseEnter={() => setHover(i)}
             onFocus={() => setHover(i)}
-            aria-label={`${i + 1} сентября: ${h * 42} ₽`}
+            aria-label={`${day(i)}: ${money(h * 0.45)}`}
             className="relative flex h-full flex-1 items-end"
           >
             <span
@@ -337,8 +355,8 @@ function AnalyticsBars() {
             />
             {i === hover && (
               <span className="absolute -top-2 left-1/2 z-10 -translate-x-1/2 -translate-y-full rounded-lg bg-card px-2 py-1 text-[11px] whitespace-nowrap shadow-float">
-                <span className="text-muted-foreground">{i + 1} сен · </span>
-                <span className="font-semibold">{(h * 42).toLocaleString("ru-RU")} ₽</span>
+                <span className="text-muted-foreground">{day(i)} · </span>
+                <span className="font-semibold">{money(h * 0.45)}</span>
               </span>
             )}
           </button>
@@ -350,91 +368,110 @@ function AnalyticsBars() {
 
 /* ——— Пополнение (кнопка сабмит + border-beam) ——— */
 const DEEPSEEK = MODELS.find((m) => m.id === "deepseek/deepseek-v3.1")!;
+const PRESETS_USD = [10, 25, 100];
+
 export function Pricing() {
-  const presets = [300, 1000, 5000];
-  const [amount, setAmount] = React.useState(1000);
-  const [method, setMethod] = React.useState<"sbp" | "card" | "invoice">("sbp");
+  const { dict, href, money, num, t, currency } = useI18n();
+  const router = useRouter();
+  const p = dict.pricing;
+  const rate = USD_RATES[currency];
+  const [usd, setUsd] = React.useState(25);
+  const [method, setMethod] = React.useState<string>("card");
+  const methods = [
+    { k: "card", t: p.card, i: CreditCard },
+    currency === "RUB" ? { k: "sbp", t: p.sbp, i: QrCode } : { k: "wallet", t: p.wallet, i: Smartphone },
+    { k: "invoice", t: p.invoice, i: Building2 },
+  ] as const;
+  const active = methods.some((m) => m.k === method) ? method : "card";
+
   return (
     <section id="pricing" className="mx-auto grid max-w-6xl scroll-mt-24 gap-10 px-4 py-24 md:grid-cols-2 md:items-center">
       <div>
-        <Eyebrow>Цены</Eyebrow>
-        <h2 className="mt-4 text-3xl font-semibold tracking-tight text-balance md:text-5xl">Платите только за токены</h2>
-        <p className="mt-4 max-w-md text-muted-foreground">
-          Без подписок. Пополняете баланс в рублях — каждый запрос списывается по фиксированной цене модели. Неизрасходованный
-          остаток вернём по заявке.
-        </p>
+        <Eyebrow>{p.eyebrow}</Eyebrow>
+        <h2 className="mt-4 text-3xl font-semibold tracking-tight text-balance md:text-5xl">{p.title}</h2>
+        <p className="mt-4 max-w-md text-muted-foreground">{p.text}</p>
         <ul className="mt-6 space-y-2 text-sm">
-          {["Цена за 1M токенов и за типичный ответ", "Чек по 54-ФЗ на каждое пополнение", "Письмо, когда баланс заканчивается"].map((t) => (
-            <li key={t} className="flex items-center gap-2">
-              <Check className="size-4 text-brand-strong" /> {t}
+          {p.bullets.map((b) => (
+            <li key={b} className="flex items-center gap-2">
+              <Check className="size-4 text-brand-strong" /> {b}
             </li>
           ))}
         </ul>
       </div>
 
       <BeamBorder size="md" colorVariant="ocean" theme="light" strength={1} duration={4} className="w-full">
-        <form id="topup" className="rounded-[28px] bg-card p-6 shadow-float md:p-8" onSubmit={(e) => e.preventDefault()}>
-          <p className="text-sm text-muted-foreground">Пополнить баланс</p>
-          <p className="mt-1 text-4xl font-semibold tracking-tight">{amount.toLocaleString("ru-RU")} ₽</p>
-          <p className="text-xs text-muted-foreground">≈ {Math.round(amount / DEEPSEEK.typical).toLocaleString("ru-RU")} ответов {DEEPSEEK.name}</p>
+        <form
+          id="topup"
+          className="rounded-[28px] bg-card p-6 shadow-float md:p-8"
+          onSubmit={(e) => {
+            e.preventDefault();
+            router.push(href(`/dashboard?topup=${usd}&method=${active}#topup`));
+          }}
+        >
+          <p className="text-sm text-muted-foreground">{p.formLabel}</p>
+          <p className="mt-1 text-4xl font-semibold tracking-tight">{money(usd)}</p>
+          <p className="text-xs text-muted-foreground">
+            {t(p.approx, { n: num(Math.round(usd / DEEPSEEK.typical), 0), model: DEEPSEEK.name })}
+          </p>
 
           <div className="mt-5 grid grid-cols-3 gap-2">
-            {presets.map((p) => (
+            {PRESETS_USD.map((v) => (
               <button
                 type="button"
-                key={p}
-                onClick={() => setAmount(p)}
+                key={v}
+                onClick={() => setUsd(v)}
                 className={cn(
                   "rounded-xl border py-2.5 text-sm font-medium transition",
-                  amount === p ? "border-foreground bg-foreground text-background" : "border-border hover:border-foreground/30",
+                  usd === v ? "border-foreground bg-foreground text-background" : "border-border hover:border-foreground/30",
                 )}
               >
-                {p.toLocaleString("ru-RU")} ₽
+                {money(v, { compact: true })}
               </button>
             ))}
           </div>
           <label className="mt-3 block">
-            <span className="sr-only">Своя сумма</span>
-            <input
-              type="number"
-              min={100}
-              step={100}
-              required
-              value={amount}
-              onChange={(e) => setAmount(Number(e.target.value))}
-              className="h-11 w-full rounded-xl border border-border bg-background px-3 text-sm outline-none focus:border-brand focus:ring-3 focus:ring-brand/20"
-            />
+            <span className="sr-only">
+              {p.custom}, {currency}
+            </span>
+            <div className="relative">
+              <input
+                type="number"
+                min={Math.ceil(MIN_TOPUP_USD * rate)}
+                step="any"
+                required
+                value={Math.round(usd * rate * 100) / 100}
+                onChange={(e) => setUsd(Number(e.target.value) / rate)}
+                className="h-11 w-full rounded-xl border border-border bg-background px-3 pr-14 text-sm outline-none focus:border-brand focus:ring-3 focus:ring-brand/20"
+              />
+              <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-muted-foreground">{currency}</span>
+            </div>
           </label>
 
           <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
-            {[
-              { k: "sbp", t: "СБП", i: QrCode },
-              { k: "card", t: "Карта", i: CreditCard },
-              { k: "invoice", t: "Счёт юрлицу", i: Building2 },
-            ].map(({ k, t, i: Icon }) => (
+            {methods.map(({ k, t: label, i: Icon }) => (
               <button
                 type="button"
                 key={k}
-                onClick={() => setMethod(k as typeof method)}
+                onClick={() => setMethod(k)}
+                aria-pressed={active === k}
                 className={cn(
-                  "flex flex-col items-center gap-1.5 rounded-xl border py-3 transition",
-                  method === k ? "border-brand bg-brand-soft/60 text-brand-strong" : "border-border text-muted-foreground hover:text-foreground",
+                  "flex flex-col items-center gap-1.5 rounded-xl border px-1 py-3 text-center transition",
+                  active === k ? "border-brand bg-brand-soft/60 text-brand-strong" : "border-border text-muted-foreground hover:text-foreground",
                 )}
               >
-                <Icon className="size-4" /> {t}
+                <Icon className="size-4" /> {label}
               </button>
             ))}
           </div>
 
-          <PendingButton
+          <button
             type="submit"
-            pendingLabel="Создаём платёж…"
-            doneLabel="Ссылка на оплату готова"
-            className="mt-5 h-12 w-full rounded-xl text-sm"
+            className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-medium text-primary-foreground transition hover:bg-primary/90 active:scale-[0.99]"
           >
-            {method === "invoice" ? "Выставить счёт" : `Оплатить ${amount.toLocaleString("ru-RU")} ₽`}
-          </PendingButton>
-          <p className="mt-3 text-center text-[11px] text-muted-foreground">Минимум 100 ₽ · зачисление после подтверждения банком</p>
+            {active === "invoice" ? p.invoiceCta : t(p.pay, { amount: money(usd) })} <ArrowRight className="size-4" />
+          </button>
+          <p className="mt-3 text-center text-[11px] text-muted-foreground">{t(p.min, { amount: money(MIN_TOPUP_USD) })}</p>
+          {currency !== "USD" && <p className="mt-1 text-center text-[11px] text-muted-foreground/80">{p.chargedIn}</p>}
         </form>
       </BeamBorder>
     </section>
@@ -442,29 +479,22 @@ export function Pricing() {
 }
 
 /* ——— FAQ ——— */
-const FAQ = [
-  ["Это законно?", "Мы российская компания: договор-оферта, чеки по 54-ФЗ, закрывающие документы. Вы покупаете у нас услугу доступа к API."],
-  ["Нужно ли менять код?", "Нет. Мы совместимы с OpenAI API: меняете base_url и ключ — остальное работает как было."],
-  ["Что будет, если модель у вендора недоступна?", "Запрос автоматически уйдёт в резервный источник. Если живых источников нет — вернём 503, деньги не спишутся."],
-  ["Храните ли вы мои промпты?", "По умолчанию нет — только метаданные: модель, токены, стоимость. Хранение содержимого включается вручную."],
-  ["Можно вернуть деньги?", "Да, неизрасходованный остаток возвращаем по заявке в течение 10 рабочих дней."],
-];
-
 export function Faq() {
+  const { dict } = useI18n();
   return (
     <section id="faq" className="mx-auto max-w-3xl scroll-mt-24 px-4 py-24">
       <div className="text-center">
-        <Eyebrow>FAQ</Eyebrow>
-        <h2 className="mt-4 text-3xl font-semibold tracking-tight md:text-5xl">Частые вопросы</h2>
+        <Eyebrow>{dict.faq.eyebrow}</Eyebrow>
+        <h2 className="mt-4 text-3xl font-semibold tracking-tight text-balance md:text-5xl">{dict.faq.title}</h2>
       </div>
       <div className="mt-10 space-y-3">
-        {FAQ.map(([q, a]) => (
+        {dict.faq.items.map(({ q, a }) => (
           <details key={q} className="group shadow-soft rounded-2xl border border-border bg-card px-5 py-4 open:pb-5">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium">
               {q}
               <span className="grid size-6 shrink-0 place-items-center rounded-full bg-muted text-sm transition-transform group-open:rotate-45">+</span>
             </summary>
-            <p className="mt-3 text-sm text-muted-foreground">{a}</p>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{a}</p>
           </details>
         ))}
       </div>
@@ -473,63 +503,100 @@ export function Faq() {
 }
 
 /* ——— Тёмный CTA + футер (реф. 5, низ) ——— */
+const LEGAL_LINKS = ["terms", "privacy", "cookies", "refunds", "acceptable-use", "subprocessors", "accessibility", "notice"] as const;
+
 export function CtaFooter() {
+  const { dict, href, money, t } = useI18n();
+  const f = dict.footer;
   return (
     <footer className="mx-auto w-full max-w-6xl px-4 pb-6">
       <div className="relative overflow-hidden rounded-[32px] bg-[#111] p-8 text-white md:p-12">
         <div className="bg-dots pointer-events-none absolute inset-0 opacity-[0.15] invert" />
         <div className="pointer-events-none absolute -right-20 -bottom-40 size-[420px] rounded-full bg-brand/30 blur-[100px]" />
         <div className="relative max-w-lg">
-          <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">Первый запрос — через две минуты</h2>
-          <p className="mt-3 text-white/60">100 ₽ на тест после подтверждения почты. Без карты.</p>
+          <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">{f.ctaTitle}</h2>
+          <p className="mt-3 text-white/60">{t(f.ctaText, { amount: money(1) })}</p>
           <Link
-            href="/sign-in"
+            href={href("/sign-up")}
             className="mt-6 inline-flex h-11 items-center gap-2 rounded-full bg-white px-5 text-sm font-medium text-black transition hover:scale-[1.03] active:scale-95"
           >
-            Получить ключ <ArrowRight className="size-4" />
+            {f.ctaButton} <ArrowRight className="size-4" />
           </Link>
         </div>
 
-        <div className="relative mt-16 grid gap-10 border-t border-white/10 pt-10 md:grid-cols-[1.4fr_1fr_1.4fr]">
+        <div className="relative mt-16 grid gap-10 border-t border-white/10 pt-10 md:grid-cols-[1.3fr_0.8fr_1fr_1.4fr]">
           <div>
             <p className="font-semibold">{BRAND}</p>
-            <p className="mt-2 max-w-xs text-sm text-white/50">Один API-ключ к GPT, Claude, Gemini и open-source моделям. Оплата в рублях.</p>
+            <p className="mt-2 max-w-xs text-sm text-white/50">{f.tagline}</p>
+            <LocaleSwitcher dark up align="left" className="mt-4 -ml-2.5" />
           </div>
-          <ul className="space-y-2 text-sm text-white/60">
-            {[
-              ["/models", "Модели"],
-              ["/compare", "Сравнение"],
-              ["/#pricing", "Цены"],
-              ["/sign-in", "Личный кабинет"],
-            ].map(([h, t]) => (
-              <li key={h}>
-                <Link href={h} className="hover:text-white">
-                  {t}
-                </Link>
-              </li>
-            ))}
-          </ul>
           <div>
-            <p className="text-sm font-medium">Новые модели и снижение цен — раз в месяц</p>
+            <p className="text-xs font-medium tracking-wider text-white/40 uppercase">{f.product}</p>
+            <ul className="mt-3 space-y-2 text-sm text-white/60">
+              {[
+                ["/models", dict.nav.models],
+                ["/compare", dict.nav.compare],
+                ["/#pricing", dict.nav.pricing],
+                ["/dashboard", f.dashboard],
+              ].map(([h, label]) => (
+                <li key={h}>
+                  <Link href={href(h)} className="hover:text-white">
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <p className="text-xs font-medium tracking-wider text-white/40 uppercase">{f.legal}</p>
+            <ul className="mt-3 space-y-2 text-sm text-white/60">
+              {LEGAL_LINKS.map((k) => (
+                <li key={k}>
+                  <Link href={href(`/legal/${k}`)} className="hover:text-white">
+                    {dict.legalNames[k]}
+                  </Link>
+                </li>
+              ))}
+              <li>
+                <button type="button" onClick={() => window.dispatchEvent(new Event(OPEN_COOKIE_SETTINGS))} className="hover:text-white">
+                  {f.cookieSettings}
+                </button>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <p className="text-sm font-medium">{f.newsletterTitle}</p>
             <form id="subscribe" className="mt-3 flex gap-2 rounded-full bg-white/10 p-1" onSubmit={(e) => e.preventDefault()}>
               <input
                 type="email"
                 required
-                placeholder="you@company.ru"
+                aria-label={dict.auth.email}
+                placeholder={f.emailPlaceholder}
                 className="min-w-0 flex-1 bg-transparent px-3 text-sm text-white outline-none placeholder:text-white/40"
               />
               <PendingButton
                 type="submit"
-                pendingLabel="Отправляем…"
-                doneLabel="Готово"
+                pendingLabel={f.subscribing}
+                doneLabel={f.subscribed}
                 className="h-9 rounded-full bg-white px-4 text-black hover:bg-white/90"
               >
-                Подписаться
+                {f.subscribe}
               </PendingButton>
             </form>
+            <p className="mt-2 text-[11px] text-white/40">
+              {fmtNodes(f.newsletterNote, {
+                privacy: (
+                  <Link key="p" href={href("/legal/privacy")} className="underline underline-offset-2 hover:text-white">
+                    {dict.legalNames.privacy}
+                  </Link>
+                ),
+              })}
+            </p>
           </div>
         </div>
-        <p className="relative mt-10 text-xs text-white/35">© 2026 {BRAND}. Демо-макет: цены и метрики условные.</p>
+        <p className="relative mt-10 text-xs text-white/35">
+          {t(f.rights, { year: new Date().getFullYear(), company: COMPANY.legalName })} {t(f.registered, { jurisdiction: COMPANY.jurisdiction })}
+        </p>
       </div>
     </footer>
   );

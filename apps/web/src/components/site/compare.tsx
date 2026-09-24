@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Brain, Code2, FileStack, Gauge, MessagesSquare, Timer, Wallet, Workflow } from "lucide-react";
 import * as React from "react";
 import { Reveal } from "@/components/site/reveal";
+import { useI18n } from "@/i18n/provider";
 import { MODELS, type Model } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
@@ -11,18 +12,26 @@ import { cn } from "@/lib/utils";
 const SERIES = ["#2a78d6", "#eb6834", "#1baf7a"];
 
 type MetricKey = "typical" | "speed" | "quality" | "ttft";
-const METRICS: Record<MetricKey, { label: string; unit: string; better: "low" | "high"; fmt: (v: number) => string }> = {
-  typical: { label: "Цена ответа", unit: "₽", better: "low", fmt: (v) => `${v.toLocaleString("ru-RU")} ₽` },
-  speed: { label: "Скорость", unit: "ток/с", better: "high", fmt: (v) => `${v} ток/с` },
-  quality: { label: "Качество", unit: "индекс", better: "high", fmt: (v) => `${v} / 100` },
-  ttft: { label: "Первый токен", unit: "с", better: "low", fmt: (v) => `${v.toLocaleString("ru-RU")} с` },
-};
+const METRIC_KEYS: MetricKey[] = ["typical", "speed", "quality", "ttft"];
+const BETTER: Record<MetricKey, "low" | "high"> = { typical: "low", speed: "high", quality: "high", ttft: "low" };
+
+/** Подписи и форматирование метрик на языке и в валюте пользователя. */
+function useMetrics() {
+  const { dict, money, num, t } = useI18n();
+  const c = dict.compare;
+  return {
+    typical: { label: c.metricPrice, fmt: (v: number) => money(v) },
+    speed: { label: c.metricSpeed, fmt: (v: number) => t(dict.units.tps, { n: v }) },
+    quality: { label: c.metricQuality, fmt: (v: number) => `${v} / 100` },
+    ttft: { label: c.metricTtft, fmt: (v: number) => t(dict.units.sec, { n: num(v) }) },
+  } satisfies Record<MetricKey, { label: string; fmt: (v: number) => string }>;
+}
 
 const TASKS = [
-  { k: "code", t: "Код и агенты", i: Code2, pick: "anthropic/claude-sonnet-4.5", why: "Лучше всех держит длинные задачи в IDE и аккуратно работает с инструментами." },
-  { k: "chat", t: "Чат-бот", i: MessagesSquare, pick: "openai/gpt-5-mini", why: "Быстрый первый токен и низкая цена — пользователь не ждёт, бюджет не тает." },
-  { k: "docs", t: "Документы", i: FileStack, pick: "google/gemini-2.5-pro", why: "Контекст 1M: договор на 300 страниц целиком, без нарезки на куски." },
-  { k: "cheap", t: "Массовая обработка", i: Workflow, pick: "deepseek/deepseek-v3.1", why: "Качество почти как у флагманов при цене в 10 раз ниже." },
+  { k: "code", i: Code2, pick: "anthropic/claude-sonnet-4.5" },
+  { k: "chat", i: MessagesSquare, pick: "openai/gpt-5-mini" },
+  { k: "docs", i: FileStack, pick: "google/gemini-2.5-pro" },
+  { k: "cheap", i: Workflow, pick: "deepseek/deepseek-v3.1" },
 ] as const;
 
 export function Compare() {
@@ -82,13 +91,15 @@ function Segmented<T extends string>({ value, onChange, options }: { value: T; o
 
 /* ——— Подбор по задаче (вкладки как в реф. 5) ——— */
 function TaskPicker() {
+  const { dict, money, t: tr } = useI18n();
+  const c = dict.compare;
   const [k, setK] = React.useState<(typeof TASKS)[number]["k"]>("code");
   const task = TASKS.find((t) => t.k === k)!;
   const m = MODELS.find((x) => x.id === task.pick)!;
   return (
     <div className="shadow-soft rounded-[28px] border-[6px] border-card bg-card/60 p-2">
       <div className="grid grid-cols-2 gap-1 rounded-2xl bg-muted/70 p-1 md:grid-cols-4">
-        {TASKS.map(({ k: key, t, i: Icon }) => (
+        {TASKS.map(({ k: key, i: Icon }) => (
           <button
             key={key}
             onClick={() => setK(key)}
@@ -96,7 +107,7 @@ function TaskPicker() {
           >
             {k === key && <motion.span layoutId="task-tab" className="absolute inset-0 rounded-xl bg-card shadow-soft" />}
             <Icon className="relative size-4" />
-            <span className="relative">{t}</span>
+            <span className="relative">{c.tasks[key].t}</span>
           </button>
         ))}
       </div>
@@ -113,21 +124,21 @@ function TaskPicker() {
           <span className="h-2 w-full rounded-sm" style={{ background: m.stripe }} />
         </div>
         <div className="flex-1">
-          <p className="text-xs font-medium tracking-wider text-muted-foreground uppercase">Рекомендуем</p>
+          <p className="text-xs font-medium tracking-wider text-muted-foreground uppercase">{c.recommend}</p>
           <p className="text-2xl font-semibold tracking-tight">{m.name}</p>
-          <p className="mt-1 max-w-xl text-sm text-muted-foreground">{task.why}</p>
+          <p className="mt-1 max-w-xl text-sm text-muted-foreground">{c.tasks[task.k].why}</p>
         </div>
         <dl className="grid grid-cols-3 gap-6 text-sm">
           <div>
-            <dt className="text-xs text-muted-foreground">За ответ</dt>
-            <dd className="font-semibold">{m.typical.toLocaleString("ru-RU")} ₽</dd>
+            <dt className="text-xs text-muted-foreground">{c.perAnswer}</dt>
+            <dd className="font-semibold">{money(m.typical)}</dd>
           </div>
           <div>
-            <dt className="text-xs text-muted-foreground">Скорость</dt>
-            <dd className="font-semibold">{m.speed} ток/с</dd>
+            <dt className="text-xs text-muted-foreground">{c.speed}</dt>
+            <dd className="font-semibold">{tr(dict.units.tps, { n: m.speed })}</dd>
           </div>
           <div>
-            <dt className="text-xs text-muted-foreground">Качество</dt>
+            <dt className="text-xs text-muted-foreground">{c.quality}</dt>
             <dd className="font-semibold">{m.quality}</dd>
           </div>
         </dl>
@@ -138,15 +149,17 @@ function TaskPicker() {
 
 /* ——— KPI-плитки ——— */
 function Kpis() {
+  const { dict, money, num, t } = useI18n();
+  const c = dict.compare;
   const cheapest = [...MODELS].sort((a, b) => a.typical - b.typical)[0];
   const fastest = [...MODELS].sort((a, b) => b.speed - a.speed)[0];
   const smartest = [...MODELS].sort((a, b) => b.quality - a.quality)[0];
   const snappiest = [...MODELS].sort((a, b) => a.ttft - b.ttft)[0];
   const tiles = [
-    { i: Wallet, k: "Дешевле всех", m: cheapest, v: `${cheapest.typical.toLocaleString("ru-RU")} ₽ / ответ` },
-    { i: Gauge, k: "Быстрее всех", m: fastest, v: `${fastest.speed} ток/с` },
-    { i: Brain, k: "Умнее всех", m: smartest, v: `${smartest.quality} / 100` },
-    { i: Timer, k: "Первый токен", m: snappiest, v: `${snappiest.ttft.toLocaleString("ru-RU")} с` },
+    { i: Wallet, k: c.kpiCheapest, m: cheapest, v: t(c.perAnswerSuffix, { amount: money(cheapest.typical) }) },
+    { i: Gauge, k: c.kpiFastest, m: fastest, v: t(dict.units.tps, { n: fastest.speed }) },
+    { i: Brain, k: c.kpiSmartest, m: smartest, v: `${smartest.quality} / 100` },
+    { i: Timer, k: c.kpiTtft, m: snappiest, v: t(dict.units.sec, { n: num(snappiest.ttft) }) },
   ];
   return (
     <div className="mt-5 grid grid-cols-2 gap-5 lg:grid-cols-4">
@@ -169,21 +182,24 @@ function Kpis() {
 
 /* ——— Столбцы по метрике: одна серия, наведённый столбец подсвечен ——— */
 function MetricBars() {
+  const { dict } = useI18n();
+  const METRICS = useMetrics();
   const [metric, setMetric] = React.useState<MetricKey>("typical");
   const [hover, setHover] = React.useState<string | null>(null);
   const cfg = METRICS[metric];
-  const sorted = [...MODELS].sort((a, b) => (cfg.better === "low" ? a[metric] - b[metric] : b[metric] - a[metric]));
+  const better = BETTER[metric];
+  const sorted = [...MODELS].sort((a, b) => (better === "low" ? a[metric] - b[metric] : b[metric] - a[metric]));
   const max = Math.max(...MODELS.map((m) => m[metric]));
   const best = sorted[0].id;
   return (
     <Card
       title={cfg.label}
-      sub={cfg.better === "low" ? "Меньше — лучше" : "Больше — лучше"}
+      sub={better === "low" ? dict.compare.lowerBetter : dict.compare.higherBetter}
       right={
         <Segmented
           value={metric}
           onChange={setMetric}
-          options={(Object.keys(METRICS) as MetricKey[]).map((k) => ({ k, t: METRICS[k].label }))}
+          options={METRIC_KEYS.map((k) => ({ k, t: METRICS[k].label }))}
         />
       }
     >
@@ -213,17 +229,20 @@ function MetricBars() {
 
 /* ——— Цена vs качество: точки с прямыми подписями ——— */
 function PriceQuality() {
+  const { dict, money, t } = useI18n();
+  const c = dict.compare;
   const [hover, setHover] = React.useState<Model | null>(null);
   const W = 360;
   const H = 340;
   const pad = { l: 36, r: 16, t: 12, b: 32 };
-  const maxP = 1.3;
+  const maxP = Math.max(...MODELS.map((m) => m.typical)) * 1.15;
+  const ticks = [0, 0.3, 0.6, 0.9].map((f) => f * maxP);
   const x = (v: number) => pad.l + (v / maxP) * (W - pad.l - pad.r);
   const y = (q: number) => pad.t + (1 - (q - 77) / 18) * (H - pad.t - pad.b);
   return (
-    <Card title="Цена ↔ качество" sub="Левый верхний угол — лучшая сделка">
+    <Card title={c.pqTitle} sub={c.pqSub}>
       <div className="relative">
-        <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label="Диаграмма цены и качества моделей">
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label={c.pqAria}>
           {[80, 85, 90, 95].map((q) => (
             <g key={q}>
               <line x1={pad.l} x2={W - pad.r} y1={y(q)} y2={y(q)} className="stroke-border" strokeDasharray="3 4" />
@@ -232,9 +251,9 @@ function PriceQuality() {
               </text>
             </g>
           ))}
-          {[0, 0.4, 0.8, 1.2].map((p) => (
+          {ticks.map((p) => (
             <text key={p} x={x(p)} y={H - 10} textAnchor="middle" className="fill-muted-foreground text-[10px]">
-              {p.toLocaleString("ru-RU")} ₽
+              {p === 0 ? "0" : money(p)}
             </text>
           ))}
           {MODELS.map((m) => {
@@ -250,9 +269,9 @@ function PriceQuality() {
                   strokeWidth={2}
                 />
                 <text
-                  x={x(m.typical) + (m.typical > 1 ? -11 : 11)}
+                  x={x(m.typical) + (m.typical > maxP * 0.7 ? -11 : 11)}
                   y={y(m.quality) + 3.5}
-                  textAnchor={m.typical > 1 ? "end" : "start"}
+                  textAnchor={m.typical > maxP * 0.7 ? "end" : "start"}
                   className={cn("text-[10px]", on ? "fill-foreground font-semibold" : "fill-muted-foreground")}>
                   {m.name}
                 </text>
@@ -267,7 +286,7 @@ function PriceQuality() {
           >
             <p className="font-semibold">{hover.name}</p>
             <p className="text-muted-foreground">
-              {hover.typical.toLocaleString("ru-RU")} ₽ · качество {hover.quality}
+              {money(hover.typical)} · {t(c.qualityOf, { n: hover.quality })}
             </p>
           </div>
         )}
@@ -292,6 +311,9 @@ const LINES = LINE_MODELS.map((m, k) => {
 });
 
 function LatencyLines() {
+  const { dict, num, date, t } = useI18n();
+  const c = dict.compare;
+  const day = (d: number, month: "short" | "long" = "short") => date(new Date(2026, 8, d), { day: "numeric", month });
   const [idx, setIdx] = React.useState<number | null>(null);
   const [hidden, setHidden] = React.useState<Set<number>>(new Set());
   const W = 900;
@@ -310,8 +332,8 @@ function LatencyLines() {
 
   return (
     <Card
-      title="Время до первого токена, 14 дней"
-      sub="Медиана по всем запросам, секунды"
+      title={c.latencyTitle}
+      sub={c.latencySub}
       right={
         <div className="flex flex-wrap gap-2 text-xs">
           {LINE_MODELS.map((m, k) => (
@@ -327,19 +349,19 @@ function LatencyLines() {
       }
     >
       <div className="relative">
-        <svg viewBox={`0 0 ${W} ${H}`} className="w-full" onMouseMove={onMove} onMouseLeave={() => setIdx(null)} role="img" aria-label="Линии задержки по трём моделям">
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full" onMouseMove={onMove} onMouseLeave={() => setIdx(null)} role="img" aria-label={c.latencyAria}>
           {[0, 0.8, 1.6, 2.4].map((v) => (
             <g key={v}>
               <line x1={pad.l} x2={W - pad.r} y1={y(v)} y2={y(v)} className="stroke-border" />
               <text x={pad.l - 8} y={y(v) + 4} textAnchor="end" className="fill-muted-foreground text-[11px]">
-                {v.toLocaleString("ru-RU")}
+                {num(v)}
               </text>
             </g>
           ))}
           {DAYS.map((d, i) =>
             i % 2 === 0 ? (
               <text key={d} x={x(i)} y={H - 6} textAnchor="middle" className="fill-muted-foreground text-[11px]">
-                {d} сен
+                {day(d)}
               </text>
             ) : null,
           )}
@@ -368,13 +390,13 @@ function LatencyLines() {
             className="pointer-events-none absolute top-2 rounded-xl bg-card px-3 py-2 text-xs shadow-float"
             style={{ left: `${(x(idx) / W) * 100}%`, transform: idx > 9 ? "translateX(calc(-100% - 12px))" : "translateX(12px)" }}
           >
-            <p className="mb-1 font-medium">{DAYS[idx]} сентября</p>
+            <p className="mb-1 font-medium">{day(DAYS[idx], "long")}</p>
             {LINE_MODELS.map((m, k) =>
               hidden.has(k) ? null : (
                 <p key={m.id} className="flex items-center gap-2">
                   <span className="h-0.5 w-3 rounded-full" style={{ background: SERIES[k] }} />
                   <span className="text-muted-foreground">{m.name}</span>
-                  <span className="ml-auto pl-3 font-medium tabular-nums">{LINES[k][idx].toLocaleString("ru-RU")} с</span>
+                  <span className="ml-auto pl-3 font-medium tabular-nums">{t(dict.units.sec, { n: num(LINES[k][idx]) })}</span>
                 </p>
               ),
             )}
@@ -387,22 +409,26 @@ function LatencyLines() {
 
 /* ——— Лицом к лицу: выбор 2 моделей ——— */
 function HeadToHead() {
+  const { dict, money, num, t } = useI18n();
+  const c = dict.compare;
+  const sec = (v: number) => t(dict.units.sec, { n: num(v) });
+  const tps = (v: number) => t(dict.units.tps, { n: v });
   const [a, setA] = React.useState(MODELS[1].id);
   const [b, setB] = React.useState(MODELS[3].id);
   const A = MODELS.find((m) => m.id === a)!;
   const B = MODELS.find((m) => m.id === b)!;
   const rows: { k: string; va: string; vb: string; win: 0 | 1 | 2 }[] = [
-    { k: "Цена за ответ", va: `${A.typical.toLocaleString("ru-RU")} ₽`, vb: `${B.typical.toLocaleString("ru-RU")} ₽`, win: A.typical === B.typical ? 0 : A.typical < B.typical ? 1 : 2 },
-    { k: "Вход / 1M", va: `${A.priceIn} ₽`, vb: `${B.priceIn} ₽`, win: A.priceIn === B.priceIn ? 0 : A.priceIn < B.priceIn ? 1 : 2 },
-    { k: "Выход / 1M", va: `${A.priceOut.toLocaleString("ru-RU")} ₽`, vb: `${B.priceOut.toLocaleString("ru-RU")} ₽`, win: A.priceOut === B.priceOut ? 0 : A.priceOut < B.priceOut ? 1 : 2 },
-    { k: "Скорость", va: `${A.speed} ток/с`, vb: `${B.speed} ток/с`, win: A.speed === B.speed ? 0 : A.speed > B.speed ? 1 : 2 },
-    { k: "Первый токен", va: `${A.ttft.toLocaleString("ru-RU")} с`, vb: `${B.ttft.toLocaleString("ru-RU")} с`, win: A.ttft === B.ttft ? 0 : A.ttft < B.ttft ? 1 : 2 },
-    { k: "Качество", va: `${A.quality}`, vb: `${B.quality}`, win: A.quality === B.quality ? 0 : A.quality > B.quality ? 1 : 2 },
-    { k: "Контекст", va: A.context, vb: B.context, win: 0 },
+    { k: c.rowPrice, va: money(A.typical), vb: money(B.typical), win: A.typical === B.typical ? 0 : A.typical < B.typical ? 1 : 2 },
+    { k: c.rowIn, va: money(A.priceIn), vb: money(B.priceIn), win: A.priceIn === B.priceIn ? 0 : A.priceIn < B.priceIn ? 1 : 2 },
+    { k: c.rowOut, va: money(A.priceOut), vb: money(B.priceOut), win: A.priceOut === B.priceOut ? 0 : A.priceOut < B.priceOut ? 1 : 2 },
+    { k: c.rowSpeed, va: tps(A.speed), vb: tps(B.speed), win: A.speed === B.speed ? 0 : A.speed > B.speed ? 1 : 2 },
+    { k: c.rowTtft, va: sec(A.ttft), vb: sec(B.ttft), win: A.ttft === B.ttft ? 0 : A.ttft < B.ttft ? 1 : 2 },
+    { k: c.rowQuality, va: `${A.quality}`, vb: `${B.quality}`, win: A.quality === B.quality ? 0 : A.quality > B.quality ? 1 : 2 },
+    { k: c.rowContext, va: A.context, vb: B.context, win: 0 },
   ];
   const sel = "h-10 w-full rounded-xl border border-border bg-card px-3 text-sm font-medium outline-none focus:ring-3 focus:ring-brand/20";
   return (
-    <Card title="Лицом к лицу" sub="Выберите две модели — победитель по каждой метрике подсвечен">
+    <Card title={c.h2hTitle} sub={c.h2hSub}>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[520px] text-sm">
           <thead>

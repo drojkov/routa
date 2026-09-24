@@ -3,26 +3,42 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, Copy, Search } from "lucide-react";
 import * as React from "react";
-import { MODELS, type Tier } from "@/lib/site";
+import { useI18n } from "@/i18n/provider";
+import { MODELS, TIERS, type Tier } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
-const TIERS: ("Все" | Tier)[] = ["Все", "Флагман", "Универсальная", "Быстрая", "Экономичная"];
-const SORTS = { popular: "Популярные", cheap: "Дешевле", fast: "Быстрее", smart: "Умнее" } as const;
+const FILTERS: ("all" | Tier)[] = ["all", ...TIERS];
+const SORTS = ["popular", "cheap", "fast", "smart"] as const;
+type Sort = (typeof SORTS)[number];
+
+export function CatalogHeading() {
+  const { dict, t, currency } = useI18n();
+  return (
+    <div className="mx-auto max-w-6xl px-4 pb-8">
+      <h2 className="text-3xl font-semibold tracking-tight">{dict.modelsPage.catalogTitle}</h2>
+      <p className="mt-1 text-muted-foreground">{t(dict.modelsPage.catalogSub, { currency })}</p>
+    </div>
+  );
+}
 
 export function Catalog() {
+  const { dict, money, t } = useI18n();
+  const c = dict.catalog;
+  const sortLabel: Record<Sort, string> = { popular: c.sortPopular, cheap: c.sortCheap, fast: c.sortFast, smart: c.sortSmart };
   const [q, setQ] = React.useState("");
-  const [tier, setTier] = React.useState<(typeof TIERS)[number]>("Все");
-  const [sort, setSort] = React.useState<keyof typeof SORTS>("popular");
+  const [tier, setTier] = React.useState<(typeof FILTERS)[number]>("all");
+  const [sort, setSort] = React.useState<Sort>("popular");
   const [perAnswer, setPerAnswer] = React.useState(false);
 
   const list = React.useMemo(() => {
     const s = q.trim().toLowerCase();
-    const r = MODELS.filter(
-      (m) => (tier === "Все" || m.tier === tier) && (!s || `${m.name} ${m.id} ${m.vendor} ${m.tags.join(" ")}`.toLowerCase().includes(s)),
-    );
+    // Ищем и по английским ключам тегов, и по их переводу — подсказка в поле на любом языке сработает.
+    const haystack = (m: (typeof MODELS)[0]) =>
+      [m.name, m.id, m.vendor, dict.tiers[m.tier], dict.taglines[m.id], ...m.tags, ...m.tags.map((x) => dict.tags[x])].join(" ").toLowerCase();
+    const r = MODELS.filter((m) => (tier === "all" || m.tier === tier) && (!s || haystack(m).includes(s)));
     const by = { popular: () => 0, cheap: (a: (typeof r)[0], b: (typeof r)[0]) => a.typical - b.typical, fast: (a: (typeof r)[0], b: (typeof r)[0]) => b.speed - a.speed, smart: (a: (typeof r)[0], b: (typeof r)[0]) => b.quality - a.quality }[sort];
     return [...r].sort(by);
-  }, [q, tier, sort]);
+  }, [q, tier, sort, dict]);
 
   return (
     <section className="mx-auto max-w-6xl px-4 pb-24">
@@ -32,32 +48,33 @@ export function Catalog() {
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Поиск: claude, код, vision…"
+            placeholder={c.search}
             className="h-10 w-full rounded-xl bg-background pr-3 pl-9 text-sm outline-none focus:ring-3 focus:ring-brand/20"
           />
         </label>
         <div className="flex flex-wrap gap-1">
-          {TIERS.map((t) => (
+          {FILTERS.map((f) => (
             <button
-              key={t}
-              onClick={() => setTier(t)}
+              key={f}
+              onClick={() => setTier(f)}
+              aria-pressed={tier === f}
               className={cn(
                 "rounded-lg px-3 py-2 text-xs transition",
-                tier === t ? "bg-foreground text-background" : "text-muted-foreground hover:bg-muted",
+                tier === f ? "bg-foreground text-background" : "text-muted-foreground hover:bg-muted",
               )}
             >
-              {t}
+              {dict.tiers[f]}
             </button>
           ))}
         </div>
         <select
           value={sort}
-          onChange={(e) => setSort(e.target.value as keyof typeof SORTS)}
+          onChange={(e) => setSort(e.target.value as Sort)}
           className="h-10 rounded-xl bg-background px-3 text-xs outline-none"
         >
-          {Object.entries(SORTS).map(([k, v]) => (
+          {SORTS.map((k) => (
             <option key={k} value={k}>
-              {v}
+              {sortLabel[k]}
             </option>
           ))}
         </select>
@@ -68,7 +85,7 @@ export function Catalog() {
               onClick={() => setPerAnswer(v)}
               className={cn("rounded-lg px-3 py-1.5 transition", perAnswer === v ? "bg-card font-medium shadow-soft" : "text-muted-foreground")}
             >
-              {v ? "за ответ" : "за 1M"}
+              {v ? c.perAnswer : c.per1m}
             </button>
           ))}
         </div>
@@ -98,29 +115,29 @@ export function Catalog() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <h3 className="font-semibold">{m.name}</h3>
-                    <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">{m.tier}</span>
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">{dict.tiers[m.tier]}</span>
                   </div>
-                  <CopyId id={m.id} />
-                  <p className="mt-2 text-sm text-muted-foreground">{m.tagline}</p>
+                  <CopyId id={m.id} label={c.copy} />
+                  <p className="mt-2 text-sm text-muted-foreground">{dict.taglines[m.id]}</p>
                 </div>
               </div>
               <dl className="relative mt-5 grid grid-cols-4 gap-2 border-t border-border pt-4 text-xs">
                 {perAnswer ? (
-                  <Stat k="≈ за ответ" v={`${m.typical.toLocaleString("ru-RU")} ₽`} wide />
+                  <Stat k={c.statPerAnswer} v={money(m.typical)} wide />
                 ) : (
                   <>
-                    <Stat k="Вход / 1M" v={`${m.priceIn} ₽`} />
-                    <Stat k="Выход / 1M" v={`${m.priceOut.toLocaleString("ru-RU")} ₽`} />
+                    <Stat k={c.in1m} v={money(m.priceIn)} />
+                    <Stat k={c.out1m} v={money(m.priceOut)} />
                   </>
                 )}
-                <Stat k="Скорость" v={`${m.speed} ток/с`} />
-                <Stat k="Контекст" v={m.context} />
+                <Stat k={c.speed} v={t(dict.units.tps, { n: m.speed })} />
+                <Stat k={c.context} v={m.context} />
               </dl>
             </motion.li>
           ))}
         </AnimatePresence>
       </motion.ul>
-      {list.length === 0 && <p className="py-16 text-center text-muted-foreground">Ничего не нашли. Попробуйте «код» или «vision».</p>}
+      {list.length === 0 && <p className="py-16 text-center text-muted-foreground">{c.empty}</p>}
     </section>
   );
 }
@@ -134,10 +151,11 @@ function Stat({ k, v, wide }: { k: string; v: string; wide?: boolean }) {
   );
 }
 
-function CopyId({ id }: { id: string }) {
+function CopyId({ id, label }: { id: string; label: string }) {
   const [ok, setOk] = React.useState(false);
   return (
     <button
+      aria-label={`${label}: ${id}`}
       onClick={() => {
         navigator.clipboard?.writeText(id);
         setOk(true);

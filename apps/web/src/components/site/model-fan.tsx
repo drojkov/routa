@@ -13,6 +13,7 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 import { ModelCard } from "@/components/site/model-card";
+import { useI18n } from "@/i18n/provider";
 import { MODELS, type Model } from "@/lib/site";
 
 const SPACING = 190;
@@ -25,11 +26,12 @@ const PAN_START = 0.42;
  */
 export function ModelFan({
   models = MODELS,
-  title = "Модели, которые мы держим в форме",
+  title,
 }: {
   models?: Model[];
   title?: React.ReactNode;
 }) {
+  const { dict, href, money, t } = useI18n();
   const ref = React.useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
@@ -56,7 +58,7 @@ export function ModelFan({
           style={{ opacity: headingOpacity, scale: headingScale }}
           className="pointer-events-none absolute top-[14vh] w-full px-4 text-center text-5xl font-semibold tracking-[-0.045em] text-balance sm:text-7xl md:text-[6.5rem] md:leading-[0.95]"
         >
-          {title}
+          {title ?? dict.fan.defaultTitle}
         </motion.h2>
 
         {/* подсветка под картами */}
@@ -82,18 +84,19 @@ export function ModelFan({
             transition={{ duration: 0.45 }}
           >
             <p className="text-xs font-medium tracking-wider text-muted-foreground uppercase">
-              {m.tier} · {m.vendor}
+              {dict.tiers[m.tier]} · {m.vendor}
             </p>
-            <p className="mt-1 text-lg font-medium text-balance">{m.tagline}</p>
+            <p className="mt-1 text-lg font-medium text-balance">{dict.taglines[m.id]}</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              ≈ {m.typical.toLocaleString("ru-RU")} ₽ за ответ · {m.speed} ток/с · контекст {m.context}
+              {t(dict.units.perAnswer, { amount: money(m.typical) })} · {t(dict.units.tps, { n: m.speed })} ·{" "}
+              {t(dict.fan.context, { c: m.context })}
             </p>
           </motion.div>
           <Link
-            href="/models"
+            href={href("/models")}
             className="mt-5 inline-flex h-11 items-center gap-2 rounded-full bg-foreground px-5 text-sm font-medium text-background shadow-float transition hover:scale-[1.03] active:scale-95"
           >
-            Все модели и цены <ArrowRight className="size-4" />
+            {dict.fan.allModels} <ArrowRight className="size-4" />
           </Link>
         </div>
 
