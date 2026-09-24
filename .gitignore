@@ -1,0 +1,6 @@
+# Правила для сайта — в apps/web/.gitignore
+node_modules/
+.DS_Store
+Thumbs.db
+.env*
+.playwright-mcp/
