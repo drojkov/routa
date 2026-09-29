@@ -11,9 +11,13 @@ import * as schema from "./schema";
  * Миграции применяются при первом обращении, поэтому свежий клон заводится без ручных шагов.
  */
 function open() {
-  const file = process.env.DATABASE_PATH ?? path.join(process.cwd(), "data", "app.db");
-  fs.mkdirSync(path.dirname(file), { recursive: true });
+  // `next build` импортирует модуль из десятков воркеров разом: общий файл — гонка миграций
+  // («table already exists»). Сборке настоящие данные не нужны — каждому воркеру своя база в памяти.
+  const building = process.env.NEXT_PHASE === "phase-production-build";
+  const file = building ? ":memory:" : (process.env.DATABASE_PATH ?? path.join(process.cwd(), "data", "app.db"));
+  if (!building) fs.mkdirSync(path.dirname(file), { recursive: true });
   const sqlite = new Database(file);
+  sqlite.pragma("busy_timeout = 5000");
   sqlite.pragma("journal_mode = WAL");
   sqlite.pragma("foreign_keys = ON");
   const db = drizzle(sqlite, { schema });
