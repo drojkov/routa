@@ -6,7 +6,6 @@ _Effective date: {{date}}_
 
 This Privacy Policy explains how {{company.legalName}} ("we", "us", "{{brand}}") collects, uses and shares personal data when you visit our website, create an account or use our API (the "Service"). It is written to meet the information requirements of the EU and UK GDPR, the California Consumer Privacy Act (CCPA/CPRA), the Hong Kong Personal Data (Privacy) Ordinance (PDPO), Brazil's LGPD, Japan's APPI and other laws. Sections 14–19 contain additional information for specific regions.
 
-If you are in Russia, please also read the separate [Consent to the processing of personal data](/legal/consent-ru).
 
 ## 1. Summary
 
@@ -43,7 +42,7 @@ If you send personal data of other people through the API (for example, your own
 | Category | Examples | Required? |
 |---|---|---|
 | Account data | Name, email address, password (stored only as a salted hash) | Email and password are required to sign up with email. Name is optional **[TO CONFIRM]** |
-| OAuth profile | If you sign in with Google or Yandex ID: name, email address, profile picture (avatar), provider account ID | Required only if you choose that sign-in method |
+| OAuth profile | If you sign in with Google: name, email address, profile picture (avatar), provider account ID | Required only if you choose that sign-in method |
 | Billing data | Top-up amounts, currency, payment status, transaction IDs, invoice details for companies (company name, address, tax ID) | Required to top up. Card data is collected directly by [PAYMENT PROCESSOR], not by us |
 | Support messages | What you write to us and our replies | Voluntary |
 
@@ -58,7 +57,7 @@ If you send personal data of other people through the API (for example, your own
 
 ### 3.3 Data from others
 
-- Google or Yandex, when you use them to sign in (see 3.1).
+- Google, when you use them to sign in (see 3.1).
 - [PAYMENT PROCESSOR], which tells us whether a payment succeeded, the card brand, the last four digits and the country of the card, and fraud-risk signals **[TO CONFIRM: exact fields returned by the processor]**.
 
 ### 3.4 Data we do not want
@@ -87,7 +86,7 @@ Where we rely on legitimate interests, you can ask us for details of the balanci
 
 ### Is providing data required?
 
-You need to give us an email address (or use Google or Yandex ID) and payment details to use the paid Service; without them we cannot create your account or process payments. Request metadata is collected automatically because we need it to bill you. Everything else, such as your name, support messages and enabling logging, is voluntary.
+You need to give us an email address (or use Google) and payment details to use the paid Service; without them we cannot create your account or process payments. Request metadata is collected automatically because we need it to bill you. Everything else, such as your name, support messages and enabling logging, is voluntary.
 
 ### Automated decision-making
 
@@ -99,7 +98,7 @@ We share personal data only as described here:
 
 - **Model providers.** When you send a request, the content of that request (prompts, files, parameters) is transmitted to the provider of the model you choose: OpenAI, Anthropic, Google, DeepSeek or Alibaba Cloud. They process it to generate the response and may retain it for a limited time under their own terms, for example for abuse monitoring. We do not send them your account data such as your name or email. **[TO CONFIRM: whether any user identifier is passed to providers for abuse monitoring.]**
 - **Service providers (subprocessors)** who host our infrastructure, process payments and send emails on our behalf: [HOSTING PROVIDER], [PAYMENT PROCESSOR], [EMAIL PROVIDER].
-- **Sign-in providers.** Google and Yandex, when you choose to sign in with them.
+- **Sign-in providers.** Google, when you choose to sign in with them.
 - **Professional advisers** such as lawyers, auditors and accountants.
 - **Authorities**, where we are legally required to, or to protect our rights, users or the public.
 - **A buyer or successor**, if we reorganise or sell our business. We will tell you before your data becomes subject to a different privacy policy.
@@ -231,7 +230,7 @@ You have the right to know, access, delete and correct your personal information
 This statement is made under the Personal Data (Privacy) Ordinance (Cap. 486).
 
 1. **Purposes of collection.** We collect your personal data for the purposes in section 4: providing and billing the Service, account security, fraud prevention, customer support, compliance with legal and regulatory obligations, and (only if you agree) marketing.
-2. **Obligatory or voluntary.** Your email address (or Google / Yandex ID sign-in) and payment information are obligatory. If you do not provide them, we cannot open an account or process top-ups. Other data (for example, your name and support messages) is voluntary.
+2. **Obligatory or voluntary.** Your email address (or Google sign-in) and payment information are obligatory. If you do not provide them, we cannot open an account or process top-ups. Other data (for example, your name and support messages) is voluntary.
 3. **Classes of transferees.** Your data may be transferred to: model providers (request content only); hosting, payment and email service providers; sign-in providers; professional advisers; law enforcement and regulators where required by law; and a successor to our business. Some transferees are outside Hong Kong (section 6).
 4. **Direct marketing.** We will not use your personal data in direct marketing without your consent. **[TO CONFIRM]**
 5. **Access and correction.** You have the right to request access to and correction of your personal data. Send data access and correction requests to our privacy officer at {{company.privacyEmail}} or by post to {{company.address}}. We may charge a fee that is not excessive for complying with a data access request.
@@ -257,5 +256,4 @@ In line with Article 9 of the LGPD:
 ## 19. Other regions
 
 - **Mainland China (PIPL).** The Service is not directed at individuals in mainland China, and we do not intend to process personal data of individuals located there.
-- **Russia (152-FZ).** Users in Russia are asked to give a separate [consent to the processing of personal data](/legal/consent-ru). **[TO CONFIRM: counsel to assess whether Russian personal data localisation (152-FZ Art. 18(5)) and cross-border transfer notification (Art. 12) requirements apply to us and how they will be met. This policy does not claim compliance.]**
 - **Other countries.** If local law gives you additional rights, contact {{company.privacyEmail}} and we will respond according to that law.

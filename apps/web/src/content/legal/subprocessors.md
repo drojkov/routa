@@ -28,11 +28,10 @@ When you send a request, its content (prompts, files and parameters) is transmit
 | [PAYMENT PROCESSOR] | Card payments, fraud checks, refunds | Name, email, payment details, billing country, transaction data | [COUNTRY] **[TO CONFIRM]** |
 | [EMAIL PROVIDER] | Sending service emails (sign-up confirmation, receipts, security alerts) | Email address, name, email content | [COUNTRY] **[TO CONFIRM]** |
 | Google | Sign-in with Google (only if you choose it) | OAuth profile: name, email, avatar | United States |
-| Yandex | Sign-in with Yandex ID (only if you choose it) | OAuth profile: name, email, avatar | Russia **[TO CONFIRM]** |
 
 **[TO CONFIRM: any other tools (error monitoring, support desk, DNS/CDN, invoicing/accounting software) before launch.]**
 
-Google and Yandex, when used for sign-in, act as independent controllers for the data they hold about you rather than as our subprocessors **[TO CONFIRM]**.
+Google, when used for sign-in, acts as an independent controller for the data they hold about you rather than as our subprocessors **[TO CONFIRM]**.
 
 ## 3. Changes to this list
 

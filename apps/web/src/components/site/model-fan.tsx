@@ -27,9 +27,12 @@ const PAN_START = 0.42;
 export function ModelFan({
   models = MODELS,
   title,
+  allHref = "/models",
 }: {
   models?: Model[];
   title?: React.ReactNode;
+  /** Куда ведёт «Все модели и цены». На самой /models — якорь каталога ниже, иначе клик никуда не ведёт. */
+  allHref?: string;
 }) {
   const { dict, href, money, t } = useI18n();
   const ref = React.useRef<HTMLDivElement>(null);
@@ -93,7 +96,7 @@ export function ModelFan({
             </p>
           </motion.div>
           <Link
-            href={href("/models")}
+            href={allHref.startsWith("#") ? allHref : href(allHref)}
             className="mt-5 inline-flex h-11 items-center gap-2 rounded-full bg-foreground px-5 text-sm font-medium text-background shadow-float transition hover:scale-[1.03] active:scale-95"
           >
             {dict.fan.allModels} <ArrowRight className="size-4" />

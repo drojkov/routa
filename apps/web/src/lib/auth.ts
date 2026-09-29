@@ -2,7 +2,6 @@ import "server-only";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
-import { genericOAuth, yandex } from "better-auth/plugins/generic-oauth";
 import { db, schema } from "@/db";
 import { SIGNUP_BONUS_USD } from "@/lib/billing";
 
@@ -14,13 +13,14 @@ const env = process.env;
  */
 export const OAUTH = {
   google: !!(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET),
-  yandex: !!(env.YANDEX_CLIENT_ID && env.YANDEX_CLIENT_SECRET),
 };
 export const DEMO_OAUTH = env.AUTH_DEMO_OAUTH === "true" || (env.NODE_ENV !== "production" && env.AUTH_DEMO_OAUTH !== "false");
 
 export const auth = betterAuth({
-  appName: "Routa",
+  appName: "Harvanera",
   database: drizzleAdapter(db, { provider: "sqlite", schema }),
+  // Dev через туннель (см. DEV_TUNNELS в next.config.ts).
+  trustedOrigins: env.NODE_ENV === "production" ? [] : ["https://*.serveousercontent.com", "https://*.free.pinggy.net", "https://*.run.pinggy-free.link","https://*.lhr.life", "https://*.trycloudflare.com"],
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
@@ -30,7 +30,7 @@ export const auth = betterAuth({
   socialProviders: OAUTH.google
     ? { google: { clientId: env.GOOGLE_CLIENT_ID!, clientSecret: env.GOOGLE_CLIENT_SECRET!, prompt: "select_account" } }
     : {},
-  account: { accountLinking: { enabled: true, trustedProviders: ["google", "yandex"] } },
+  account: { accountLinking: { enabled: true, trustedProviders: ["google"] } },
   user: { deleteUser: { enabled: true } },
   databaseHooks: {
     user: {
@@ -54,9 +54,6 @@ export const auth = betterAuth({
   },
   rateLimit: { enabled: true, window: 60, max: 30 },
   plugins: [
-    genericOAuth({
-      config: OAUTH.yandex ? [yandex({ clientId: env.YANDEX_CLIENT_ID!, clientSecret: env.YANDEX_CLIENT_SECRET! })] : [],
-    }),
     nextCookies(), // последним: проставляет cookie из server actions
   ],
 });

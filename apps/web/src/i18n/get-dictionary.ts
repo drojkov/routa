@@ -4,7 +4,6 @@ import type { Dictionary } from "./dictionaries/en";
 
 const loaders: Record<Locale, () => Promise<Dictionary>> = {
   en: () => import("./dictionaries/en").then((m) => m.en),
-  ru: () => import("./dictionaries/ru").then((m) => m.ru),
   es: () => import("./dictionaries/es").then((m) => m.es),
   pt: () => import("./dictionaries/pt").then((m) => m.pt),
   de: () => import("./dictionaries/de").then((m) => m.de),

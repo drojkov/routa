@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:gateway": "node scripts/gateway-smoke.mjs",
+    "test:gateway:live": "node scripts/gateway-live.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",

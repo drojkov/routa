@@ -1,43 +1,40 @@
 import type { Metadata } from "next";
-import { Dashboard } from "@/components/dashboard/dashboard";
+import { Overview } from "@/components/dashboard/overview";
 import { loadLocale } from "@/i18n/server";
-import { getBalanceMicros, getMonthSpendMicros, listKeys, listLedger, requireUser } from "@/lib/account";
+import { getBalanceMicros, listKeys, requireUser } from "@/lib/account";
+import { apiBase } from "@/lib/api-base";
+import { listRequests, monthStart, usageSummary } from "@/lib/usage";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/dashboard">): Promise<Metadata> {
   const { dict } = await loadLocale(params);
   return { title: dict.dashboard.metaTitle, robots: { index: false } };
 }
 
-export default async function DashboardPage({ params, searchParams }: PageProps<"/[lang]/dashboard">) {
+export default async function DashboardPage({ params }: PageProps<"/[lang]/dashboard">) {
   const { lang } = await loadLocale(params);
   const user = await requireUser(lang);
-  const [balance, spent, keys, ledger, sp] = await Promise.all([
+  const [balance, month, keys, recent] = await Promise.all([
     getBalanceMicros(user.id),
-    getMonthSpendMicros(user.id),
+    usageSummary(user.id, monthStart()),
     listKeys(user.id),
-    listLedger(user.id),
-    searchParams,
+    listRequests(user.id, {}, 6),
   ]);
-  const topup = Number(sp.topup);
-  const method = typeof sp.method === "string" ? sp.method : undefined;
-
   return (
-    <Dashboard
-      user={{ name: user.name, email: user.email, image: user.image ?? null }}
+    <Overview
+      name={user.name}
       balanceUsd={balance / 1_000_000}
-      spentUsd={spent / 1_000_000}
-      keys={keys.map((k) => ({
-        id: k.id,
-        name: k.name,
-        prefix: k.prefix,
-        limitUsd: k.limitMicros == null ? null : k.limitMicros / 1_000_000,
-        createdAt: k.createdAt.getTime(),
-        lastUsedAt: k.lastUsedAt?.getTime() ?? null,
-        revoked: !!k.revokedAt,
+      monthUsd={month.costMicros / 1_000_000}
+      monthRequests={month.requests}
+      activeKeys={keys.filter((k) => !k.revokedAt).length}
+      baseUrl={await apiBase()}
+      recent={recent.map((r) => ({
+        id: r.id,
+        at: r.createdAt.getTime(),
+        model: r.model,
+        source: r.apiKeyId ? (r.keyName ?? "—") : null,
+        costUsd: r.costMicros / 1_000_000,
+        status: r.status,
       }))}
-      ledger={ledger.map((l) => ({ id: l.id, kind: l.kind, usd: l.amountMicros / 1_000_000, at: l.createdAt.getTime() }))}
-      initialTopUpUsd={Number.isFinite(topup) && topup > 0 ? topup : undefined}
-      initialMethod={method}
     />
   );
 }

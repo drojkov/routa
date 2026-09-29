@@ -25,7 +25,7 @@ This website and the {{brand}} service are operated by:
 
 ## Point of contact for authorities and users (Digital Services Act)
 
-Under Articles 11 and 12 of the EU Digital Services Act, authorities, the European Commission and users can contact us at **{{company.legalEmail}}**. We accept messages in English and Russian **[TO CONFIRM: languages]**.
+Under Articles 11 and 12 of the EU Digital Services Act, authorities, the European Commission and users can contact us at **{{company.legalEmail}}**. We accept messages in English **[TO CONFIRM: languages]**.
 
 **[TO CONFIRM: whether the DSA applies to the Service and in what capacity; the contact point is provided in any case.]**
 
@@ -36,7 +36,6 @@ Under Articles 11 and 12 of the EU Digital Services Act, authorities, the Europe
 - Payments: [Refund Policy](/legal/refunds)
 - Rules of use: [Acceptable Use Policy](/legal/acceptable-use)
 - Accessibility: [Accessibility Statement](/legal/accessibility)
-- Users in Russia: [Consent to the processing of personal data](/legal/consent-ru)
 
 Model names and logos shown on this site are trademarks of their respective owners. They are used only to identify the models available through the Service and do not imply any partnership with or endorsement by those owners.
 

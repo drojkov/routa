@@ -1,3 +1,4 @@
+import { cabPt } from "./cab/pt";
 import type { Dictionary } from "./en";
 
 export const pt: Dictionary = {
@@ -17,8 +18,7 @@ export const pt: Dictionary = {
     dashboard: "Painel",
     language: "Idioma",
     currency: "Moeda",
-    menu: "Menu",
-  },
+    menu: "Menu", docs: "Docs" },
   hero: {
     badgeNew: "Novo ✦",
     badgeText: "Claude Sonnet 4.5 já está no catálogo —",
@@ -115,7 +115,6 @@ export const pt: Dictionary = {
     custom: "Outro valor",
     card: "Cartão",
     wallet: "Apple / Google Pay",
-    sbp: "SBP",
     invoice: "Fatura para empresa",
     pay: "Continuar — {amount}",
     invoiceCta: "Solicitar fatura",
@@ -187,7 +186,6 @@ export const pt: Dictionary = {
     subprocessors: "Suboperadores e Fornecedores de Modelos",
     accessibility: "Declaração de Acessibilidade",
     notice: "Aviso Legal",
-    "consent-ru": "Согласие на обработку персональных данных",
   },
   legal: {
     englishNote: "Este documento é disponibilizado em inglês. Se algum dia houver uma tradução, prevalece a versão em inglês.",
@@ -197,7 +195,7 @@ export const pt: Dictionary = {
   },
   modelsPage: {
     metaTitle: "Modelos e preços",
-    fanTitle: "Oito modelos. Cada um é o melhor em alguma coisa.",
+    fanTitle: "Cada modelo é o melhor em alguma coisa.",
     catalogTitle: "Catálogo",
     catalogSub: "Preços em {currency}. Clique no ID de um modelo para copiá-lo.",
   },
@@ -206,7 +204,7 @@ export const pt: Dictionary = {
     context: "contexto {c}",
     allModels: "Todos os modelos e preços",
   },
-  card: { in1m: "Entrada / 1M", context: "Contexto", modelId: "ID do modelo" },
+  card: { in1m: "Entrada / 1M", context: "Contexto", modelId: "ID do modelo", soon: "Temporariamente indisponível" },
   tiers: { all: "Todos", flagship: "Topo de linha", general: "Versáteis", fast: "Rápidos", budget: "Econômicos" },
   tags: { reasoning: "raciocínio", tools: "ferramentas", vision: "visão", code: "código", context: "contexto longo", pdf: "pdf", fast: "rápido" },
   taglines: {
@@ -218,6 +216,9 @@ export const pt: Dictionary = {
     "openai/gpt-5-mini": "Barato e rápido: chatbots, classificação, RAG",
     "anthropic/claude-haiku-4.5": "Claude rápido para tarefas de alto volume",
     "google/gemini-2.5-flash": "O burro de carga multimodal",
+    "openai/gpt-oss-120b": "Modelo aberto da OpenAI: raciocínio por centavos",
+    "moonshotai/kimi-k2.6": "Modelo aberto forte para agentes e código",
+    "meta-llama/llama-3.3-70b": "Cavalo de batalha confiável para chat e RAG",
   } as Record<string, string>,
   units: { tps: "{n} tok/s", sec: "{n} s", perAnswer: "≈ {amount} por resposta" },
   catalog: {
@@ -299,7 +300,6 @@ export const pt: Dictionary = {
     signingUp: "Criando conta…",
     or: "ou",
     google: "Google",
-    yandex: "Yandex ID",
     noAccount: "Não tem uma conta?",
     signUpLink: "Cadastre-se",
     haveAccount: "Já tem uma conta?",
@@ -307,9 +307,7 @@ export const pt: Dictionary = {
     consent: "Concordo com os {terms} e li a {privacy}.",
     age: "Tenho pelo menos 18 anos.",
     marketing: "Quero receber novidades do produto (opcional).",
-    ruConsent: "Dou meu {consent} (obrigatório para usuários na Rússia).",
-    ruConsentLink: "consentimento para o tratamento de dados pessoais",
-    demo: "Modo demo: o login com Google e Yandex é simulado até que as chaves OAuth sejam configuradas.",
+    demo: "Modo demo: o login com Google é simulado até que as chaves OAuth sejam configuradas.",
     errors: {
       generic: "Algo deu errado. Tente de novo.",
       invalid: "E-mail ou senha incorretos.",
@@ -382,6 +380,10 @@ export const pt: Dictionary = {
       toPay: "A pagar",
       text: "Estamos conectando os pagamentos neste momento. Seu pedido está salvo e será creditado assim que o pagamento for aprovado.",
       back: "Voltar ao painel",
+      paid: "Pago",
+      paidText: "Pagamento recebido — o valor já está no seu saldo.",
+      demoPay: "Marcar como pago (demo)",
+      demoNote: "Modo demo: ainda não há provedor de pagamento. Isto credita o saldo sem cobrar ninguém.",
     },
     settings: {
       title: "Conta e privacidade",
@@ -411,5 +413,6 @@ export const pt: Dictionary = {
     gpc: "Seu navegador enviou um sinal Global Privacy Control, então os cookies opcionais ficam desativados por padrão.",
   },
   notFound: { title: "Página não encontrada", text: "A página que você procura não existe ou foi movida.", home: "Ir para o início" },
+  cab: cabPt,
   common: { close: "Fechar", loading: "Carregando…", demo: "demo" },
 };

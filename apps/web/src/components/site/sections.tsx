@@ -8,7 +8,7 @@ import {
   CreditCard,
   FileText,
   KeyRound,
-  QrCode,
+
   ReceiptText,
   RefreshCw,
   Smartphone,
@@ -73,7 +73,7 @@ export function Steps() {
         <Reveal rotate={-3}>
           <StepCard n={1} title={s.s1Title} sub={s.s1Sub}>
             <div className="flex items-center gap-2 rounded-2xl bg-card p-2 pl-4 shadow-soft">
-              <span className="font-mono text-xs text-muted-foreground">sk-routa-…</span>
+              <span className="font-mono text-xs text-muted-foreground">sk-harvanera-…</span>
               <span className="ml-auto rounded-xl bg-brand px-4 py-2 text-sm font-medium text-white shadow-[0_8px_20px_-8px_var(--brand)]">
                 {s.s1Button}
               </span>
@@ -297,7 +297,7 @@ export function Features() {
               <h3 className="text-2xl leading-tight font-medium">{f.vibeTitle}</h3>
               <p className="text-sm text-white/60">{f.vibeText}</p>
               <pre className="overflow-x-auto rounded-xl border border-white/10 bg-white/5 p-3 font-mono text-[11px] text-white/80">
-                export ANTHROPIC_BASE_URL={API_HOST}{"\n"}export ANTHROPIC_AUTH_TOKEN=sk-routa-…
+                export ANTHROPIC_BASE_URL={API_HOST}{"\n"}export ANTHROPIC_AUTH_TOKEN=sk-harvanera-…
               </pre>
               <Link
                 href={href("/models")}
@@ -379,7 +379,7 @@ export function Pricing() {
   const [method, setMethod] = React.useState<string>("card");
   const methods = [
     { k: "card", t: p.card, i: CreditCard },
-    currency === "RUB" ? { k: "sbp", t: p.sbp, i: QrCode } : { k: "wallet", t: p.wallet, i: Smartphone },
+    { k: "wallet", t: p.wallet, i: Smartphone },
     { k: "invoice", t: p.invoice, i: Building2 },
   ] as const;
   const active = methods.some((m) => m.k === method) ? method : "card";
@@ -405,7 +405,7 @@ export function Pricing() {
           className="rounded-[28px] bg-card p-6 shadow-float md:p-8"
           onSubmit={(e) => {
             e.preventDefault();
-            router.push(href(`/dashboard?topup=${usd}&method=${active}#topup`));
+            router.push(href(`/dashboard/billing?topup=${usd}&method=${active}`));
           }}
         >
           <p className="text-sm text-muted-foreground">{p.formLabel}</p>

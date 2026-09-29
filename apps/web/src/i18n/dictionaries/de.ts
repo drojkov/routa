@@ -1,3 +1,4 @@
+import { cabDe } from "./cab/de";
 import type { Dictionary } from "./en";
 
 export const de: Dictionary = {
@@ -17,8 +18,7 @@ export const de: Dictionary = {
     dashboard: "Dashboard",
     language: "Sprache",
     currency: "Währung",
-    menu: "Menü",
-  },
+    menu: "Menü", docs: "Doku" },
   hero: {
     badgeNew: "Neu ✦",
     badgeText: "Claude Sonnet 4.5 ist jetzt im Katalog —",
@@ -115,7 +115,6 @@ export const de: Dictionary = {
     custom: "Eigener Betrag",
     card: "Karte",
     wallet: "Apple / Google Pay",
-    sbp: "SBP",
     invoice: "Firmenrechnung",
     pay: "Weiter – {amount}",
     invoiceCta: "Rechnung anfordern",
@@ -187,7 +186,6 @@ export const de: Dictionary = {
     subprocessors: "Unterauftragsverarbeiter und Modellanbieter",
     accessibility: "Erklärung zur Barrierefreiheit",
     notice: "Impressum",
-    "consent-ru": "Согласие на обработку персональных данных",
   },
   legal: {
     englishNote: "Dieses Dokument wird auf Englisch bereitgestellt. Sollte eine Übersetzung bereitgestellt werden, ist die englische Fassung maßgeblich.",
@@ -197,7 +195,7 @@ export const de: Dictionary = {
   },
   modelsPage: {
     metaTitle: "Modelle und Preise",
-    fanTitle: "Acht Modelle. Jedes ist in etwas unschlagbar.",
+    fanTitle: "Jedes Modell ist in etwas unschlagbar.",
     catalogTitle: "Katalog",
     catalogSub: "Preise in {currency}. Klicke auf eine Modell-ID, um sie zu kopieren.",
   },
@@ -206,7 +204,7 @@ export const de: Dictionary = {
     context: "Kontext {c}",
     allModels: "Alle Modelle und Preise",
   },
-  card: { in1m: "Input / 1M", context: "Kontext", modelId: "Modell-ID" },
+  card: { in1m: "Input / 1M", context: "Kontext", modelId: "Modell-ID", soon: "Vorübergehend nicht verfügbar" },
   tiers: { all: "Alle", flagship: "Flaggschiff", general: "Allrounder", fast: "Schnell", budget: "Günstig" },
   tags: { reasoning: "Reasoning", tools: "Tools", vision: "Vision", code: "Code", context: "langer Kontext", pdf: "pdf", fast: "schnell" },
   taglines: {
@@ -218,6 +216,9 @@ export const de: Dictionary = {
     "openai/gpt-5-mini": "Günstig und schnell: Chatbots, Klassifizierung, RAG",
     "anthropic/claude-haiku-4.5": "Schnelles Claude für große Volumen",
     "google/gemini-2.5-flash": "Das multimodale Arbeitspferd",
+    "openai/gpt-oss-120b": "Offenes Modell von OpenAI: Reasoning für Cent-Beträge",
+    "moonshotai/kimi-k2.6": "Starkes offenes Modell für Agenten und Code",
+    "meta-llama/llama-3.3-70b": "Zuverlässiges Arbeitstier für Chat und RAG",
   } as Record<string, string>,
   units: { tps: "{n} Tok./s", sec: "{n} s", perAnswer: "≈ {amount} pro Antwort" },
   catalog: {
@@ -299,7 +300,6 @@ export const de: Dictionary = {
     signingUp: "Konto wird erstellt…",
     or: "oder",
     google: "Google",
-    yandex: "Yandex ID",
     noAccount: "Noch kein Konto?",
     signUpLink: "Registrieren",
     haveAccount: "Du hast schon ein Konto?",
@@ -307,9 +307,7 @@ export const de: Dictionary = {
     consent: "Ich stimme den {terms} zu und habe die {privacy} gelesen.",
     age: "Ich bin mindestens 18 Jahre alt.",
     marketing: "Schickt mir Produktneuigkeiten (optional).",
-    ruConsent: "Ich erteile die {consent} (erforderlich für Nutzer in Russland).",
-    ruConsentLink: "Einwilligung in die Verarbeitung personenbezogener Daten",
-    demo: "Demo-Modus: Die Anmeldung mit Google und Yandex wird simuliert, bis OAuth-Schlüssel konfiguriert sind.",
+    demo: "Demo-Modus: Die Anmeldung mit Google wird simuliert, bis OAuth-Schlüssel konfiguriert sind.",
     errors: {
       generic: "Etwas ist schiefgelaufen. Bitte versuch es noch einmal.",
       invalid: "E-Mail oder Passwort falsch.",
@@ -382,6 +380,10 @@ export const de: Dictionary = {
       toPay: "Zu zahlen",
       text: "Die Zahlungsabwicklung wird gerade angebunden. Deine Bestellung ist gespeichert und wird gutgeschrieben, sobald die Zahlung eingegangen ist.",
       back: "Zurück zum Dashboard",
+      paid: "Bezahlt",
+      paidText: "Zahlung eingegangen – der Betrag ist Ihrem Guthaben gutgeschrieben.",
+      demoPay: "Als bezahlt markieren (Demo)",
+      demoNote: "Demo-Modus: Noch kein Zahlungsanbieter angebunden. Das schreibt Guthaben gut, ohne jemanden zu belasten.",
     },
     settings: {
       title: "Konto & Datenschutz",
@@ -411,5 +413,6 @@ export const de: Dictionary = {
     gpc: "Dein Browser hat ein Global-Privacy-Control-Signal gesendet, daher sind optionale Cookies standardmäßig deaktiviert.",
   },
   notFound: { title: "Seite nicht gefunden", text: "Die gesuchte Seite existiert nicht oder wurde verschoben.", home: "Zur Startseite" },
+  cab: cabDe,
   common: { close: "Schließen", loading: "Wird geladen…", demo: "Demo" },
 };

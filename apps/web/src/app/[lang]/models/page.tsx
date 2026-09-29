@@ -16,7 +16,7 @@ export default async function ModelsPage({ params }: PageProps<"/[lang]/models">
     <>
       <Nav />
       <main className="-mt-16">
-        <ModelFan title={dict.modelsPage.fanTitle} />
+        <ModelFan title={dict.modelsPage.fanTitle} allHref="#catalog" />
         <CatalogHeading />
         <Catalog />
       </main>

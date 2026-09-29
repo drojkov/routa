@@ -1,23 +1,23 @@
 /** Рабочее название. Меняется здесь — и везде на сайте. */
-export const BRAND = "Routa";
+export const BRAND = "Harvanera";
 /** Домен — заглушка до регистрации. */
-export const API_BASE = "https://api.routa.ai/v1";
-export const API_HOST = "https://api.routa.ai";
+export const API_BASE = "https://api.harvanera.com/v1";
+export const API_HOST = "https://api.harvanera.com";
 
 /**
  * Реквизиты компании (Гонконг). Подставляются в футер и юридические документы.
  * До запуска заполнить реальными данными из Business Registration / Certificate of Incorporation.
  */
 export const COMPANY = {
-  legalName: "[COMPANY NAME] Limited",
+  legalName: "Harvanera Limited",
   jurisdiction: "Hong Kong SAR",
   crNumber: "[CR NUMBER]",
   brNumber: "[BR NUMBER]",
   address: "[REGISTERED OFFICE ADDRESS], Hong Kong",
   director: "[DIRECTOR NAME]",
-  email: "support@routa.ai",
-  privacyEmail: "privacy@routa.ai",
-  legalEmail: "legal@routa.ai",
+  email: "support@harvanera.com",
+  privacyEmail: "privacy@harvanera.com",
+  legalEmail: "legal@harvanera.com",
   euRep: "[EU REPRESENTATIVE NAME AND ADDRESS]",
   ukRep: "[UK REPRESENTATIVE NAME AND ADDRESS]",
 };
@@ -34,7 +34,6 @@ export const LEGAL_DOCS = [
   "subprocessors",
   "accessibility",
   "notice",
-  "consent-ru",
 ] as const;
 export type LegalDoc = (typeof LEGAL_DOCS)[number];
 
@@ -42,6 +41,7 @@ export const NAV = [
   { href: "/", key: "home" },
   { href: "/models", key: "models" },
   { href: "/compare", key: "compare" },
+  { href: "/docs", key: "docs" },
   { href: "/#pricing", key: "pricing" },
   { href: "/#faq", key: "faq" },
 ] as const;
@@ -72,16 +72,27 @@ export type Model = {
   stripe: string;
   ink: "dark" | "light";
   tags: Tag[];
+  /**
+   * Продаётся ли модель сейчас. false — в каталоге с плашкой «временно недоступна», шлюз отвечает 503.
+   * Откуда шлюз берёт модель — `lib/gateway/routes.ts`.
+   */
+  available: boolean;
 };
 
 type ModelInput = Omit<Model, "typical">;
 const typical = (m: ModelInput): Model => ({ ...m, typical: (1000 * m.priceIn + 500 * m.priceOut) / 1_000_000 });
 
-// Цены — ориентир по прайсам вендоров; скорость и качество условные до сбора реальных метрик.
+/**
+ * Цены продажи. Для доступных моделей = закупка у хостера × 1.05, округлено вверх
+ * (до 2 значащих цифр ниже $1, до цента выше) — закупка и сверка в `lib/gateway/routes.ts`.
+ * Для недоступных (GPT, Claude, Gemini) — прайс вендора, пересчитать при подключении.
+ * Скорость и качество условные до сбора реальных метрик.
+ */
 export const MODELS: Model[] = (
   [
     {
       id: "openai/gpt-5",
+      available: false,
       name: "GPT-5",
       vendor: "OpenAI",
       tier: "flagship",
@@ -98,6 +109,7 @@ export const MODELS: Model[] = (
     },
     {
       id: "anthropic/claude-sonnet-4.5",
+      available: false,
       name: "Claude Sonnet 4.5",
       vendor: "Anthropic",
       tier: "flagship",
@@ -114,6 +126,7 @@ export const MODELS: Model[] = (
     },
     {
       id: "google/gemini-2.5-pro",
+      available: false,
       name: "Gemini 2.5 Pro",
       vendor: "Google",
       tier: "flagship",
@@ -130,12 +143,13 @@ export const MODELS: Model[] = (
     },
     {
       id: "deepseek/deepseek-v3.1",
+      available: true,
       name: "DeepSeek V3.1",
       vendor: "DeepSeek",
       tier: "general",
-      context: "128K",
+      context: "160K",
       priceIn: 0.27,
-      priceOut: 1.1,
+      priceOut: 1.0,
       speed: 58,
       ttft: 1.6,
       quality: 84,
@@ -146,12 +160,13 @@ export const MODELS: Model[] = (
     },
     {
       id: "qwen/qwen3-coder",
+      available: true,
       name: "Qwen3 Coder",
       vendor: "Alibaba",
       tier: "fast",
       context: "256K",
-      priceIn: 0.23,
-      priceOut: 1,
+      priceIn: 0.32,
+      priceOut: 1.05,
       speed: 140,
       ttft: 0.6,
       quality: 81,
@@ -162,6 +177,7 @@ export const MODELS: Model[] = (
     },
     {
       id: "openai/gpt-5-mini",
+      available: false,
       name: "GPT-5 mini",
       vendor: "OpenAI",
       tier: "budget",
@@ -178,6 +194,7 @@ export const MODELS: Model[] = (
     },
     {
       id: "anthropic/claude-haiku-4.5",
+      available: false,
       name: "Claude Haiku 4.5",
       vendor: "Anthropic",
       tier: "fast",
@@ -194,6 +211,7 @@ export const MODELS: Model[] = (
     },
     {
       id: "google/gemini-2.5-flash",
+      available: false,
       name: "Gemini 2.5 Flash",
       vendor: "Google",
       tier: "budget",
@@ -207,6 +225,57 @@ export const MODELS: Model[] = (
       stripe: "#6d28d9",
       ink: "dark",
       tags: ["vision", "fast"],
+    },
+    {
+      id: "openai/gpt-oss-120b",
+      available: true,
+      name: "gpt-oss-120b",
+      vendor: "OpenAI",
+      tier: "budget",
+      context: "128K",
+      priceIn: 0.039,
+      priceOut: 0.18,
+      speed: 180,
+      ttft: 0.5,
+      quality: 78,
+      gradient: ["#e6fff4", "#8ff0c4", "#1baf7a"],
+      stripe: "#0f7a55",
+      ink: "dark",
+      tags: ["reasoning", "tools", "fast"],
+    },
+    {
+      id: "moonshotai/kimi-k2.6",
+      available: true,
+      name: "Kimi K2.6",
+      vendor: "Moonshot AI",
+      tier: "general",
+      context: "256K",
+      priceIn: 0.79,
+      priceOut: 3.68,
+      speed: 55,
+      ttft: 1.2,
+      quality: 86,
+      gradient: ["#eef0f3", "#b9c0cc", "#4b5563"],
+      stripe: "#111827",
+      ink: "dark",
+      tags: ["code", "tools", "context"],
+    },
+    {
+      id: "meta-llama/llama-3.3-70b",
+      available: true,
+      name: "Llama 3.3 70B",
+      vendor: "Meta",
+      tier: "fast",
+      context: "128K",
+      priceIn: 0.11,
+      priceOut: 0.34,
+      speed: 120,
+      ttft: 0.5,
+      quality: 72,
+      gradient: ["#e5f0ff", "#93c1ff", "#2a78d6"],
+      stripe: "#1d4ed8",
+      ink: "dark",
+      tags: ["fast", "tools"],
     },
   ] satisfies ModelInput[]
 ).map(typical);

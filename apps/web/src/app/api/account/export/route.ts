@@ -33,7 +33,7 @@ export async function GET(request: Request) {
   return new Response(body, {
     headers: {
       "content-type": "application/json; charset=utf-8",
-      "content-disposition": `attachment; filename="routa-data-${new Date().toISOString().slice(0, 10)}.json"`,
+      "content-disposition": `attachment; filename="harvanera-data-${new Date().toISOString().slice(0, 10)}.json"`,
       "cache-control": "no-store",
     },
   });

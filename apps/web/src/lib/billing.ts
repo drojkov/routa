@@ -8,4 +8,4 @@ export const MAX_TOPUP_USD = 10_000;
 export const toMicros = (usd: number) => Math.round(usd * 1_000_000);
 export const fromMicros = (micros: number) => micros / 1_000_000;
 
-export const KEY_PREFIX = "sk-routa-";
+export const KEY_PREFIX = "sk-harvanera-";

@@ -3,7 +3,7 @@ import { JetBrains_Mono, Onest } from "next/font/google";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { CookieBanner } from "@/components/site/cookie-banner";
-import { CURRENCY_COOKIE, isCurrency, isLocale, LOCALE_CURRENCY, LOCALE_TAGS, LOCALES } from "@/i18n/config";
+import { CURRENCY_COOKIE, DEFAULT_CURRENCY, isCurrency, isLocale, LOCALE_TAGS, LOCALES } from "@/i18n/config";
 import { fmt } from "@/i18n/fmt";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { I18nProvider } from "@/i18n/provider";
@@ -15,9 +15,13 @@ const onest = Onest({
   subsets: ["latin", "latin-ext", "cyrillic"],
 });
 
+// Если Google Fonts недоступен, next/font по умолчанию подставляет Arial с поправкой метрик —
+// для кода это не годится, поэтому запасные шрифты — системные моноширинные.
 const jetbrains = JetBrains_Mono({
   variable: "--font-jetbrains",
   subsets: ["latin", "cyrillic"],
+  adjustFontFallback: false,
+  fallback: ["ui-monospace", "Cascadia Code", "Consolas", "SF Mono", "Menlo", "monospace"],
 });
 
 export function generateStaticParams() {
@@ -43,7 +47,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
   if (!isLocale(lang)) notFound();
   const [dict, jar] = await Promise.all([getDictionary(lang), cookies()]);
   const saved = jar.get(CURRENCY_COOKIE)?.value;
-  const currency = isCurrency(saved) ? saved : LOCALE_CURRENCY[lang];
+  const currency = isCurrency(saved) ? saved : DEFAULT_CURRENCY;
 
   return (
     <html lang={LOCALE_TAGS[lang]} className={`${onest.variable} ${jetbrains.variable} h-full antialiased`}>

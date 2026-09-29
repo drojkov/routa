@@ -11,7 +11,6 @@ const CURRENCY_SIGN: Record<string, string> = {
   USD: "$",
   EUR: "€",
   GBP: "£",
-  RUB: "₽",
   CNY: "¥",
   JPY: "¥",
   INR: "₹",

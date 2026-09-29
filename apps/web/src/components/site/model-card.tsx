@@ -50,6 +50,10 @@ export function ModelCard({ model, className }: { model: Model; className?: stri
         </div>
       </header>
 
+      {!model.available && (
+        <p className="relative mx-5 w-fit rounded-full bg-black/75 px-2.5 py-1 text-[10px] font-medium text-white">{dict.card.soon}</p>
+      )}
+
       <div className="relative mt-auto px-5 pb-4">
         <p className="text-[10px] font-medium tracking-wide text-black/50 uppercase">{dict.card.modelId}</p>
         <p className="font-mono text-[13px] leading-snug font-medium break-all text-black/85">{model.id}</p>

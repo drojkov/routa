@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { AuthPage, authProviders } from "@/components/site/auth-page";
 import { loadLocale } from "@/i18n/server";
+import { redirectIfSignedIn } from "@/lib/account";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/sign-up">): Promise<Metadata> {
   const { dict } = await loadLocale(params);
@@ -8,7 +9,8 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/sign-up">)
 }
 
 export default async function SignUpPage({ params, searchParams }: PageProps<"/[lang]/sign-up">) {
-  await loadLocale(params);
+  const { lang } = await loadLocale(params);
   const { next } = await searchParams;
+  await redirectIfSignedIn(lang, typeof next === "string" ? next : undefined);
   return <AuthPage mode="sign-up" providers={authProviders()} next={typeof next === "string" ? next : undefined} />;
 }

@@ -36,7 +36,7 @@ export default async function LegalPage({ params }: PageProps<"/[lang]/legal/[do
   const { lang, dict } = await loadLocale(params);
   if (!isDoc(doc)) notFound();
   const text = await readDoc(doc);
-  const showNote = lang !== "en" && doc !== "consent-ru";
+  const showNote = lang !== "en";
 
   // Внутренние ссылки документов (/legal/privacy) ведём на ту же языковую версию сайта.
   const components: Components = {
@@ -78,7 +78,7 @@ export default async function LegalPage({ params }: PageProps<"/[lang]/legal/[do
       <Nav />
       <main className="mx-auto w-full max-w-3xl px-4 pt-16 pb-24">
         <nav aria-label={dict.legal.allDocs} className="mb-8 flex flex-wrap gap-1.5">
-          {LEGAL_DOCS.filter((d) => d !== "consent-ru" || lang === "ru").map((d) => (
+          {LEGAL_DOCS.map((d) => (
             <Link
               key={d}
               href={localePath(lang, `/legal/${d}`)}
@@ -94,7 +94,7 @@ export default async function LegalPage({ params }: PageProps<"/[lang]/legal/[do
           ))}
         </nav>
         {showNote && <p className="mb-6 rounded-2xl bg-muted px-4 py-3 text-sm text-muted-foreground">{dict.legal.englishNote}</p>}
-        <article lang={doc === "consent-ru" ? "ru" : "en"}>
+        <article lang="en">
           <Markdown remarkPlugins={[remarkGfm]} components={components}>
             {text}
           </Markdown>

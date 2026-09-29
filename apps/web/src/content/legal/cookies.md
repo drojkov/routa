@@ -21,7 +21,7 @@ Cookies are small text files that a website stores in your browser. They let the
 | `currency` | Remembers the currency you chose for displaying prices | {{brand}} (first party) | **[TO CONFIRM: e.g. 1 year]** |
 | `cookie_consent` | Stores your cookie choices so we don't ask again on every visit | {{brand}} (first party) | 6 months |
 
-**[TO CONFIRM: whether the sign-in flow with Google or Yandex ID sets additional short-lived first-party cookies (for example OAuth state or PKCE cookies), and whether the payment page of [PAYMENT PROCESSOR] sets its own cookies; if so, add them to the table.]**
+**[TO CONFIRM: whether the sign-in flow with Google sets additional short-lived first-party cookies (for example OAuth state or PKCE cookies), and whether the payment page of [PAYMENT PROCESSOR] sets its own cookies; if so, add them to the table.]**
 
 We do not use cookies to track you across other websites.
 

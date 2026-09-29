@@ -1,3 +1,4 @@
+import { cabFr } from "./cab/fr";
 import type { Dictionary } from "./en";
 
 export const fr: Dictionary = {
@@ -17,8 +18,7 @@ export const fr: Dictionary = {
     dashboard: "Tableau de bord",
     language: "Langue",
     currency: "Devise",
-    menu: "Menu",
-  },
+    menu: "Menu", docs: "Docs" },
   hero: {
     badgeNew: "Nouveau ✦",
     badgeText: "Claude Sonnet 4.5 est désormais au catalogue —",
@@ -115,7 +115,6 @@ export const fr: Dictionary = {
     custom: "Autre montant",
     card: "Carte",
     wallet: "Apple / Google Pay",
-    sbp: "SBP",
     invoice: "Facture entreprise",
     pay: "Continuer — {amount}",
     invoiceCta: "Demander une facture",
@@ -187,7 +186,6 @@ export const fr: Dictionary = {
     subprocessors: "Sous-traitants et fournisseurs de modèles",
     accessibility: "Déclaration d’accessibilité",
     notice: "Mentions légales",
-    "consent-ru": "Согласие на обработку персональных данных",
   },
   legal: {
     englishNote: "Ce document est fourni en anglais. Si une traduction est proposée, la version anglaise fait foi.",
@@ -197,7 +195,7 @@ export const fr: Dictionary = {
   },
   modelsPage: {
     metaTitle: "Modèles et tarifs",
-    fanTitle: "Huit modèles. Chacun excelle dans un domaine.",
+    fanTitle: "Chaque modèle excelle dans un domaine.",
     catalogTitle: "Catalogue",
     catalogSub: "Prix affichés en {currency}. Cliquez sur l’ID d’un modèle pour le copier.",
   },
@@ -206,7 +204,7 @@ export const fr: Dictionary = {
     context: "contexte {c}",
     allModels: "Tous les modèles et tarifs",
   },
-  card: { in1m: "Entrée / 1M", context: "Contexte", modelId: "ID du modèle" },
+  card: { in1m: "Entrée / 1M", context: "Contexte", modelId: "ID du modèle", soon: "Temporairement indisponible" },
   tiers: { all: "Tous", flagship: "Phare", general: "Polyvalent", fast: "Rapide", budget: "Économique" },
   tags: { reasoning: "raisonnement", tools: "outils", vision: "vision", code: "code", context: "long contexte", pdf: "pdf", fast: "rapide" },
   taglines: {
@@ -218,6 +216,9 @@ export const fr: Dictionary = {
     "openai/gpt-5-mini": "Rapide et bon marché : chatbots, classification, RAG",
     "anthropic/claude-haiku-4.5": "Un Claude rapide pour les gros volumes",
     "google/gemini-2.5-flash": "Le cheval de trait multimodal",
+    "openai/gpt-oss-120b": "Modèle ouvert d’OpenAI : du raisonnement pour quelques centimes",
+    "moonshotai/kimi-k2.6": "Modèle ouvert puissant pour agents et code",
+    "meta-llama/llama-3.3-70b": "Modèle fiable pour le chat et le RAG",
   } as Record<string, string>,
   units: { tps: "{n} tok/s", sec: "{n} s", perAnswer: "≈ {amount} par réponse" },
   catalog: {
@@ -299,7 +300,6 @@ export const fr: Dictionary = {
     signingUp: "Création du compte…",
     or: "ou",
     google: "Google",
-    yandex: "Yandex ID",
     noAccount: "Pas encore de compte ?",
     signUpLink: "S’inscrire",
     haveAccount: "Vous avez déjà un compte ?",
@@ -307,9 +307,7 @@ export const fr: Dictionary = {
     consent: "J’accepte les {terms} et j’ai lu la {privacy}.",
     age: "J’ai au moins 18 ans.",
     marketing: "Envoyez-moi les nouveautés produit (facultatif).",
-    ruConsent: "Je donne mon {consent} (obligatoire pour les utilisateurs en Russie).",
-    ruConsentLink: "consentement au traitement des données personnelles",
-    demo: "Mode démo : la connexion via Google et Yandex est simulée tant que les clés OAuth ne sont pas configurées.",
+    demo: "Mode démo : la connexion via Google est simulée tant que les clés OAuth ne sont pas configurées.",
     errors: {
       generic: "Une erreur s’est produite. Veuillez réessayer.",
       invalid: "E-mail ou mot de passe incorrect.",
@@ -382,6 +380,10 @@ export const fr: Dictionary = {
       toPay: "À payer",
       text: "Le paiement est en cours de mise en place. Votre commande est enregistrée et sera créditée dès que le paiement aura abouti.",
       back: "Retour au tableau de bord",
+      paid: "Payé",
+      paidText: "Paiement reçu — le montant est crédité sur votre solde.",
+      demoPay: "Marquer comme payé (démo)",
+      demoNote: "Mode démo : aucun prestataire de paiement n’est encore connecté. Cela crédite le solde sans rien débiter.",
     },
     settings: {
       title: "Compte et confidentialité",
@@ -411,5 +413,6 @@ export const fr: Dictionary = {
     gpc: "Votre navigateur a envoyé un signal Global Privacy Control : les cookies facultatifs sont donc désactivés par défaut.",
   },
   notFound: { title: "Page introuvable", text: "La page que vous cherchez n’existe pas ou a été déplacée.", home: "Retour à l’accueil" },
+  cab: cabFr,
   common: { close: "Fermer", loading: "Chargement…", demo: "démo" },
 };

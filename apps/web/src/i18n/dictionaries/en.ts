@@ -2,6 +2,7 @@
  * Эталонный словарь. Остальные языки обязаны повторять его форму (тип Dictionary).
  * Плейсхолдеры в фигурных скобках — {amount}, {n}, {brand} — подставляет fmt().
  */
+import { cabEn } from "./cab/en";
 export const en = {
   meta: {
     title: "{brand} — one API key for every AI model",
@@ -19,8 +20,7 @@ export const en = {
     dashboard: "Dashboard",
     language: "Language",
     currency: "Currency",
-    menu: "Menu",
-  },
+    menu: "Menu", docs: "Docs" },
   hero: {
     badgeNew: "New ✦",
     badgeText: "Claude Sonnet 4.5 is now in the catalog —",
@@ -117,7 +117,6 @@ export const en = {
     custom: "Custom amount",
     card: "Card",
     wallet: "Apple / Google Pay",
-    sbp: "SBP",
     invoice: "Company invoice",
     pay: "Continue — {amount}",
     invoiceCta: "Request an invoice",
@@ -189,7 +188,6 @@ export const en = {
     subprocessors: "Subprocessors & Model Providers",
     accessibility: "Accessibility Statement",
     notice: "Legal Notice",
-    "consent-ru": "Согласие на обработку персональных данных",
   },
   legal: {
     englishNote: "This document is provided in English. If a translation is ever provided, the English version governs.",
@@ -199,7 +197,7 @@ export const en = {
   },
   modelsPage: {
     metaTitle: "Models and pricing",
-    fanTitle: "Eight models. Each the best at something.",
+    fanTitle: "Every model is the best at something.",
     catalogTitle: "Catalog",
     catalogSub: "Prices shown in {currency}. Click a model ID to copy it.",
   },
@@ -208,7 +206,7 @@ export const en = {
     context: "context {c}",
     allModels: "All models and prices",
   },
-  card: { in1m: "Input / 1M", context: "Context", modelId: "Model ID" },
+  card: { in1m: "Input / 1M", context: "Context", modelId: "Model ID", soon: "Temporarily unavailable" },
   tiers: { all: "All", flagship: "Flagship", general: "All-rounder", fast: "Fast", budget: "Budget" },
   tags: { reasoning: "reasoning", tools: "tools", vision: "vision", code: "code", context: "long context", pdf: "pdf", fast: "fast" },
   taglines: {
@@ -220,6 +218,9 @@ export const en = {
     "openai/gpt-5-mini": "Cheap and fast: chatbots, classification, RAG",
     "anthropic/claude-haiku-4.5": "Fast Claude for high-volume tasks",
     "google/gemini-2.5-flash": "The multimodal workhorse",
+    "openai/gpt-oss-120b": "Open model from OpenAI: reasoning for pennies",
+    "moonshotai/kimi-k2.6": "Strong open model for agents and code",
+    "meta-llama/llama-3.3-70b": "Reliable workhorse for chat and RAG",
   } as Record<string, string>,
   units: { tps: "{n} tok/s", sec: "{n} s", perAnswer: "≈ {amount} per answer" },
   catalog: {
@@ -301,7 +302,6 @@ export const en = {
     signingUp: "Creating account…",
     or: "or",
     google: "Google",
-    yandex: "Yandex ID",
     noAccount: "Don't have an account?",
     signUpLink: "Sign up",
     haveAccount: "Already have an account?",
@@ -309,9 +309,7 @@ export const en = {
     consent: "I agree to the {terms} and have read the {privacy}.",
     age: "I am at least 18 years old.",
     marketing: "Send me product news (optional).",
-    ruConsent: "I give {consent} (required for users in Russia).",
-    ruConsentLink: "consent to the processing of personal data",
-    demo: "Demo mode: Google and Yandex sign-in is simulated until OAuth keys are configured.",
+    demo: "Demo mode: Google sign-in is simulated until OAuth keys are configured.",
     errors: {
       generic: "Something went wrong. Please try again.",
       invalid: "Wrong email or password.",
@@ -384,6 +382,10 @@ export const en = {
       toPay: "To pay",
       text: "Payments are being connected right now. Your order is saved and will be credited as soon as payment goes through.",
       back: "Back to dashboard",
+      paid: "Paid",
+      paidText: "Payment received — the amount is on your balance.",
+      demoPay: "Mark as paid (demo)",
+      demoNote: "Demo mode: no payment provider is connected yet. This credits the balance without charging anyone.",
     },
     settings: {
       title: "Account & privacy",
@@ -413,6 +415,7 @@ export const en = {
     gpc: "Your browser sent a Global Privacy Control signal, so optional cookies are off by default.",
   },
   notFound: { title: "Page not found", text: "The page you're looking for doesn't exist or has moved.", home: "Go home" },
+  cab: cabEn,
   common: { close: "Close", loading: "Loading…", demo: "demo" },
 };
 

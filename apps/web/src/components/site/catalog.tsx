@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, Copy, Search } from "lucide-react";
+import Link from "next/link";
 import * as React from "react";
 import { useI18n } from "@/i18n/provider";
 import { MODELS, TIERS, type Tier } from "@/lib/site";
@@ -14,7 +15,7 @@ type Sort = (typeof SORTS)[number];
 export function CatalogHeading() {
   const { dict, t, currency } = useI18n();
   return (
-    <div className="mx-auto max-w-6xl px-4 pb-8">
+    <div id="catalog" className="mx-auto max-w-6xl scroll-mt-20 px-4 pb-8">
       <h2 className="text-3xl font-semibold tracking-tight">{dict.modelsPage.catalogTitle}</h2>
       <p className="mt-1 text-muted-foreground">{t(dict.modelsPage.catalogSub, { currency })}</p>
     </div>
@@ -22,7 +23,7 @@ export function CatalogHeading() {
 }
 
 export function Catalog() {
-  const { dict, money, t } = useI18n();
+  const { dict, money, t, href } = useI18n();
   const c = dict.catalog;
   const sortLabel: Record<Sort, string> = { popular: c.sortPopular, cheap: c.sortCheap, fast: c.sortFast, smart: c.sortSmart };
   const [q, setQ] = React.useState("");
@@ -114,8 +115,15 @@ export function Catalog() {
                 />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <h3 className="font-semibold">{m.name}</h3>
+                    <h3 className="font-semibold">
+                      <Link href={href(`/models/${m.id}`)} className="after:absolute after:inset-0 hover:underline">
+                        {m.name}
+                      </Link>
+                    </h3>
                     <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">{dict.tiers[m.tier]}</span>
+                    {!m.available && (
+                      <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800">{dict.card.soon}</span>
+                    )}
                   </div>
                   <CopyId id={m.id} label={c.copy} />
                   <p className="mt-2 text-sm text-muted-foreground">{dict.taglines[m.id]}</p>
@@ -161,7 +169,7 @@ function CopyId({ id, label }: { id: string; label: string }) {
         setOk(true);
         setTimeout(() => setOk(false), 1400);
       }}
-      className="mt-1 inline-flex items-center gap-1.5 rounded-md bg-muted/70 px-1.5 py-0.5 font-mono text-xs text-muted-foreground transition hover:text-foreground"
+      className="relative z-10 mt-1 inline-flex items-center gap-1.5 rounded-md bg-muted/70 px-1.5 py-0.5 font-mono text-xs text-muted-foreground transition hover:text-foreground"
     >
       {id}
       {ok ? <Check className="size-3 text-brand-strong" /> : <Copy className="size-3" />}

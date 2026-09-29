@@ -4,10 +4,10 @@ import { LocaleSwitcher } from "@/components/site/locale-switcher";
 import { Logo } from "@/components/site/nav";
 import { DEMO_OAUTH, OAUTH } from "@/lib/auth";
 
-/** Какой режим у кнопок Google/Яндекс: настоящий OAuth, демо-вход или скрыта. */
-export function authProviders(): Record<"google" | "yandex", ProviderMode> {
+/** Какой режим у кнопки Google: настоящий OAuth, демо-вход или скрыта. */
+export function authProviders(): Record<"google", ProviderMode> {
   const mode = (on: boolean): ProviderMode => (on ? "live" : DEMO_OAUTH ? "demo" : "off");
-  return { google: mode(OAUTH.google), yandex: mode(OAUTH.yandex) };
+  return { google: mode(OAUTH.google) };
 }
 
 export function AuthPage(props: React.ComponentProps<typeof AuthCard>) {

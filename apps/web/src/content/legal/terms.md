@@ -36,7 +36,7 @@ If you are a consumer, nothing in these Terms limits the rights you have under t
 
 ### 4.1 Creating an account
 
-You can sign up with an email address and password, or with Google or Yandex ID. You must give us accurate information and keep it up to date.
+You can sign up with an email address and password, or with Google. You must give us accurate information and keep it up to date.
 
 ### 4.2 Keeping your account secure
 
@@ -58,7 +58,7 @@ The Service works on a prepaid basis. Your balance is kept in **US dollars (USD)
 
 ### 5.2 Top-ups
 
-- You can top up by card in USD, EUR, GBP, RUB, CNY, JPY, INR or BRL. Payments in currencies other than USD are converted to USD at the exchange rate applied on the day of payment. **[TO CONFIRM: source of the exchange rate (payment processor rate or other) and whether a conversion margin is charged.]**
+- You can top up by card in USD, EUR, GBP, CNY, JPY, INR or BRL. Payments in currencies other than USD are converted to USD at the exchange rate applied on the day of payment. **[TO CONFIRM: source of the exchange rate (payment processor rate or other) and whether a conversion margin is charged.]**
 - Businesses can request an invoice for a top-up. The balance is credited once payment is received.
 - Card payments are processed by our payment processor, [PAYMENT PROCESSOR]. We do not see or store your full card number.
 - Your bank or card issuer may charge its own fees (for example, foreign transaction fees). These are outside our control.
@@ -184,7 +184,7 @@ If we terminate your account because of a serious breach, fraud or sanctions, we
 You confirm that you are not a person subject to sanctions and that you will not use the Service:
 
 - from, or for the benefit of anyone in, a country or territory subject to comprehensive sanctions **[TO CONFIRM: list, e.g. Cuba, Iran, North Korea, Syria, and the Crimea, so-called Donetsk and Luhansk regions of Ukraine]**;
-- on behalf of, or for the benefit of, any person on a sanctions list that applies to us, our payment processors or the Model Providers **[TO CONFIRM: which sanctions regimes we commit to (UN, Hong Kong, US, EU, UK) and how this interacts with serving users in Russia and paying in RUB]**;
+- on behalf of, or for the benefit of, any person on a sanctions list that applies to us, our payment processors or the Model Providers **[TO CONFIRM: which sanctions regimes we commit to (UN, Hong Kong, US, EU, UK)]**;
 - for any purpose prohibited by export control laws.
 
 We may screen accounts and payments, block access from certain locations, and refuse, suspend or terminate accounts to comply with sanctions or export control rules, including rules that bind our Model Providers and payment processors.
@@ -214,7 +214,6 @@ If you are a business user, you will compensate us for reasonable losses and cos
 
 We process personal data as described in our [Privacy Policy](/legal/privacy). If you send personal data of other people through the Service, you act as the controller of that data and we process it on your behalf. **[TO CONFIRM: whether to publish a Data Processing Addendum (DPA) for business users, and link it here.]**
 
-For users in Russia, a separate [Consent to the processing of personal data](/legal/consent-ru) applies.
 
 ## 17. Changes to these Terms
 

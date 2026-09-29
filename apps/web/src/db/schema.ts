@@ -84,13 +84,17 @@ export const apiKey = sqliteTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
-    /** Первые символы для узнавания в списке: sk-routa-ab12… */
+    /** Первые символы для узнавания в списке: sk-harvanera-ab12… */
     prefix: text("prefix").notNull(),
     hash: text("hash").notNull().unique(),
     /** Месячный лимит в микро-USD; null — без лимита. */
     limitMicros: integer("limit_micros"),
     createdAt: createdAt(),
     lastUsedAt: integer("last_used_at", { mode: "timestamp_ms" }),
+    /** Временно выключен владельцем (в отличие от revoked — можно включить обратно). */
+    disabledAt: integer("disabled_at", { mode: "timestamp_ms" }),
+    /** Белый список моделей (id из каталога); null — все модели. */
+    allowedModels: text("allowed_models", { mode: "json" }).$type<string[]>(),
     revokedAt: integer("revoked_at", { mode: "timestamp_ms" }),
   },
   (t) => [index("api_key_user_idx").on(t.userId)],
@@ -137,4 +141,36 @@ export const payment = sqliteTable(
     updatedAt: updatedAt(),
   },
   (t) => [index("payment_user_idx").on(t.userId)],
+);
+
+/**
+ * Журнал запросов к шлюзу (SPEC §5 п.5): метаданные без текста промптов.
+ * id = x-request-id ответа = ledger.ref списания.
+ */
+export const requestLog = sqliteTable(
+  "request_log",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    /** null — запрос из чата в кабинете (по сессии, без ключа). */
+    apiKeyId: text("api_key_id").references(() => apiKey.id, { onDelete: "set null" }),
+    model: text("model").notNull(),
+    /** Хостер, который ответил: deepinfra, together, mock… null — до апстрима не дошло. */
+    provider: text("provider"),
+    status: integer("status").notNull(),
+    errorCode: text("error_code"),
+    stream: integer("stream", { mode: "boolean" }).notNull().default(false),
+    inputTokens: integer("input_tokens").notNull().default(0),
+    outputTokens: integer("output_tokens").notNull().default(0),
+    /** Списано с клиента, микро-USD. */
+    costMicros: integer("cost_micros").notNull().default(0),
+    /** Токены посчитаны нами (обрыв стрима без usage), а не взяты у хостера. */
+    estimated: integer("estimated", { mode: "boolean" }).notNull().default(false),
+    latencyMs: integer("latency_ms"),
+    ttftMs: integer("ttft_ms"),
+    createdAt: createdAt(),
+  },
+  (t) => [index("request_log_user_idx").on(t.userId, t.createdAt), index("request_log_key_idx").on(t.apiKeyId, t.createdAt)],
 );

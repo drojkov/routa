@@ -1,3 +1,4 @@
+import { cabJa } from "./cab/ja";
 import type { Dictionary } from "./en";
 
 export const ja: Dictionary = {
@@ -17,8 +18,7 @@ export const ja: Dictionary = {
     dashboard: "ダッシュボード",
     language: "言語",
     currency: "通貨",
-    menu: "メニュー",
-  },
+    menu: "メニュー", docs: "ドキュメント" },
   hero: {
     badgeNew: "New ✦",
     badgeText: "Claude Sonnet 4.5 をカタログに追加しました —",
@@ -115,7 +115,6 @@ export const ja: Dictionary = {
     custom: "金額を指定",
     card: "カード",
     wallet: "Apple / Google Pay",
-    sbp: "SBP",
     invoice: "法人請求書",
     pay: "次へ — {amount}",
     invoiceCta: "請求書を依頼",
@@ -187,7 +186,6 @@ export const ja: Dictionary = {
     subprocessors: "再委託先とモデルプロバイダー",
     accessibility: "アクセシビリティ方針",
     notice: "法的通知",
-    "consent-ru": "Согласие на обработку персональных данных",
   },
   legal: {
     englishNote: "本書は英語で提供されています。翻訳版が提供された場合でも、英語版が優先されます。",
@@ -197,7 +195,7 @@ export const ja: Dictionary = {
   },
   modelsPage: {
     metaTitle: "モデルと料金",
-    fanTitle: "8 つのモデル。それぞれに得意分野があります。",
+    fanTitle: "どのモデルにも得意分野があります。",
     catalogTitle: "カタログ",
     catalogSub: "価格は {currency} で表示しています。モデル ID をクリックするとコピーできます。",
   },
@@ -206,7 +204,7 @@ export const ja: Dictionary = {
     context: "コンテキスト {c}",
     allModels: "すべてのモデルと料金",
   },
-  card: { in1m: "入力 / 1M", context: "コンテキスト", modelId: "モデル ID" },
+  card: { in1m: "入力 / 1M", context: "コンテキスト", modelId: "モデル ID", soon: "一時的に利用不可" },
   tiers: { all: "すべて", flagship: "フラッグシップ", general: "汎用", fast: "高速", budget: "低価格" },
   tags: { reasoning: "推論", tools: "ツール", vision: "画像認識", code: "コード", context: "長文コンテキスト", pdf: "pdf", fast: "高速" },
   taglines: {
@@ -218,6 +216,9 @@ export const ja: Dictionary = {
     "openai/gpt-5-mini": "安くて速い：チャットボット、分類、RAG",
     "anthropic/claude-haiku-4.5": "大量処理向けの高速な Claude",
     "google/gemini-2.5-flash": "頼れるマルチモーダルの主力",
+    "openai/gpt-oss-120b": "OpenAI のオープンモデル：格安で推論",
+    "moonshotai/kimi-k2.6": "エージェントとコード向けの強力なオープンモデル",
+    "meta-llama/llama-3.3-70b": "チャットと RAG に頼れる定番モデル",
   } as Record<string, string>,
   units: { tps: "{n} tok/s", sec: "{n} 秒", perAnswer: "≈ {amount} / 回答" },
   catalog: {
@@ -299,7 +300,6 @@ export const ja: Dictionary = {
     signingUp: "アカウント作成中…",
     or: "または",
     google: "Google",
-    yandex: "Yandex ID",
     noAccount: "アカウントをお持ちでないですか？",
     signUpLink: "新規登録",
     haveAccount: "すでにアカウントをお持ちですか？",
@@ -307,9 +307,7 @@ export const ja: Dictionary = {
     consent: "{terms}に同意し、{privacy}を読みました。",
     age: "18 歳以上です。",
     marketing: "プロダクトのお知らせを受け取る（任意）。",
-    ruConsent: "{consent}に同意します（ロシアのユーザーは必須）。",
-    ruConsentLink: "個人データの処理",
-    demo: "デモモード：OAuth キーが設定されるまで、Google と Yandex のログインはシミュレーションです。",
+    demo: "デモモード：OAuth キーが設定されるまで、Google ログインはシミュレーションです。",
     errors: {
       generic: "問題が発生しました。もう一度お試しください。",
       invalid: "メールアドレスまたはパスワードが正しくありません。",
@@ -382,6 +380,10 @@ export const ja: Dictionary = {
       toPay: "お支払い額",
       text: "現在、決済機能を接続中です。ご注文は保存されており、お支払いが完了し次第、残高に反映されます。",
       back: "ダッシュボードに戻る",
+      paid: "支払い済み",
+      paidText: "お支払いを確認しました。残高に反映済みです。",
+      demoPay: "支払い済みにする（デモ）",
+      demoNote: "デモモード：決済プロバイダーは未接続です。実際の請求なしで残高に加算されます。",
     },
     settings: {
       title: "アカウントとプライバシー",
@@ -411,5 +413,6 @@ export const ja: Dictionary = {
     gpc: "お使いのブラウザから Global Privacy Control のシグナルが送信されたため、任意の Cookie はデフォルトでオフになっています。",
   },
   notFound: { title: "ページが見つかりません", text: "お探しのページは存在しないか、移動した可能性があります。", home: "ホームに戻る" },
+  cab: cabJa,
   common: { close: "閉じる", loading: "読み込み中…", demo: "デモ" },
 };

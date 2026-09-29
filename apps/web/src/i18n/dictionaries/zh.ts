@@ -1,3 +1,4 @@
+import { cabZh } from "./cab/zh";
 import type { Dictionary } from "./en";
 
 export const zh: Dictionary = {
@@ -17,8 +18,7 @@ export const zh: Dictionary = {
     dashboard: "控制台",
     language: "语言",
     currency: "货币",
-    menu: "菜单",
-  },
+    menu: "菜单", docs: "文档" },
   hero: {
     badgeNew: "新 ✦",
     badgeText: "Claude Sonnet 4.5 已上线 —",
@@ -115,7 +115,6 @@ export const zh: Dictionary = {
     custom: "自定义金额",
     card: "银行卡",
     wallet: "Apple / Google Pay",
-    sbp: "SBP",
     invoice: "企业发票",
     pay: "继续 — {amount}",
     invoiceCta: "申请发票",
@@ -187,7 +186,6 @@ export const zh: Dictionary = {
     subprocessors: "子处理方与模型服务商",
     accessibility: "无障碍声明",
     notice: "法律声明",
-    "consent-ru": "Согласие на обработку персональных данных",
   },
   legal: {
     englishNote: "本文件以英文提供。如日后提供译本，以英文版本为准。",
@@ -197,7 +195,7 @@ export const zh: Dictionary = {
   },
   modelsPage: {
     metaTitle: "模型与价格",
-    fanTitle: "八个模型，各有所长。",
+    fanTitle: "每个模型都各有所长。",
     catalogTitle: "模型目录",
     catalogSub: "价格以 {currency} 显示。点击模型 ID 即可复制。",
   },
@@ -206,7 +204,7 @@ export const zh: Dictionary = {
     context: "上下文 {c}",
     allModels: "全部模型与价格",
   },
-  card: { in1m: "输入 / 1M", context: "上下文", modelId: "模型 ID" },
+  card: { in1m: "输入 / 1M", context: "上下文", modelId: "模型 ID", soon: "暂时不可用" },
   tiers: { all: "全部", flagship: "旗舰", general: "全能", fast: "快速", budget: "经济" },
   tags: { reasoning: "推理", tools: "工具", vision: "视觉", code: "代码", context: "长上下文", pdf: "pdf", fast: "快速" },
   taglines: {
@@ -218,6 +216,9 @@ export const zh: Dictionary = {
     "openai/gpt-5-mini": "便宜又快：聊天机器人、分类、RAG",
     "anthropic/claude-haiku-4.5": "快速版 Claude，适合大批量任务",
     "google/gemini-2.5-flash": "多模态主力模型",
+    "openai/gpt-oss-120b": "OpenAI 开源模型：极低成本的推理能力",
+    "moonshotai/kimi-k2.6": "面向智能体和代码的强大开源模型",
+    "meta-llama/llama-3.3-70b": "可靠的聊天与 RAG 主力模型",
   } as Record<string, string>,
   units: { tps: "{n} tok/s", sec: "{n} 秒", perAnswer: "≈ {amount} / 次回答" },
   catalog: {
@@ -299,7 +300,6 @@ export const zh: Dictionary = {
     signingUp: "正在创建账户…",
     or: "或",
     google: "Google",
-    yandex: "Yandex ID",
     noAccount: "还没有账户？",
     signUpLink: "注册",
     haveAccount: "已有账户？",
@@ -307,9 +307,7 @@ export const zh: Dictionary = {
     consent: "我同意{terms}，并已阅读{privacy}。",
     age: "我已年满 18 周岁。",
     marketing: "向我发送产品动态（可选）。",
-    ruConsent: "我同意{consent}（俄罗斯用户必填）。",
-    ruConsentLink: "个人数据处理",
-    demo: "演示模式：在配置 OAuth 密钥之前，Google 和 Yandex 登录为模拟流程。",
+    demo: "演示模式：在配置 OAuth 密钥之前，Google 登录为模拟流程。",
     errors: {
       generic: "出了点问题，请重试。",
       invalid: "邮箱或密码错误。",
@@ -382,6 +380,10 @@ export const zh: Dictionary = {
       toPay: "应付",
       text: "支付功能正在接入中。你的订单已保存，付款成功后将立即入账。",
       back: "返回控制台",
+      paid: "已支付",
+      paidText: "已收到付款，金额已计入余额。",
+      demoPay: "标记为已支付（演示）",
+      demoNote: "演示模式：尚未接入支付服务商。此操作会直接增加余额，不会产生实际扣款。",
     },
     settings: {
       title: "账户与隐私",
@@ -411,5 +413,6 @@ export const zh: Dictionary = {
     gpc: "你的浏览器发送了 Global Privacy Control 信号，因此可选 Cookie 默认关闭。",
   },
   notFound: { title: "页面不存在", text: "你要找的页面不存在或已被移动。", home: "返回首页" },
+  cab: cabZh,
   common: { close: "关闭", loading: "加载中…", demo: "演示" },
 };

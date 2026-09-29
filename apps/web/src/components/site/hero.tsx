@@ -82,7 +82,7 @@ export function Hero() {
         <Pop delay={0.55} rotate={-6} className="absolute top-[150px] left-[5%] hidden lg:block">
           <div className="animate-float-slow w-52 rounded-2xl border border-white/60 bg-gradient-to-br from-brand to-teal-700 p-3 text-left text-white shadow-float">
             <p className="text-[11px] text-white/75">{h.keyCreated}</p>
-            <p className="font-mono text-sm font-medium">sk-routa-••••7f3a</p>
+            <p className="font-mono text-sm font-medium">sk-harvanera-••••7f3a</p>
             <div className="mt-2 flex gap-1.5">
               <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px]">GPT-5</span>
               <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px]">Claude</span>
@@ -260,7 +260,7 @@ function CodeWindow() {
           <span className="text-violet-600">from</span> openai <span className="text-violet-600">import</span> OpenAI
           {"\n\n"}client = OpenAI({"\n"}
           {"  "}base_url=<span className="text-brand-strong">&quot;{API_BASE}&quot;</span>,{"\n"}
-          {"  "}api_key=<span className="text-brand-strong">&quot;sk-routa-…&quot;</span>,{"\n"}){"\n"}
+          {"  "}api_key=<span className="text-brand-strong">&quot;sk-harvanera-…&quot;</span>,{"\n"}){"\n"}
           r = client.chat.completions.create({"\n"}
           {"  "}model=<span className="text-orange-600">&quot;anthropic/claude-sonnet-4.5&quot;</span>,{"\n"}
           {"  "}messages=[…]){"\n"}

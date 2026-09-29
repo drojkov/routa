@@ -11,12 +11,11 @@ import { demoSocialSignIn } from "@/lib/actions/auth";
 import { authClient } from "@/lib/auth-client";
 import { safeNext } from "@/lib/safe-next";
 import { BRAND } from "@/lib/site";
-import { cn } from "@/lib/utils";
 
 export type ProviderMode = "live" | "demo" | "off";
-type Provider = "google" | "yandex";
+type Provider = "google";
 
-/** Вход и регистрация: email + пароль, Google, Яндекс ID. */
+/** Вход и регистрация: email + пароль или Google. */
 export function AuthCard({
   mode,
   providers,
@@ -26,7 +25,7 @@ export function AuthCard({
   providers: Record<Provider, ProviderMode>;
   next?: string;
 }) {
-  const { dict, href, money, t, locale } = useI18n();
+  const { dict, href, money, t } = useI18n();
   const a = dict.auth;
   const router = useRouter();
   const signUp = mode === "sign-up";
@@ -38,9 +37,7 @@ export function AuthCard({
   const [error, setError] = React.useState<string | null>(null);
   const [consent, setConsent] = React.useState(false);
   const [adult, setAdult] = React.useState(false);
-  const [ruConsent, setRuConsent] = React.useState(false);
-  const needRu = signUp && locale === "ru";
-  const consentsOk = !signUp || (consent && adult && (!needRu || ruConsent));
+  const consentsOk = !signUp || (consent && adult);
 
   function errorText(code?: string) {
     if (code === "INVALID_EMAIL_OR_PASSWORD") return a.errors.invalid;
@@ -91,13 +88,13 @@ export function AuthCard({
     }
   }
 
-  const legalLink = (doc: "terms" | "privacy" | "consent-ru") => (
+  const legalLink = (doc: "terms" | "privacy") => (
     <Link key={doc} href={href(`/legal/${doc}`)} target="_blank" className="text-teal-300 underline-offset-2 hover:underline">
-      {doc === "consent-ru" ? a.ruConsentLink : dict.legalNames[doc]}
+      {dict.legalNames[doc]}
     </Link>
   );
 
-  const visible = (["google", "yandex"] as const).filter((p) => providers[p] !== "off");
+  const visible = (["google"] as const).filter((p) => providers[p] !== "off");
   const demo = visible.some((p) => providers[p] === "demo");
 
   return (
@@ -112,7 +109,7 @@ export function AuthCard({
 
       {visible.length > 0 && (
         <>
-          <div className={cn("grid gap-2", visible.length === 2 ? "grid-cols-2" : "grid-cols-1")}>
+          <div className="grid gap-2">
             {visible.map((p) => (
               <button
                 key={p}
@@ -121,7 +118,7 @@ export function AuthCard({
                 onClick={() => onSocial(p)}
                 className="flex h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 text-sm text-white/85 transition hover:bg-white/10 disabled:opacity-60"
               >
-                {busy === p ? <Loader2 className="size-4 animate-spin" /> : p === "google" ? <GoogleIcon /> : <YandexIcon />}
+                {busy === p ? <Loader2 className="size-4 animate-spin" /> : <GoogleIcon />}
                 {a[p]}
               </button>
             ))}
@@ -193,11 +190,6 @@ export function AuthCard({
             <Check checked={adult} onChange={setAdult}>
               {a.age}
             </Check>
-            {needRu && (
-              <Check checked={ruConsent} onChange={setRuConsent}>
-                {fmtNodes(a.ruConsent, { consent: legalLink("consent-ru") })}
-              </Check>
-            )}
           </div>
         ) : (
           <label className="flex cursor-pointer items-center gap-2 pt-1 text-xs text-white/55">
@@ -268,13 +260,5 @@ function GoogleIcon() {
       <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2A11.9 11.9 0 0 1 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z" />
       <path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3a12 12 0 0 1-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.7-.4-3.9z" />
     </svg>
-  );
-}
-
-function YandexIcon() {
-  return (
-    <span aria-hidden className="grid size-4 place-items-center rounded-full bg-[#fc3f1d] text-[10px] leading-none font-bold text-white">
-      Я
-    </span>
   );
 }
