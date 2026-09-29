@@ -62,5 +62,6 @@
 - Юр. документы — черновики с `[TO CONFIRM]`, нужны реквизиты и проверка юристом. Сверка SPEC с международной моделью.
 - Отзывы выдуманы — заменить реальными или убрать до запуска. Рассылка в футере — заглушка.
 - Тёмная тема. `/pricing`. Тексты лендинга ещё обещают GPT/Claude/Gemini — переписать под открытые модели.
-- Postgres вместо SQLite в проде. Деплой на Railway (решение 2026-09-29): SQLite на volume, демо-вход включён (`AUTH_DEMO_OAUTH=true`). Репозиторий — `github.com/drojkov/routa`.
+- Postgres вместо SQLite в проде. Репозиторий — `github.com/drojkov/routa`.
+- **Прод на Railway** (с 2026-09-29): https://web-production-06476.up.railway.app — проект `harvanera`, сервис `web`, корень `/apps/web`, volume `/data` (`DATABASE_PATH=/data/app.db`), healthcheck `/api/v1/models`. Демо-вход включён (`AUTH_DEMO_OAUTH=true`), демо-оплата **выключена** (иначе любой накрутит баланс и потратит DeepInfra). Автодеплоя по пушу нет, пока Railway GitHub App не получит доступ к репозиторию; до тех пор деплой — `railway api` мутацией `serviceInstanceDeployV2(commitSha)`. Во время `next build` база в памяти (`db/index.ts`, `NEXT_PHASE`).
 - Показ dev-сервера по ссылке — SSH-туннели (serveo, pinggy; Cloudflare из сети владельца не подключается), домены разрешены в `DEV_TUNNELS` (`next.config.ts`) и `trustedOrigins` (`lib/auth.ts`). Бесплатные туннели нестабильны.
