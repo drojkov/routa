@@ -25,7 +25,7 @@ export const LOCALE_TAGS: Record<Locale, string> = {
   ja: "ja-JP",
 };
 
-export const CURRENCIES = ["USD", "EUR", "GBP", "CNY", "JPY", "INR", "BRL"] as const;
+export const CURRENCIES = ["USD", "EUR", "GBP", "CNY", "JPY", "INR", "BRL", "HKD"] as const;
 export type Currency = (typeof CURRENCIES)[number];
 
 /** Валюта по умолчанию — всегда USD; другую пользователь выбирает сам (cookie). */
@@ -43,6 +43,7 @@ export const USD_RATES: Record<Currency, number> = {
   JPY: 148,
   INR: 84,
   BRL: 5.4,
+  HKD: 7.8,
 };
 
 /** Минимальное пополнение в USD. */

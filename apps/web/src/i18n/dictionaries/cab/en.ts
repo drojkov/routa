@@ -112,6 +112,14 @@ export const cabEn = {
     estimated: "≈ estimated (stream cut off)",
     loadMore: "Show more",
     empty: "No requests in this period.",
+    content: {
+      view: "Text",
+      hide: "Hide",
+      request: "Request",
+      response: "Response",
+      gone: "The text is no longer stored.",
+      loading: "Loading…",
+    },
   },
   billing: {
     title: "Billing",
@@ -123,7 +131,19 @@ export const cabEn = {
     status: { pending: "Awaiting payment", paid: "Paid", failed: "Failed", canceled: "Canceled" },
     open: "Open",
   },
-  settings: { title: "Settings", profile: "Profile", name: "Name", email: "Email" },
+  settings: {
+    title: "Settings", profile: "Profile", name: "Name", email: "Email",
+    logging: {
+      title: "Request logging",
+      toggle: "Store prompts and responses",
+      text: "When on, we store the text of your requests and the model's responses so you can review them in Activity. Off by default: without it we keep only metadata (model, tokens, cost).",
+      retention: "Saved texts are deleted automatically after {days} days.",
+      offNote: "Turning logging off stops new logs. Texts already saved stay until they expire or you delete them.",
+      delete: "Delete saved texts",
+      deleteConfirm: "Delete all saved prompts and responses? This cannot be undone.",
+      deleted: "Deleted",
+    },
+  },
   docs: {
     title: "Documentation",
     onThisPage: "On this page",

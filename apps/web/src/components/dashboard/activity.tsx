@@ -1,10 +1,11 @@
 "use client";
 
-import { AlertTriangle, BarChart3, CheckCircle2, Coins, Download, Hash } from "lucide-react";
+import { AlertTriangle, BarChart3, CheckCircle2, ChevronDown, Coins, Download, FileText, Hash } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
 import { useI18n } from "@/i18n/provider";
+import { readRequestContent } from "@/lib/actions/dashboard";
 import { MODELS } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import { PageTitle, Panel, Tile } from "./ui";
@@ -38,6 +39,8 @@ export type ActivityData = {
     costUsd: number;
     estimated: boolean;
     latencyMs: number | null;
+    /** Сохранён текст запроса и ответа (включено логирование). */
+    hasContent: boolean;
   }[];
   hasMore: boolean;
 };
@@ -175,12 +178,13 @@ export function Activity({ data }: { data: ActivityData }) {
                   <th className="py-2 text-right font-normal">{a.cols.tokens}</th>
                   <th className="py-2 text-right font-normal">{a.cols.cost}</th>
                   <th className="py-2 text-right font-normal">{a.cols.speed}</th>
-                  <th className="px-5 py-2 text-right font-normal">{a.cols.status}</th>
+                  <th className="py-2 text-right font-normal">{a.cols.status}</th>
+                  <th className="pr-5" />
                 </tr>
               </thead>
               <tbody>
                 {data.rows.map((r) => (
-                  <tr key={r.id} className="border-b border-border last:border-0" title={r.id}>
+                  <RequestRow key={r.id} id={r.id} hasContent={r.hasContent}>
                     <td className="px-5 py-2 whitespace-nowrap text-muted-foreground tabular-nums">
                       <DateCell at={r.at} />
                     </td>
@@ -196,7 +200,7 @@ export function Activity({ data }: { data: ActivityData }) {
                     </td>
                     <td className="py-2 text-right tabular-nums">{money(r.costUsd)}</td>
                     <td className="py-2 text-right text-xs text-muted-foreground tabular-nums">{r.latencyMs != null ? `${(r.latencyMs / 1000).toFixed(1)} s` : "—"}</td>
-                    <td className="px-5 py-2 text-right text-xs">
+                    <td className="py-2 pl-3 text-right text-xs">
                       {r.status < 400 ? (
                         <span className="inline-flex items-center gap-1 text-emerald-700">
                           <CheckCircle2 className="size-3.5" /> {a.ok}
@@ -207,7 +211,7 @@ export function Activity({ data }: { data: ActivityData }) {
                         </span>
                       )}
                     </td>
-                  </tr>
+                  </RequestRow>
                 ))}
               </tbody>
             </table>
@@ -228,6 +232,79 @@ export function Activity({ data }: { data: ActivityData }) {
       </Panel>
     </div>
   );
+}
+
+/** Строка ленты; если текст сохранён — кнопка раскрывает запрос и ответ под строкой. */
+function RequestRow({ id, hasContent, children }: { id: string; hasContent: boolean; children: React.ReactNode }) {
+  const { dict } = useI18n();
+  const c = dict.cab.activity.content;
+  const [open, setOpen] = React.useState(false);
+  const [content, setContent] = React.useState<{ request: string; response: string } | null | undefined>(undefined);
+
+  const toggle = async () => {
+    setOpen(!open);
+    if (content === undefined) setContent(await readRequestContent(id));
+  };
+
+  return (
+    <>
+      <tr className={cn("border-b border-border", !open && "last:border-0")} title={id}>
+        {children}
+        <td className="py-2 pr-5 text-right">
+          {hasContent && (
+            <button
+              type="button"
+              onClick={toggle}
+              aria-expanded={open}
+              className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs text-muted-foreground transition hover:bg-muted hover:text-foreground"
+            >
+              <FileText className="size-3.5" /> {open ? c.hide : c.view}
+              <ChevronDown className={cn("size-3 transition-transform", open && "rotate-180")} />
+            </button>
+          )}
+        </td>
+      </tr>
+      {open && (
+        <tr className="border-b border-border last:border-0">
+          <td colSpan={8} className="bg-muted/40 px-5 py-3">
+            {content === undefined ? (
+              <p className="text-xs text-muted-foreground">{c.loading}</p>
+            ) : content === null ? (
+              <p className="text-xs text-muted-foreground">{c.gone}</p>
+            ) : (
+              <div className="grid gap-3 lg:grid-cols-2">
+                <div>
+                  <p className="mb-1 text-xs font-medium text-muted-foreground">{c.request}</p>
+                  <div className="max-h-80 space-y-2 overflow-auto rounded-lg border border-border bg-card p-3 text-xs">
+                    {messagesOf(content.request).map((m, i) => (
+                      <div key={i}>
+                        <span className="font-mono text-[11px] text-muted-foreground">{m.role}</span>
+                        <p className="break-words whitespace-pre-wrap">{m.text}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="mb-1 text-xs font-medium text-muted-foreground">{c.response}</p>
+                  <p className="max-h-80 overflow-auto rounded-lg border border-border bg-card p-3 text-xs break-words whitespace-pre-wrap">{content.response}</p>
+                </div>
+              </div>
+            )}
+          </td>
+        </tr>
+      )}
+    </>
+  );
+}
+
+/** messages из сохранённого JSON → роль и текст (не строковый content — как JSON). */
+function messagesOf(json: string): { role: string; text: string }[] {
+  try {
+    const list = JSON.parse(json) as { role?: string; content?: unknown }[];
+    return list.map((m) => ({ role: m.role ?? "?", text: typeof m.content === "string" ? m.content : JSON.stringify(m.content, null, 2) }));
+  } catch {
+    return [{ role: "raw", text: json }];
+  }
 }
 
 function DateCell({ at }: { at: number }) {

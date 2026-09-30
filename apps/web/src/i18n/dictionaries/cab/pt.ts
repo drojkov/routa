@@ -110,6 +110,14 @@ export const cabPt: CabDictionary = {
     estimated: "≈ estimado (stream interrompido)",
     loadMore: "Mostrar mais",
     empty: "Nenhuma requisição neste período.",
+    content: {
+      view: "Texto",
+      hide: "Ocultar",
+      request: "Requisição",
+      response: "Resposta",
+      gone: "O texto não está mais armazenado.",
+      loading: "Carregando…",
+    },
   },
   billing: {
     title: "Saldo",
@@ -121,7 +129,19 @@ export const cabPt: CabDictionary = {
     status: { pending: "Aguardando pagamento", paid: "Pago", failed: "Falhou", canceled: "Cancelado" },
     open: "Abrir",
   },
-  settings: { title: "Configurações", profile: "Perfil", name: "Nome", email: "E-mail" },
+  settings: {
+    title: "Configurações", profile: "Perfil", name: "Nome", email: "E-mail",
+    logging: {
+      title: "Registro de requisições",
+      toggle: "Salvar prompts e respostas",
+      text: "Quando ativado, guardamos o texto das suas requisições e as respostas do modelo para você revisá-las em Atividade. Desativado por padrão: sem ele guardamos só metadados (modelo, tokens, custo).",
+      retention: "Os textos salvos são apagados automaticamente após {days} dias.",
+      offNote: "Ao desativar, novos textos deixam de ser salvos. Os já salvos ficam até expirarem ou você apagá-los.",
+      delete: "Apagar textos salvos",
+      deleteConfirm: "Apagar todos os prompts e respostas salvos? Não é possível desfazer.",
+      deleted: "Apagado",
+    },
+  },
   docs: {
     title: "Documentação",
     onThisPage: "Nesta página",

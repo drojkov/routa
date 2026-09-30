@@ -110,6 +110,14 @@ export const cabJa: CabDictionary = {
     estimated: "≈ 推定値（ストリーム中断）",
     loadMore: "さらに表示",
     empty: "この期間のリクエストはありません。",
+    content: {
+      view: "テキスト",
+      hide: "閉じる",
+      request: "リクエスト",
+      response: "応答",
+      gone: "このテキストはもう保存されていません。",
+      loading: "読み込み中…",
+    },
   },
   billing: {
     title: "残高",
@@ -121,7 +129,19 @@ export const cabJa: CabDictionary = {
     status: { pending: "支払い待ち", paid: "支払い済み", failed: "失敗", canceled: "キャンセル" },
     open: "開く",
   },
-  settings: { title: "設定", profile: "プロフィール", name: "名前", email: "メール" },
+  settings: {
+    title: "設定", profile: "プロフィール", name: "名前", email: "メール",
+    logging: {
+      title: "リクエストログ",
+      toggle: "プロンプトと応答を保存する",
+      text: "オンにすると、リクエストの本文とモデルの応答を保存し、「アクティビティ」で確認できます。初期設定はオフで、その場合はメタデータ（モデル、トークン数、費用）のみ保存します。",
+      retention: "保存したテキストは {days} 日後に自動的に削除されます。",
+      offNote: "オフにすると新しいテキストは保存されません。保存済みのテキストは期限切れになるか削除するまで残ります。",
+      delete: "保存したテキストを削除",
+      deleteConfirm: "保存したプロンプトと応答をすべて削除しますか？元に戻せません。",
+      deleted: "削除しました",
+    },
+  },
   docs: {
     title: "ドキュメント",
     onThisPage: "このページの内容",

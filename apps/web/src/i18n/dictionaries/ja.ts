@@ -99,7 +99,7 @@ export const ja: Dictionary = {
     docStatement: "明細書",
     docReceipt: "領収書",
     vibeEyebrow: "バイブコーディング向け",
-    vibeTitle: "Claude Code、Cursor、Cline を 2 分で。",
+    vibeTitle: "Cursor、Cline、Roo Code を 2 分で。",
     vibeText: "IDE とエージェント向けの設定をご用意しています。1 行貼り付けるだけで、あなたのキーを通じてモデルがコードを書き始めます。",
     vibeCta: "ガイドを見る",
     analyticsTitle: "詳細な分析",
@@ -176,6 +176,7 @@ export const ja: Dictionary = {
     cookieSettings: "Cookie 設定",
     rights: "© {year} {company}. All rights reserved.",
     registered: "{jurisdiction} にて登記。",
+    geo: "IP ジオロケーション: {dbip}",
   },
   legalNames: {
     terms: "利用規約",
@@ -183,9 +184,12 @@ export const ja: Dictionary = {
     cookies: "Cookie ポリシー",
     refunds: "返金・撤回ポリシー",
     "acceptable-use": "利用ポリシー",
-    subprocessors: "再委託先とモデルプロバイダー",
-    accessibility: "アクセシビリティ方針",
-    notice: "法的通知",
+  },
+  unavailable: {
+    title: "お住まいの地域ではご利用いただけません",
+    text: "法律および制裁上の制限により、お住まいの国・地域では登録、支払い、API アクセスを提供できません。モデル、料金、ドキュメントは引き続きご覧いただけます。",
+    terms: "対象の国・地域の一覧は{terms}の第 2 条に記載しています。",
+    models: "モデルを見る",
   },
   legal: {
     englishNote: "本書は英語で提供されています。翻訳版が提供された場合でも、英語版が優先されます。",

@@ -15,6 +15,7 @@ const CURRENCY_SIGN: Record<string, string> = {
   JPY: "¥",
   INR: "₹",
   BRL: "R$",
+  HKD: "HK$",
 };
 
 /** Язык + валюта в одном поповере. `dark` — для тёмного футера и страницы входа. */

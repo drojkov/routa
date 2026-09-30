@@ -1,29 +1,22 @@
 /** Рабочее название. Меняется здесь — и везде на сайте. */
 export const BRAND = "Harvanera";
-/** Домен — заглушка до регистрации. */
-export const API_BASE = "https://api.harvanera.com/v1";
-export const API_HOST = "https://api.harvanera.com";
+/** Публичный адрес шлюза. Поддомена api. в DNS нет (2026-09-30) — шлюз на основном домене, /v1. */
+export const API_BASE = "https://harvanera.com/v1";
 
 /**
- * Реквизиты компании (Гонконг). Подставляются в футер и юридические документы.
- * До запуска заполнить реальными данными из Business Registration / Certificate of Incorporation.
+ * Реквизиты компании (Гонконг). Подставляются в футер и юридические документы ({{company.*}}).
+ * Сами документы (src/content/legal) содержат реквизиты текстом — при смене править и там.
  */
 export const COMPANY = {
   legalName: "Harvanera Limited",
   jurisdiction: "Hong Kong SAR",
-  crNumber: "[CR NUMBER]",
-  brNumber: "[BR NUMBER]",
-  address: "[REGISTERED OFFICE ADDRESS], Hong Kong",
-  director: "[DIRECTOR NAME]",
-  email: "support@harvanera.com",
-  privacyEmail: "privacy@harvanera.com",
-  legalEmail: "legal@harvanera.com",
-  euRep: "[EU REPRESENTATIVE NAME AND ADDRESS]",
-  ukRep: "[UK REPRESENTATIVE NAME AND ADDRESS]",
+  crNumber: "81275806",
+  address: "Unit 704C, 7/F, Block 3, Nan Fung Industrial City, 18 Tin Hau Road, Tuen Mun, N.T., Hong Kong",
+  email: "info@harvanera.com",
 };
 
-/** Дата вступления юридических документов в силу. Ставится при публикации. */
-export const LEGAL_EFFECTIVE_DATE = "[EFFECTIVE DATE]";
+/** Дата вступления юридических документов в силу. */
+export const LEGAL_EFFECTIVE_DATE = "30 September 2026";
 
 export const LEGAL_DOCS = [
   "terms",
@@ -31,9 +24,6 @@ export const LEGAL_DOCS = [
   "cookies",
   "refunds",
   "acceptable-use",
-  "subprocessors",
-  "accessibility",
-  "notice",
 ] as const;
 export type LegalDoc = (typeof LEGAL_DOCS)[number];
 

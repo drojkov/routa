@@ -57,6 +57,7 @@ export default async function ActivityPage({ params, searchParams }: PageProps<"
       costUsd: usd(r.costMicros),
       estimated: r.estimated,
       latencyMs: r.latencyMs,
+      hasContent: Boolean(r.hasContent),
     })),
     hasMore: rows.length > q.limit,
   };

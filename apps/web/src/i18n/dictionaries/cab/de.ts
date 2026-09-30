@@ -110,6 +110,14 @@ export const cabDe: CabDictionary = {
     estimated: "≈ geschätzt (Stream abgebrochen)",
     loadMore: "Mehr anzeigen",
     empty: "Keine Anfragen in diesem Zeitraum.",
+    content: {
+      view: "Text",
+      hide: "Ausblenden",
+      request: "Anfrage",
+      response: "Antwort",
+      gone: "Der Text ist nicht mehr gespeichert.",
+      loading: "Wird geladen…",
+    },
   },
   billing: {
     title: "Guthaben",
@@ -121,7 +129,19 @@ export const cabDe: CabDictionary = {
     status: { pending: "Zahlung ausstehend", paid: "Bezahlt", failed: "Fehlgeschlagen", canceled: "Storniert" },
     open: "Öffnen",
   },
-  settings: { title: "Einstellungen", profile: "Profil", name: "Name", email: "E-Mail" },
+  settings: {
+    title: "Einstellungen", profile: "Profil", name: "Name", email: "E-Mail",
+    logging: {
+      title: "Anfrage-Protokoll",
+      toggle: "Prompts und Antworten speichern",
+      text: "Wenn aktiviert, speichern wir den Text deiner Anfragen und die Antworten des Modells, damit du sie unter Aktivität ansehen kannst. Standardmäßig aus: ohne Protokoll speichern wir nur Metadaten (Modell, Tokens, Kosten).",
+      retention: "Gespeicherte Texte werden nach {days} Tagen automatisch gelöscht.",
+      offNote: "Beim Deaktivieren werden keine neuen Texte mehr gespeichert. Bereits gespeicherte bleiben, bis sie ablaufen oder du sie löschst.",
+      delete: "Gespeicherte Texte löschen",
+      deleteConfirm: "Alle gespeicherten Prompts und Antworten löschen? Das kann nicht rückgängig gemacht werden.",
+      deleted: "Gelöscht",
+    },
+  },
   docs: {
     title: "Dokumentation",
     onThisPage: "Auf dieser Seite",

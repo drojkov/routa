@@ -17,6 +17,8 @@ export const user = sqliteTable("user", {
   email: text("email").notNull().unique(),
   emailVerified: integer("email_verified", { mode: "boolean" }).notNull().default(false),
   image: text("image"),
+  /** Хранить тексты запросов и ответов (Terms §7.4, Privacy §3). По умолчанию выключено. */
+  logContent: integer("log_content", { mode: "boolean" }).notNull().default(false),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });
@@ -173,4 +175,26 @@ export const requestLog = sqliteTable(
     createdAt: createdAt(),
   },
   (t) => [index("request_log_user_idx").on(t.userId, t.createdAt), index("request_log_key_idx").on(t.apiKeyId, t.createdAt)],
+);
+
+/**
+ * Тексты запроса и ответа — только если у пользователя включено логирование (user.log_content).
+ * Хранятся CONTENT_RETENTION_DAYS (lib/request-content.ts), затем удаляются.
+ */
+export const requestContent = sqliteTable(
+  "request_content",
+  {
+    id: text("id")
+      .primaryKey()
+      .references(() => requestLog.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    /** JSON массива messages. */
+    request: text("request").notNull(),
+    /** Текст ответа модели. */
+    response: text("response").notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [index("request_content_user_idx").on(t.userId), index("request_content_created_idx").on(t.createdAt)],
 );

@@ -2,13 +2,13 @@ import { desc, eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { auth } from "@/lib/auth";
 
-/** Выгрузка своих данных (GDPR ст. 15/20): профиль, ключи без секретов, проводки, заказы. */
+/** Выгрузка своих данных (GDPR ст. 15/20): профиль, ключи без секретов, проводки, заказы, сохранённые тексты запросов. */
 export async function GET(request: Request) {
   const session = await auth.api.getSession({ headers: request.headers });
   if (!session) return new Response("Unauthorized", { status: 401 });
   const userId = session.user.id;
 
-  const [profile, accounts, keys, ledger, payments] = await Promise.all([
+  const [profile, accounts, keys, ledger, payments, requestContent] = await Promise.all([
     db.query.user.findFirst({ where: eq(schema.user.id, userId) }),
     db
       .select({ provider: schema.account.providerId, createdAt: schema.account.createdAt })
@@ -27,9 +27,14 @@ export async function GET(request: Request) {
       .where(eq(schema.apiKey.userId, userId)),
     db.select().from(schema.ledger).where(eq(schema.ledger.userId, userId)).orderBy(desc(schema.ledger.createdAt)),
     db.select().from(schema.payment).where(eq(schema.payment.userId, userId)).orderBy(desc(schema.payment.createdAt)),
+    db
+      .select({ requestId: schema.requestContent.id, request: schema.requestContent.request, response: schema.requestContent.response, createdAt: schema.requestContent.createdAt })
+      .from(schema.requestContent)
+      .where(eq(schema.requestContent.userId, userId))
+      .orderBy(desc(schema.requestContent.createdAt)),
   ]);
 
-  const body = JSON.stringify({ exportedAt: new Date(), profile, signInMethods: accounts, apiKeys: keys, ledger, payments }, null, 2);
+  const body = JSON.stringify({ exportedAt: new Date(), profile, signInMethods: accounts, apiKeys: keys, ledger, payments, requestContent }, null, 2);
   return new Response(body, {
     headers: {
       "content-type": "application/json; charset=utf-8",

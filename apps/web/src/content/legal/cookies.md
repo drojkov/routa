@@ -1,10 +1,8 @@
 # Cookie Policy
 
-_Effective date: {{date}}_
+*Effective date: 30 September 2026*
 
-> **Draft template.** This document was prepared before launch and has not yet been reviewed by a lawyer. Items marked **[TO CONFIRM: …]** need a business or legal decision.
-
-This policy explains how {{company.legalName}} ("we", "{{brand}}") uses cookies and similar technologies (such as local storage) on our website and dashboard. For how we handle personal data in general, see our [Privacy Policy](/legal/privacy).
+This policy explains how Harvanera Limited ("we", "Harvanera") uses cookies and similar technologies (such as local storage) on our website and dashboard. For how we handle personal data in general, see our [Privacy Policy](/legal/privacy).
 
 ## 1. What cookies are
 
@@ -14,14 +12,12 @@ Cookies are small text files that a website stores in your browser. They let the
 
 **We currently use only strictly necessary cookies.** They are needed for the website to work or to provide something you asked for, so they do not require your consent. You can block them in your browser, but then signing in and some settings will not work.
 
-| Name | Purpose | Set by | Duration |
-|---|---|---|---|
-| `better-auth.session_token` | Keeps you signed in and protects your session | {{brand}} (first party) | Until you sign out or the session expires **[TO CONFIRM: session lifetime, e.g. 7 days]** |
-| `NEXT_LOCALE` | Remembers the language you chose | {{brand}} (first party) | **[TO CONFIRM: e.g. 1 year]** |
-| `currency` | Remembers the currency you chose for displaying prices | {{brand}} (first party) | **[TO CONFIRM: e.g. 1 year]** |
-| `cookie_consent` | Stores your cookie choices so we don't ask again on every visit | {{brand}} (first party) | 6 months |
-
-**[TO CONFIRM: whether the sign-in flow with Google sets additional short-lived first-party cookies (for example OAuth state or PKCE cookies), and whether the payment page of [PAYMENT PROCESSOR] sets its own cookies; if so, add them to the table.]**
+| **Name** | **Purpose** | **Set by** | **Duration** |
+| --- | --- | --- | --- |
+| `better-auth.session_token` | Keeps you signed in and protects your session | Harvanera (first party) | Until you sign out or the session expires |
+| `NEXT_LOCALE` | Remembers the language you chose | Harvanera (first party) | Until the cookie expires or you delete it |
+| `currency` | Remembers the currency you chose for displaying prices | Harvanera (first party) | Until the cookie expires or you delete it |
+| `cookie_consent` | Stores your cookie choices so we don't ask again on every visit | Harvanera (first party) | 6 months |
 
 We do not use cookies to track you across other websites.
 
@@ -43,7 +39,7 @@ If we decide to add such tools in the future:
 ## 4. Your choices
 
 - **Cookie banner.** When you first visit, you can accept or reject optional categories. Rejecting is as easy as accepting.
-- **Changing your mind.** You can change your choice at any time through the "Cookie settings" link in the website footer **[TO CONFIRM: link exists]**. Withdrawing consent does not affect anything that happened before.
+- **Changing your mind.** You can change your choice at any time through the "Cookie settings" link in the website footer. Withdrawing consent does not affect anything that happened before.
 - **Global Privacy Control.** If your browser sends a Global Privacy Control (GPC) signal, we treat it as a refusal of analytics and marketing cookies and as an opt-out of any sale or sharing of personal data.
 - **Browser settings.** You can also delete or block cookies in your browser settings. Blocking strictly necessary cookies will stop parts of the site from working.
 
@@ -53,4 +49,4 @@ We will update this policy whenever we change the cookies we use. The effective 
 
 ## 6. Contact
 
-Questions about cookies: {{company.privacyEmail}}
+Questions about cookies: [info@harvanera.com](mailto:info@harvanera.com)

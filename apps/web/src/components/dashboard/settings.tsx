@@ -1,13 +1,17 @@
 "use client";
 
-import { Download, Loader2, Trash2 } from "lucide-react";
+import { Check, Download, Loader2, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 import { useI18n } from "@/i18n/provider";
+import { deleteRequestContent, setLogContent } from "@/lib/actions/dashboard";
 import { authClient } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
 import { PageTitle, Panel } from "./ui";
 
-export function Settings({ user }: { user: { name: string; email: string } }) {
+type Logging = { enabled: boolean; retentionDays: number };
+
+export function Settings({ user, logging }: { user: { name: string; email: string }; logging: Logging }) {
   const { dict } = useI18n();
   const s = dict.cab.settings;
   return (
@@ -27,6 +31,7 @@ export function Settings({ user }: { user: { name: string; email: string } }) {
           </dl>
         </Panel>
         <Privacy />
+        <RequestLogging {...logging} />
       </div>
     </div>
   );
@@ -73,6 +78,66 @@ function Privacy() {
           </button>
           <p className="mt-1.5 text-xs text-muted-foreground">{s.deleteNote}</p>
         </div>
+      </div>
+    </Panel>
+  );
+}
+
+/* ——— Логирование текстов запросов (Terms §7.4, Privacy §3) ——— */
+function RequestLogging({ enabled, retentionDays }: Logging) {
+  const { dict, t } = useI18n();
+  const l = dict.cab.settings.logging;
+  const router = useRouter();
+  const [on, setOn] = React.useState(enabled);
+  const [pending, startTransition] = React.useTransition();
+  const [deleted, setDeleted] = React.useState(false);
+
+  const toggle = () => {
+    const next = !on;
+    setOn(next);
+    startTransition(async () => {
+      await setLogContent(next);
+      router.refresh();
+    });
+  };
+
+  return (
+    <Panel title={l.title}>
+      <div className="space-y-4 text-sm">
+        <label className="flex cursor-pointer items-center justify-between gap-4">
+          <span className="font-medium">{l.toggle}</span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={on}
+            disabled={pending}
+            onClick={toggle}
+            className={cn(
+              "relative h-6 w-11 shrink-0 rounded-full transition disabled:opacity-60",
+              on ? "bg-brand" : "bg-muted-foreground/30",
+            )}
+          >
+            <span className={cn("absolute top-0.5 left-0.5 size-5 rounded-full bg-white shadow transition-transform", on && "translate-x-5")} />
+          </button>
+        </label>
+        <p className="text-muted-foreground">{l.text}</p>
+        <p className="text-muted-foreground">
+          {t(l.retention, { days: retentionDays })} {l.offNote}
+        </p>
+        <button
+          type="button"
+          onClick={() => {
+            if (!confirm(l.deleteConfirm)) return;
+            startTransition(async () => {
+              await deleteRequestContent();
+              setDeleted(true);
+            });
+          }}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 font-medium transition hover:bg-muted"
+        >
+          {deleted ? <Check className="size-4" /> : <Trash2 className="size-4" />}
+          {deleted ? l.deleted : l.delete}
+        </button>
       </div>
     </Panel>
   );

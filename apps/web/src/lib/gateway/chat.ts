@@ -54,6 +54,7 @@ export async function runChat(request: Request, actor: Actor, requestId = newReq
 
   const upstream = await forward(route, upstreamBody, request.signal);
   const base = { requestId, actor, model: route.model, stream };
+  const requestText = actor.logContent ? JSON.stringify(body.messages) : "";
 
   if (!upstream.ok) {
     if (upstream.kind === "client") {
@@ -72,7 +73,7 @@ export async function runChat(request: Request, actor: Actor, requestId = newReq
   const headers = { "x-request-id": requestId, "cache-control": "no-store" };
 
   if (!stream) {
-    const json = (await upstream.response.json()) as { model?: string; usage?: Usage };
+    const json = (await upstream.response.json()) as { model?: string; usage?: Usage; choices?: { message?: { content?: unknown } }[] };
     json.model = route.model.id;
     const cost = settle({
       ...base,
@@ -81,6 +82,7 @@ export async function runChat(request: Request, actor: Actor, requestId = newReq
       inputTokens: json.usage?.prompt_tokens ?? 0,
       outputTokens: json.usage?.completion_tokens ?? 0,
       latencyMs: Date.now() - started,
+      content: actor.logContent ? { request: requestText, response: responseText(json.choices) } : undefined,
     });
     return Response.json(json, { headers: { ...headers, "x-cost-usd": (cost / 1_000_000).toFixed(6) } });
   }
@@ -91,9 +93,17 @@ export async function runChat(request: Request, actor: Actor, requestId = newReq
       started,
       clientWantsUsage,
       inputEstimate: approxTokens(JSON.stringify(body.messages)),
+      requestText,
     }), {
     headers: { ...headers, "content-type": "text/event-stream; charset=utf-8", connection: "keep-alive", "x-accel-buffering": "no" },
   });
+}
+
+/** Текст ответа для журнала: content каждого варианта; не строка (tool calls и т. п.) — как JSON. */
+function responseText(choices: { message?: { content?: unknown } }[] | undefined) {
+  return (choices ?? [])
+    .map((c) => (typeof c.message?.content === "string" ? c.message.content : JSON.stringify(c.message ?? null)))
+    .join("\n\n");
 }
 
 /**
@@ -103,7 +113,17 @@ export async function runChat(request: Request, actor: Actor, requestId = newReq
  */
 function meterStream(
   upstream: Response,
-  ctx: { requestId: string; actor: Actor; model: Model; stream: boolean; provider: string; started: number; clientWantsUsage: boolean; inputEstimate: number },
+  ctx: {
+    requestId: string;
+    actor: Actor;
+    model: Model;
+    stream: boolean;
+    provider: string;
+    started: number;
+    clientWantsUsage: boolean;
+    inputEstimate: number;
+    requestText: string;
+  },
 ) {
   const reader = upstream.body!.getReader();
   const decoder = new TextDecoder();
@@ -111,6 +131,8 @@ function meterStream(
   let buffer = "";
   let usage: Usage | null = null;
   let outputChars = 0;
+  // Текст ответа собираем, только если его надо сохранить.
+  let output = "";
   let ttft: number | null = null;
   let settled = false;
 
@@ -127,6 +149,7 @@ function meterStream(
       estimated,
       latencyMs: Date.now() - ctx.started,
       ttftMs: ttft,
+      content: ctx.actor.logContent ? { request: ctx.requestText, response: output } : undefined,
     });
   };
 
@@ -144,6 +167,7 @@ function meterStream(
       const piece = (c.delta?.content ?? "") + (c.delta?.reasoning_content ?? "");
       if (piece && ttft == null) ttft = Date.now() - ctx.started;
       outputChars += piece.length;
+      if (ctx.actor.logContent && c.delta?.content) output += c.delta.content;
     }
     if (!ctx.clientWantsUsage && chunk.usage) {
       if (!chunk.choices?.length) return null;

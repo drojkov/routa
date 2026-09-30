@@ -188,6 +188,32 @@ try {
     assert.equal(r.status, 401);
   });
 
+  const content = (id) => db.prepare("select request, response from request_content where id = ?").get(id);
+
+  await test("логирование выключено → текст не сохраняется", async () => {
+    const r = await chat(rich.plain, { model: OPEN, messages });
+    assert.equal(r.status, 200);
+    assert.equal(content(r.headers.get("x-request-id")), undefined);
+  });
+
+  await test("логирование включено → запрос и ответ сохранены (обычный и стрим)", async () => {
+    db.prepare("update user set log_content = 1 where id = ?").run(rich.userId);
+    const r = await chat(rich.plain, { model: OPEN, messages });
+    const json = await r.json();
+    const saved = content(r.headers.get("x-request-id"));
+    assert.deepEqual(JSON.parse(saved.request), messages);
+    assert.equal(saved.response, json.choices[0].message.content);
+
+    const s = await chat(rich.plain, { model: OPEN, messages, stream: true });
+    const text = (await s.text())
+      .split("\n\n")
+      .filter((e) => e.startsWith("data: {"))
+      .map((e) => JSON.parse(e.slice(6)).choices[0]?.delta?.content ?? "")
+      .join("");
+    assert.equal(content(s.headers.get("x-request-id"))?.response, text);
+    db.prepare("update user set log_content = 0 where id = ?").run(rich.userId);
+  });
+
   await test("отозванный ключ → 401", async () => {
     db.prepare("update api_key set revoked_at = ? where id = ?").run(Date.now(), rich.keyId);
     const r = await chat(rich.plain, { model: OPEN, messages });

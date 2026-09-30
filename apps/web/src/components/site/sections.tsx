@@ -25,7 +25,7 @@ import { MarqueeLogoScroller } from "@/components/ui/marquee-logo-scroller";
 import { MIN_TOPUP_USD, USD_RATES } from "@/i18n/config";
 import { fmtNodes } from "@/i18n/fmt";
 import { useI18n } from "@/i18n/provider";
-import { API_BASE, API_HOST, BRAND, COMPANY, INTEGRATIONS, MODELS } from "@/lib/site";
+import { API_BASE, BRAND, COMPANY, INTEGRATIONS, MODELS } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 /* ——— Лента моделей под hero (реф. 1) ——— */
@@ -297,7 +297,8 @@ export function Features() {
               <h3 className="text-2xl leading-tight font-medium">{f.vibeTitle}</h3>
               <p className="text-sm text-white/60">{f.vibeText}</p>
               <pre className="overflow-x-auto rounded-xl border border-white/10 bg-white/5 p-3 font-mono text-[11px] text-white/80">
-                export ANTHROPIC_BASE_URL={API_HOST}{"\n"}export ANTHROPIC_AUTH_TOKEN=sk-harvanera-…
+                {/* Cursor / Cline / Roo Code: провайдер «OpenAI Compatible». Формата Anthropic (/v1/messages) у шлюза нет. */}
+                Base URL: {API_BASE}{"\n"}API key:  sk-harvanera-…{"\n"}Model:    qwen/qwen3-coder
               </pre>
               <Link
                 href={href("/models")}
@@ -503,7 +504,7 @@ export function Faq() {
 }
 
 /* ——— Тёмный CTA + футер (реф. 5, низ) ——— */
-const LEGAL_LINKS = ["terms", "privacy", "cookies", "refunds", "acceptable-use", "subprocessors", "accessibility", "notice"] as const;
+const LEGAL_LINKS = ["terms", "privacy", "cookies", "refunds", "acceptable-use"] as const;
 
 export function CtaFooter() {
   const { dict, href, money, t } = useI18n();
@@ -595,7 +596,15 @@ export function CtaFooter() {
           </div>
         </div>
         <p className="relative mt-10 text-xs text-white/35">
-          {t(f.rights, { year: new Date().getFullYear(), company: COMPANY.legalName })} {t(f.registered, { jurisdiction: COMPANY.jurisdiction })}
+          {t(f.rights, { year: new Date().getFullYear(), company: COMPANY.legalName })} {t(f.registered, { jurisdiction: COMPANY.jurisdiction })}{" "}
+          {/* Атрибуция обязательна по лицензии базы DB-IP Lite (CC BY 4.0), см. lib/geo.ts */}
+          {fmtNodes(f.geo, {
+            dbip: (
+              <a key="d" href="https://db-ip.com" target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:text-white">
+                DB-IP
+              </a>
+            ),
+          })}
         </p>
       </div>
     </footer>

@@ -1,85 +1,76 @@
 # Refund Policy
 
-_Effective date: {{date}}_
+*Effective date: 30 September 2026*
 
-> **Draft template.** This document was prepared before launch and has not yet been reviewed by a lawyer. Items marked **[TO CONFIRM: …]** need a business or legal decision.
-
-This policy explains when and how you can get money back from {{company.legalName}} ("{{brand}}"). It forms part of our [Terms of Service](/legal/terms).
+This policy explains when and how you can get money back from Harvanera Limited ("Harvanera"). It forms part of our [Terms of Service](/legal/terms).
 
 ## 1. The short version
 
 - You can ask for a refund of your **unused paid balance** at any time.
-- We refund within **10 business days** of approving your request, minus payment fees if any.
-- Consumers in the EU, EEA and UK also have a **14-day right of withdrawal** for each top-up.
-- Money already spent on API requests and the **welcome credit** are not refundable.
+- We send approved refunds within **10 business days** of approval. We do not deduct our payment processing fees.
+- Consumers in the EU, EEA and UK have a **14-day right of withdrawal** for each top-up, subject to the rules in section 3.
+- Money spent on API requests is generally not refundable under our voluntary refund policy. The **welcome credit** has no cash value and is not refundable. Your statutory rights remain unaffected.
 
 ## 2. Refund of unused balance
 
 You can ask us to refund the part of your paid balance that you have not used, whenever you like, including when you close your account.
 
-- **How to ask:** email {{company.email}} from the address on your account, or use the refund form in your dashboard **[TO CONFIRM: form exists]**.
-- **What we refund:** the unused paid balance at the time of your request. We will stop the balance from being used while the request is processed.
-- **Deductions:** we may deduct non-refundable fees charged to us by the payment processor for the original payment or for the refund **[TO CONFIRM: list of fees and typical amounts]**. We will tell you the amount before the refund is made. No deductions are made when you exercise the 14-day right of withdrawal (section 3), except as the law allows.
-- **Timing:** we send the refund within 10 business days of approving your request. Your bank may take a few more days to show it.
-- **Method and currency:** we refund to the original payment method where possible. Your balance is kept in USD; if you paid in another currency, the refund is converted back at the exchange rate on the refund date, so the amount you receive may differ from what you originally paid because of exchange rate changes. **[TO CONFIRM: which party bears exchange rate differences; EU law may require refunding the full original amount on withdrawal within 14 days.]**
-- **Invoiced top-ups:** refunds are made by bank transfer to the account the payment came from.
+- **How to ask:** Email [info@harvanera.com](mailto:info@harvanera.com) from the address on your account. Include the relevant transaction ID if you have it.
+- **What we refund:** The unused paid balance at the time of your request. We will stop that balance from being used while the request is processed.
+- **Deductions:** We do not deduct our payment processing fees from the refund. Any amount we are legally required to withhold or permitted to apply because of fraud, a chargeback or a serious breach is governed by the [Terms of Service](/legal/terms) and applicable law.
+- **Timing:** We send an approved refund within 10 business days of approval. Your payment provider may take additional time to show it.
+- **Method and currency:** We refund to the original payment method where possible. For details about a particular refund, email [info@harvanera.com](mailto:info@harvanera.com).
+- **Invoiced top-ups:** We normally refund by bank transfer to the account from which the payment came.
 
 ## 3. 14-day right of withdrawal (EU, EEA and UK consumers)
 
-If you are a consumer living in the EU, EEA or UK, you can withdraw from a top-up within **14 days** of the day it was paid, without giving any reason.
+If you are a consumer living in the EU, EEA or UK, you may withdraw from a top-up within **14 days** of the day you paid for it, without giving a reason. This right is separate from the voluntary refund of unused balance in section 2.
 
 ### 3.1 Starting immediately
 
-Credit is normally available as soon as you pay. At checkout we ask you to tick a box to:
-
-1. expressly request that we start providing the Service before the withdrawal period ends; and
-2. acknowledge that you lose the right of withdrawal for the part of the credit you use during that period (and for the whole top-up once all of it has been used).
+Credit is normally available as soon as you pay. Where you choose to use the Service during the withdrawal period, any charge for Service already provided depends on the express request, information and acknowledgement required by applicable law. If those requirements are not met, we will not charge you for use during that period where the law prohibits it. Any loss of the right of withdrawal after full performance applies only where the legal conditions for that loss are met.
 
 ### 3.2 What you get back
 
-If you withdraw within 14 days, we refund the **unused part** of that top-up. The part you have already spent on API requests is not refunded, because you asked us to start straight away and that part of the Service has been fully provided. **[TO CONFIRM: that treating credit consumption as pro-rata performance is the approach counsel is comfortable with.]**
+If you withdraw in time, we refund the amount you paid for that top-up, less any amount that applicable law permits us to charge for Service provided before you withdrew. We will not automatically treat use of credit as a waiver of your entire withdrawal right.
 
-We refund using the same payment method you used, without undue delay and in any case within 14 days of receiving your withdrawal, and we do not charge you a fee for it.
+We make the refund without undue delay and within **14 days** of receiving your withdrawal notice. We use the same payment method you used unless you expressly agree otherwise, and we do not charge you a refund fee.
 
 ### 3.3 How to withdraw
 
-Tell us clearly that you want to withdraw from the contract, for example:
+Send a clear statement that you wish to withdraw by emailing [info@harvanera.com](mailto:info@harvanera.com) or writing to Harvanera Limited, Unit 704C, 7/F, Block 3, Nan Fung Industrial City, 18 Tin Hau Road, Tuen Mun, N.T., Hong Kong.
 
-- **[withdrawal button in account — to be added]**; or
-- email {{company.email}}, or write to {{company.legalName}}, {{company.address}}.
+You may use this wording, but you do not have to:
 
-You can use this wording, but you don't have to:
+> To Harvanera Limited, Unit 704C, 7/F, Block 3, Nan Fung Industrial City, 18 Tin Hau Road, Tuen Mun, N.T., Hong Kong, [info@harvanera.com](mailto:info@harvanera.com): I hereby give notice that I withdraw from my contract for the following top-up: [top-up date, amount, transaction ID]. Name: […] Account email: […] Date: […]
 
-> To {{company.legalName}}, {{company.address}}, {{company.email}}:
-> I hereby give notice that I withdraw from my contract for the following top-up: [top-up date, amount, transaction ID].
-> Name: […] Account email: […] Date: […]
-
-You only need to send your notice before the 14 days end. We will confirm receipt on a durable medium (by email) without delay.
+It is enough to send your notice before the 14-day period ends. We will confirm receipt by email without delay.
 
 ### 3.4 Confirmation of your purchase
 
-After each top-up we send you an email confirming the payment, the amount credited, these terms (or a link to them), your express request to start immediately and your acknowledgement about losing the right of withdrawal.
+After each top-up, we send an email confirming the payment and the amount credited. Where applicable, we also provide the legally required information about withdrawal and confirm any express request or acknowledgement concerning immediate performance.
 
-## 4. What is not refundable
+## 4. What is not refundable under our voluntary refund policy
 
-- **Used balance.** Money already spent on requests, including requests that returned output you did not like. AI outputs vary, and each request is charged at the listed price for the tokens processed.
-- **Welcome credit.** The 1 USD promotional credit has no cash value, cannot be refunded and may expire.
-- **Other promotional or bonus credit** we may give you.
-- **Balance withheld** because of fraud, chargeback, a serious breach of our [Terms of Service](/legal/terms) or a legal requirement (for example, sanctions), as described in the Terms.
+- **Used balance.** Charges for requests already provided, including requests that returned output you did not like. AI outputs vary, and each request is charged at the applicable listed price for the usage processed. Statutory withdrawal and other consumer rights remain unaffected.
+- **Welcome credit.** The USD 1 promotional credit has no cash value and cannot be refunded. It does not expire while your account remains open, subject to the abuse rules in our Terms; unused welcome credit ends when your account closes.
+- **Other promotional or bonus credit** we may give you, unless its terms say otherwise.
+- **Balance lawfully withheld** because of fraud, a chargeback, a serious breach of our [Terms of Service](/legal/terms) or a legal requirement, such as sanctions. We will refund any remaining unused paid balance as required by our Terms and applicable law.
 
 ## 5. Billing errors and failed requests
 
-If you think you were charged incorrectly — for example, a request failed on our side but was billed, or a top-up was charged twice — email {{company.email}} within **[TO CONFIRM: e.g. 60 days]** with the request ID or transaction ID. If we confirm the error, we will credit your balance or refund the amount to your card. This does not affect your statutory rights.
+If you think you were charged incorrectly—for example, a request failed on our side but was billed, or a top-up was charged twice—email [info@harvanera.com](mailto:info@harvanera.com) as soon as you can with the request ID or transaction ID, if available. If we confirm an error, we will correct the charge by crediting your balance or refunding the amount to your original payment method where possible. This does not affect your statutory rights.
 
 ## 6. Chargebacks
 
-Please contact us before disputing a payment with your bank; most issues can be solved faster that way. If you open a chargeback, we may suspend your account while it is investigated. If the chargeback is found to be unjustified, we may recover the amount and related fees.
+Please contact us before disputing a payment with your bank; many issues can be resolved directly. If you open a chargeback, we may suspend your account while it is investigated. If the chargeback is found to be unjustified, we may seek to recover the amount and reasonable related fees where permitted by law.
 
 ## 7. Your statutory rights
 
-This policy does not limit any rights you have as a consumer under the law of the country where you live, including rights if the Service is not as described or not provided with reasonable care.
+This policy does not limit any rights you have as a consumer under applicable law, including rights if the Service is not as described or is not provided with reasonable care.
 
 ## 8. Contact
 
-Refunds and billing: {{company.email}}
-{{company.legalName}}, {{company.address}}
+Refunds and billing: [info@harvanera.com](mailto:info@harvanera.com)  
+Harvanera Limited (registration number **81275806**)  
+Unit 704C, 7/F, Block 3, Nan Fung Industrial City, 18 Tin Hau Road, Tuen Mun, N.T., Hong Kong

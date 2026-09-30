@@ -8,6 +8,7 @@ import { type Currency, isCurrency, isLocale, USD_RATES } from "@/i18n/config";
 import { currentUserId, generateKey } from "@/lib/account";
 import { MAX_TOPUP_USD, MIN_TOPUP_USD, toMicros } from "@/lib/billing";
 import { creditPayment, demoPaymentsEnabled } from "@/lib/payments";
+import { getRequestContent } from "@/lib/request-content";
 import { MODELS } from "@/lib/site";
 
 const MAX_KEYS = 25;
@@ -154,4 +155,24 @@ export async function demoPay(input: { id: string; lang: string }) {
   const lang = isLocale(input.lang) ? input.lang : "en";
   revalidatePath("/[lang]/dashboard", "layout");
   redirect(`/${lang}/dashboard/checkout/${order.id}`);
+}
+
+/** Включить или выключить хранение текстов запросов. Уже сохранённые тексты не трогает. */
+export async function setLogContent(enabled: boolean) {
+  const userId = await currentUserId();
+  await db.update(schema.user).set({ logContent: enabled }).where(eq(schema.user.id, userId));
+  revalidatePath("/[lang]/dashboard", "layout");
+}
+
+/** Удалить все сохранённые тексты запросов пользователя. */
+export async function deleteRequestContent() {
+  const userId = await currentUserId();
+  await db.delete(schema.requestContent).where(eq(schema.requestContent.userId, userId));
+  revalidatePath("/[lang]/dashboard", "layout");
+}
+
+/** Текст запроса и ответа для ленты активности (только свои). */
+export async function readRequestContent(id: string) {
+  const userId = await currentUserId();
+  return (await getRequestContent(userId, id)) ?? null;
 }

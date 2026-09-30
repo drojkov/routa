@@ -110,6 +110,14 @@ export const cabEs: CabDictionary = {
     estimated: "≈ estimado (stream cortado)",
     loadMore: "Mostrar más",
     empty: "No hay peticiones en este periodo.",
+    content: {
+      view: "Texto",
+      hide: "Ocultar",
+      request: "Solicitud",
+      response: "Respuesta",
+      gone: "El texto ya no está guardado.",
+      loading: "Cargando…",
+    },
   },
   billing: {
     title: "Saldo",
@@ -121,7 +129,19 @@ export const cabEs: CabDictionary = {
     status: { pending: "Pendiente de pago", paid: "Pagado", failed: "Fallido", canceled: "Cancelado" },
     open: "Abrir",
   },
-  settings: { title: "Ajustes", profile: "Perfil", name: "Nombre", email: "Correo" },
+  settings: {
+    title: "Ajustes", profile: "Perfil", name: "Nombre", email: "Correo",
+    logging: {
+      title: "Registro de solicitudes",
+      toggle: "Guardar prompts y respuestas",
+      text: "Si está activado, guardamos el texto de tus solicitudes y las respuestas del modelo para que puedas revisarlas en Actividad. Desactivado por defecto: sin él solo guardamos metadatos (modelo, tokens, coste).",
+      retention: "Los textos guardados se eliminan automáticamente a los {days} días.",
+      offNote: "Al desactivarlo dejamos de guardar nuevos textos. Los ya guardados se conservan hasta que caduquen o los elimines.",
+      delete: "Eliminar textos guardados",
+      deleteConfirm: "¿Eliminar todos los prompts y respuestas guardados? No se puede deshacer.",
+      deleted: "Eliminado",
+    },
+  },
   docs: {
     title: "Documentación",
     onThisPage: "En esta página",

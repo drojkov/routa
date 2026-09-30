@@ -99,7 +99,7 @@ export const de: Dictionary = {
     docStatement: "Abrechnung",
     docReceipt: "Beleg",
     vibeEyebrow: "Für Vibe Coding",
-    vibeTitle: "Claude Code, Cursor und Cline in zwei Minuten.",
+    vibeTitle: "Cursor, Cline und Roo Code in zwei Minuten.",
     vibeText: "Fertige Konfigurationen für IDEs und Agenten: eine Zeile einfügen, und das Modell schreibt Code über deinen Schlüssel.",
     vibeCta: "Zu den Anleitungen",
     analyticsTitle: "Detaillierte Analysen",
@@ -176,6 +176,7 @@ export const de: Dictionary = {
     cookieSettings: "Cookie-Einstellungen",
     rights: "© {year} {company}. Alle Rechte vorbehalten.",
     registered: "Eingetragen in {jurisdiction}.",
+    geo: "IP-Geolokalisierung von {dbip}",
   },
   legalNames: {
     terms: "Nutzungsbedingungen",
@@ -183,9 +184,12 @@ export const de: Dictionary = {
     cookies: "Cookie-Richtlinie",
     refunds: "Erstattungs- und Widerrufsrichtlinie",
     "acceptable-use": "Richtlinie zur zulässigen Nutzung",
-    subprocessors: "Unterauftragsverarbeiter und Modellanbieter",
-    accessibility: "Erklärung zur Barrierefreiheit",
-    notice: "Impressum",
+  },
+  unavailable: {
+    title: "In deiner Region nicht verfügbar",
+    text: "Aufgrund rechtlicher und sanktionsbedingter Beschränkungen können wir in deinem Land oder deiner Region keine Registrierung, Zahlungen oder API-Zugang anbieten. Modelle, Preise und Dokumentation kannst du weiterhin ansehen.",
+    terms: "Die Liste der Länder und Regionen steht in Abschnitt 2 der {terms}.",
+    models: "Modelle ansehen",
   },
   legal: {
     englishNote: "Dieses Dokument wird auf Englisch bereitgestellt. Sollte eine Übersetzung bereitgestellt werden, ist die englische Fassung maßgeblich.",

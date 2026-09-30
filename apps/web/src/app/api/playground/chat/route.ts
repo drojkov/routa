@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { newRequestId, runChat } from "@/lib/gateway/chat";
 import { apiError } from "@/lib/gateway/errors";
+import { logContentEnabled } from "@/lib/request-content";
 
 /**
  * Чат в кабинете: тот же шлюз, но платит владелец сессии, ключ не нужен.
@@ -27,5 +28,7 @@ export async function POST(request: Request) {
     stream_options: { include_usage: true },
   };
   const proxied = new Request(request.url, { method: "POST", body: JSON.stringify(body), signal: request.signal });
-  return runChat(proxied, { userId: session.user.id, keyId: null, limitMicros: null, allowedModels: null }, requestId);
+  const userId = session.user.id;
+  const actor = { userId, keyId: null, limitMicros: null, allowedModels: null, logContent: await logContentEnabled(userId) };
+  return runChat(proxied, actor, requestId);
 }

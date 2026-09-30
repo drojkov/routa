@@ -110,6 +110,14 @@ export const cabZh: CabDictionary = {
     estimated: "≈ 估算值（流被中断）",
     loadMore: "显示更多",
     empty: "该时间段内没有请求。",
+    content: {
+      view: "文本",
+      hide: "隐藏",
+      request: "请求",
+      response: "回复",
+      gone: "该文本已不再保存。",
+      loading: "加载中…",
+    },
   },
   billing: {
     title: "余额",
@@ -121,7 +129,19 @@ export const cabZh: CabDictionary = {
     status: { pending: "待支付", paid: "已支付", failed: "支付失败", canceled: "已取消" },
     open: "打开",
   },
-  settings: { title: "设置", profile: "个人资料", name: "姓名", email: "邮箱" },
+  settings: {
+    title: "设置", profile: "个人资料", name: "姓名", email: "邮箱",
+    logging: {
+      title: "请求日志",
+      toggle: "保存提示词和回复",
+      text: "开启后，我们会保存您的请求文本和模型回复，方便您在“活动”中查看。默认关闭：关闭时我们只保存元数据（模型、token、费用）。",
+      retention: "已保存的文本会在 {days} 天后自动删除。",
+      offNote: "关闭后不再保存新的文本。已保存的文本会保留到过期或被您删除。",
+      delete: "删除已保存的文本",
+      deleteConfirm: "删除所有已保存的提示词和回复？此操作无法撤销。",
+      deleted: "已删除",
+    },
+  },
   docs: {
     title: "文档",
     onThisPage: "本页内容",

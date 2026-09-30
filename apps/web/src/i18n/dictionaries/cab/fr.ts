@@ -110,6 +110,14 @@ export const cabFr: CabDictionary = {
     estimated: "≈ estimé (stream interrompu)",
     loadMore: "Afficher plus",
     empty: "Aucune requête sur cette période.",
+    content: {
+      view: "Texte",
+      hide: "Masquer",
+      request: "Requête",
+      response: "Réponse",
+      gone: "Le texte n’est plus conservé.",
+      loading: "Chargement…",
+    },
   },
   billing: {
     title: "Solde",
@@ -121,7 +129,19 @@ export const cabFr: CabDictionary = {
     status: { pending: "En attente de paiement", paid: "Payée", failed: "Échouée", canceled: "Annulée" },
     open: "Ouvrir",
   },
-  settings: { title: "Paramètres", profile: "Profil", name: "Nom", email: "E-mail" },
+  settings: {
+    title: "Paramètres", profile: "Profil", name: "Nom", email: "E-mail",
+    logging: {
+      title: "Journal des requêtes",
+      toggle: "Enregistrer les prompts et les réponses",
+      text: "Si activé, nous enregistrons le texte de vos requêtes et les réponses du modèle pour que vous puissiez les consulter dans Activité. Désactivé par défaut : sans lui, nous ne gardons que les métadonnées (modèle, tokens, coût).",
+      retention: "Les textes enregistrés sont supprimés automatiquement au bout de {days} jours.",
+      offNote: "Désactiver arrête l’enregistrement de nouveaux textes. Ceux déjà enregistrés restent jusqu’à leur expiration ou leur suppression.",
+      delete: "Supprimer les textes enregistrés",
+      deleteConfirm: "Supprimer tous les prompts et réponses enregistrés ? Action irréversible.",
+      deleted: "Supprimé",
+    },
+  },
   docs: {
     title: "Documentation",
     onThisPage: "Sur cette page",

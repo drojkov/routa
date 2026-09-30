@@ -99,9 +99,11 @@ export async function listRequests(userId: string, f: RequestFilter, limit = 50)
       estimated: r.estimated,
       latencyMs: r.latencyMs,
       ttftMs: r.ttftMs,
+      hasContent: sql<number>`${schema.requestContent.id} is not null`,
     })
     .from(r)
     .leftJoin(schema.apiKey, eq(schema.apiKey.id, r.apiKeyId))
+    .leftJoin(schema.requestContent, eq(schema.requestContent.id, r.id))
     .where(and(...where))
     .orderBy(desc(r.createdAt))
     .limit(limit);

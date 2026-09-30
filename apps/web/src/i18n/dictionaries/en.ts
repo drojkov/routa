@@ -101,7 +101,7 @@ export const en = {
     docStatement: "Statement",
     docReceipt: "Receipt",
     vibeEyebrow: "For vibe coding",
-    vibeTitle: "Claude Code, Cursor and Cline in two minutes.",
+    vibeTitle: "Cursor, Cline and Roo Code in two minutes.",
     vibeText: "Ready-made configs for IDEs and agents: paste one line and the model is writing code through your key.",
     vibeCta: "Open the guides",
     analyticsTitle: "Detailed analytics",
@@ -178,6 +178,7 @@ export const en = {
     cookieSettings: "Cookie settings",
     rights: "© {year} {company}. All rights reserved.",
     registered: "Registered in {jurisdiction}.",
+    geo: "IP geolocation by {dbip}",
   },
   legalNames: {
     terms: "Terms of Service",
@@ -185,9 +186,12 @@ export const en = {
     cookies: "Cookie Policy",
     refunds: "Refund & Withdrawal Policy",
     "acceptable-use": "Acceptable Use Policy",
-    subprocessors: "Subprocessors & Model Providers",
-    accessibility: "Accessibility Statement",
-    notice: "Legal Notice",
+  },
+  unavailable: {
+    title: "Not available in your region",
+    text: "Because of legal and sanctions restrictions, we can't offer sign-up, payments or API access in your country or region. You can still browse models, prices and documentation.",
+    terms: "The list of countries and regions is in section 2 of the {terms}.",
+    models: "Browse models",
   },
   legal: {
     englishNote: "This document is provided in English. If a translation is ever provided, the English version governs.",

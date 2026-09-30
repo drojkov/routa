@@ -99,7 +99,7 @@ export const zh: Dictionary = {
     docStatement: "对账单",
     docReceipt: "收据",
     vibeEyebrow: "Vibe Coding",
-    vibeTitle: "两分钟接入 Claude Code、Cursor 和 Cline。",
+    vibeTitle: "两分钟接入 Cursor、Cline 和 Roo Code。",
     vibeText: "为 IDE 和智能体准备好的现成配置：粘贴一行，模型就开始通过你的密钥写代码。",
     vibeCta: "查看指南",
     analyticsTitle: "详细分析",
@@ -176,6 +176,7 @@ export const zh: Dictionary = {
     cookieSettings: "Cookie 设置",
     rights: "© {year} {company}。保留所有权利。",
     registered: "注册于 {jurisdiction}。",
+    geo: "IP 地理位置数据来自 {dbip}",
   },
   legalNames: {
     terms: "服务条款",
@@ -183,9 +184,12 @@ export const zh: Dictionary = {
     cookies: "Cookie 政策",
     refunds: "退款与撤回政策",
     "acceptable-use": "可接受使用政策",
-    subprocessors: "子处理方与模型服务商",
-    accessibility: "无障碍声明",
-    notice: "法律声明",
+  },
+  unavailable: {
+    title: "您所在的地区暂不可用",
+    text: "由于法律和制裁限制，我们无法在您所在的国家或地区提供注册、付款或 API 访问。您仍可浏览模型、价格和文档。",
+    terms: "国家和地区列表见{terms}第 2 节。",
+    models: "浏览模型",
   },
   legal: {
     englishNote: "本文件以英文提供。如日后提供译本，以英文版本为准。",

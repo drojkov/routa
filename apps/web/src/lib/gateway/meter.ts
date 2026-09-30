@@ -3,13 +3,14 @@ import { and, eq, gte, isNull, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { getBalanceMicros, hashKey } from "@/lib/account";
 import { KEY_PREFIX } from "@/lib/billing";
+import { clip, logContentEnabled, purgeExpiredContent } from "@/lib/request-content";
 import type { Model } from "@/lib/site";
 
 /**
  * Кто платит за запрос. keyId = null — чат в кабинете (по сессии, без ключа).
- * allowedModels = null — ключу доступны все модели.
+ * allowedModels = null — ключу доступны все модели. logContent — хранить тексты запроса и ответа.
  */
-export type Actor = { userId: string; keyId: string | null; limitMicros: number | null; allowedModels: string[] | null };
+export type Actor = { userId: string; keyId: string | null; limitMicros: number | null; allowedModels: string[] | null; logContent: boolean };
 
 /** Authorization: Bearer sk-harvanera-… → активный (не отозванный и не выключенный) ключ или null. */
 export async function authenticate(request: Request): Promise<Actor | null> {
@@ -25,7 +26,13 @@ export async function authenticate(request: Request): Promise<Actor | null> {
   if (!key.lastUsedAt || Date.now() - key.lastUsedAt.getTime() > 60_000) {
     await db.update(schema.apiKey).set({ lastUsedAt: new Date() }).where(eq(schema.apiKey.id, key.id));
   }
-  return { userId: key.userId, keyId: key.id, limitMicros: key.limitMicros, allowedModels: key.allowedModels ?? null };
+  return {
+    userId: key.userId,
+    keyId: key.id,
+    limitMicros: key.limitMicros,
+    allowedModels: key.allowedModels ?? null,
+    logContent: await logContentEnabled(key.userId),
+  };
 }
 
 /** Грубая оценка токенов: ~4 символа на токен. Только для предпроверки и обрыва стрима без usage. */
@@ -79,11 +86,13 @@ export type Settlement = {
   estimated?: boolean;
   latencyMs?: number;
   ttftMs?: number | null;
+  /** Тексты для журнала — пишутся, только если у пользователя включено логирование. */
+  content?: { request: string; response: string };
 };
 
 /**
- * Итог запроса: строка в request_log и, если есть расход, проводка debit в ledger —
- * одной транзакцией. ledger.ref = request_id, поэтому повторное списание невозможно.
+ * Итог запроса: строка в request_log, тексты (если включено логирование) и, если есть расход,
+ * проводка debit в ledger — одной транзакцией. ledger.ref = request_id, поэтому повторное списание невозможно.
  */
 export function settle(s: Settlement) {
   const cost = s.status < 400 ? costMicros(s.model, s.inputTokens, s.outputTokens) : 0;
@@ -107,6 +116,12 @@ export function settle(s: Settlement) {
       })
       .onConflictDoNothing()
       .run();
+    if (s.actor.logContent && s.content) {
+      tx.insert(schema.requestContent)
+        .values({ id: s.requestId, userId: s.actor.userId, request: clip(s.content.request), response: clip(s.content.response) })
+        .onConflictDoNothing()
+        .run();
+    }
     if (cost > 0) {
       tx.insert(schema.ledger)
         .values({ id: crypto.randomUUID(), userId: s.actor.userId, kind: "debit", amountMicros: -cost, ref: s.requestId, note: s.model.id })
@@ -114,5 +129,6 @@ export function settle(s: Settlement) {
         .run();
     }
   });
+  if (s.content) purgeExpiredContent();
   return cost;
 }
