@@ -1,0 +1,20 @@
+# Деплой Harvanera на Railway из GitLab.
+# Пуш в main → `railway up` в проект harvanera, сервис web.
+# Railway сам берёт папку /apps/web (Root Directory в настройках сервиса),
+# поэтому заливаем репозиторий целиком — как при деплое из GitHub.
+#
+# Нужна CI/CD-переменная RAILWAY_TOKEN (Masked + Protected): токен проекта
+# harvanera для окружения production (Railway → Project Settings → Tokens).
+# Пока переменной нет, job не запускается.
+
+stages:
+  - deploy
+
+deploy-railway:
+  stage: deploy
+  image: node:22-alpine
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $RAILWAY_TOKEN'
+  script:
+    - npm install -g @railway/cli@5.71.0
+    - railway up --ci --service 25c6f588-510c-4c4b-87dc-9e05177559fb --message "GitLab $CI_COMMIT_SHORT_SHA"
