@@ -1,28 +1,40 @@
 import "server-only";
 
+import nodemailer, { type Transporter } from "nodemailer";
+
 /**
- * Отправка писем через Resend (HTTP API, без SDK). Без RESEND_API_KEY письмо пишется в лог —
- * так весь путь проверяется локально. Отправитель — EMAIL_FROM (домен должен быть подтверждён в Resend).
+ * Отправка писем по SMTP через почтовый сервер компании (mail.harvanera.com, ящик info@) —
+ * та же схема, что у других витрин в GitLab. Без EMAIL_HOST письмо пишется в лог —
+ * так весь путь проверяется локально. Отправитель — EMAIL_FROM, иначе EMAIL_USER.
  */
 export type Email = { to: string; subject: string; text: string; html: string; replyTo?: string };
 
+let transport: Transporter | null = null;
+
+function getTransport() {
+  if (transport) return transport;
+  const port = Number(process.env.EMAIL_PORT ?? 587);
+  transport = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST,
+    port,
+    // 465 — сразу TLS, 587 — STARTTLS
+    secure: process.env.EMAIL_SECURE ? process.env.EMAIL_SECURE === "true" : port === 465,
+    auth: process.env.EMAIL_USER ? { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS ?? "" } : undefined,
+    // у сервера компании сертификат на чужое имя и бывает просрочен
+    tls: { rejectUnauthorized: process.env.EMAIL_TLS_REJECT_UNAUTHORIZED !== "false" },
+    connectionTimeout: 15_000,
+  });
+  return transport;
+}
+
 export async function sendEmail(mail: Email) {
-  const key = process.env.RESEND_API_KEY;
-  const from = process.env.EMAIL_FROM ?? "Harvanera <info@harvanera.com>";
-  if (!key) {
-    console.info(`[email] RESEND_API_KEY не задан — письмо не отправлено.\nTo: ${mail.to}\nSubject: ${mail.subject}\n\n${mail.text}`);
+  const from = process.env.EMAIL_FROM ?? (process.env.EMAIL_USER ? `Harvanera <${process.env.EMAIL_USER}>` : "Harvanera <info@harvanera.com>");
+  if (!process.env.EMAIL_HOST) {
+    console.info(`[email] EMAIL_HOST не задан — письмо не отправлено.\nTo: ${mail.to}\nSubject: ${mail.subject}\n\n${mail.text}`);
     return { ok: false as const, skipped: true };
   }
   try {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
-      body: JSON.stringify({ from, to: [mail.to], subject: mail.subject, text: mail.text, html: mail.html, ...(mail.replyTo ? { reply_to: mail.replyTo } : {}) }),
-    });
-    if (!res.ok) {
-      console.error(`[email] Resend ${res.status}: ${await res.text()}`);
-      return { ok: false as const, skipped: false };
-    }
+    await getTransport().sendMail({ from, to: mail.to, subject: mail.subject, text: mail.text, html: mail.html, replyTo: mail.replyTo });
     return { ok: true as const };
   } catch (e) {
     console.error("[email] send failed:", (e as Error).message);
