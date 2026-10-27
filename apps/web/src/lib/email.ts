@@ -4,7 +4,7 @@ import "server-only";
  * Отправка писем через Resend (HTTP API, без SDK). Без RESEND_API_KEY письмо пишется в лог —
  * так весь путь проверяется локально. Отправитель — EMAIL_FROM (домен должен быть подтверждён в Resend).
  */
-export type Email = { to: string; subject: string; text: string; html: string };
+export type Email = { to: string; subject: string; text: string; html: string; replyTo?: string };
 
 export async function sendEmail(mail: Email) {
   const key = process.env.RESEND_API_KEY;
@@ -17,7 +17,7 @@ export async function sendEmail(mail: Email) {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
-      body: JSON.stringify({ from, to: [mail.to], subject: mail.subject, text: mail.text, html: mail.html }),
+      body: JSON.stringify({ from, to: [mail.to], subject: mail.subject, text: mail.text, html: mail.html, ...(mail.replyTo ? { reply_to: mail.replyTo } : {}) }),
     });
     if (!res.ok) {
       console.error(`[email] Resend ${res.status}: ${await res.text()}`);

@@ -1,13 +1,17 @@
 "use server";
 
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, gte, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { db, schema } from "@/db";
 import { type Currency, isCurrency, isLocale, USD_RATES } from "@/i18n/config";
 import { currentUserId, generateKey } from "@/lib/account";
-import { MAX_TOPUP_USD, MIN_TOPUP_USD, toMicros } from "@/lib/billing";
+import { auth } from "@/lib/auth";
+import { isTopUpPackage, ORDER_LIMITS, toMicros } from "@/lib/billing";
+import { clientIp, countryOf } from "@/lib/geo";
 import { creditPayment, demoPaymentsEnabled } from "@/lib/payments";
+import { createRefundRequest, notifyRefundRequest } from "@/lib/refunds";
 import { getRequestContent } from "@/lib/request-content";
 import { MODELS } from "@/lib/site";
 
@@ -112,34 +116,77 @@ export async function revokeApiKey(id: string) {
   revalidatePath("/[lang]/dashboard", "layout");
 }
 
-export type TopUpResult = { ok: false; error: "min" | "max" | "waiver" };
+export type TopUpResult = { ok: false; error: "package" | "waiver" | "unverified" | "too_many" };
 
 /**
  * Создаёт заказ на пополнение и ведёт на страницу оплаты.
- * Провайдер (Stripe / Paddle / ЮKassa…) подключается на следующем этапе: там же — вебхук, который
- * переводит заказ в paid и пишет проводку topup в ledger.
+ * Сумма — только один из фиксированных пакетов (TOPUP_PACKAGES_USD), в USD; к оплате — пересчёт в валюту показа.
+ * Пополнять можно только с подтверждённым email; число заказов ограничено (защита от card testing).
+ * IP, страна, браузер и время согласия сохраняются в заказе — для разбора чарджбэков.
+ * Провайдер оплаты подключается на следующем этапе: его вебхук вызывает creditPayment().
  */
-export async function createTopUp(input: { amount: number; currency: string; waiver: boolean; lang: string }): Promise<TopUpResult> {
-  const userId = await currentUserId();
+export async function createTopUp(input: { usd: number; currency: string; waiver: boolean; lang: string }): Promise<TopUpResult> {
+  const h = await headers();
+  const session = await auth.api.getSession({ headers: h });
+  if (!session) throw new Error("Unauthorized");
+  const userId = session.user.id;
   const currency: Currency = isCurrency(input.currency) ? input.currency : "USD";
   const lang = isLocale(input.lang) ? input.lang : "en";
-  const usd = input.amount / USD_RATES[currency];
-  if (!Number.isFinite(usd) || usd < MIN_TOPUP_USD - 1e-9) return { ok: false, error: "min" };
-  if (usd > MAX_TOPUP_USD) return { ok: false, error: "max" };
+  if (!isTopUpPackage(input.usd)) return { ok: false, error: "package" };
   // Согласие на немедленное начало услуги (отказ от 14-дневного права отзыва для потраченного) — ЕС/UK.
   if (!input.waiver) return { ok: false, error: "waiver" };
+  if (!session.user.emailVerified) return { ok: false, error: "unverified" };
+
+  const now = Date.now();
+  const recent = await db
+    .select({ status: schema.payment.status, createdAt: schema.payment.createdAt })
+    .from(schema.payment)
+    .where(and(eq(schema.payment.userId, userId), gte(schema.payment.createdAt, new Date(now - 60 * 60_000))));
+  const pendingHour = recent.filter((o) => o.status === "pending").length;
+  const lastTen = recent.filter((o) => o.createdAt.getTime() > now - 10 * 60_000).length;
+  if (pendingHour >= ORDER_LIMITS.pendingPerHour || lastTen >= ORDER_LIMITS.perTenMinutes) return { ok: false, error: "too_many" };
 
   const minor = currency === "JPY" ? 1 : 100;
+  const ip = clientIp(h);
   const id = crypto.randomUUID();
   await db.insert(schema.payment).values({
     id,
     userId,
-    amountMicros: toMicros(usd),
+    amountMicros: toMicros(input.usd),
     currency,
-    amountMinor: Math.round(input.amount * minor),
+    amountMinor: Math.round(input.usd * USD_RATES[currency] * minor),
     status: "pending",
+    ipAddress: ip,
+    country: countryOf(ip),
+    userAgent: h.get("user-agent")?.slice(0, 500) ?? null,
+    waiverAt: new Date(),
   });
   redirect(`/${lang}/dashboard/checkout/${id}`);
+}
+
+/** Повторно отправить письмо для подтверждения email (ссылка ведёт обратно в «Баланс»). */
+export async function resendVerification(lang: string) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) throw new Error("Unauthorized");
+  if (session.user.emailVerified) return { ok: true as const };
+  const l = isLocale(lang) ? lang : "en";
+  await auth.api.sendVerificationEmail({ body: { email: session.user.email, callbackURL: `/${l}/dashboard/billing?verified=1` } });
+  return { ok: true as const };
+}
+
+export type RefundActionResult = { ok: true } | { ok: false; error: "nothing" | "pending" };
+
+/** Заявка на возврат неиспользованного оплаченного баланса: сумма замораживается, поддержке — письмо. */
+export async function requestRefund(input: { reason: string }): Promise<RefundActionResult> {
+  const h = await headers();
+  const session = await auth.api.getSession({ headers: h });
+  if (!session) throw new Error("Unauthorized");
+  const reason = input.reason.trim().slice(0, 1000) || null;
+  const res = createRefundRequest(session.user.id, reason, clientIp(h));
+  if (!res.ok) return res;
+  void notifyRefundRequest({ id: res.id, email: session.user.email, amountMicros: res.amountMicros, reason });
+  revalidatePath("/[lang]/dashboard", "layout");
+  return { ok: true };
 }
 
 /** Демо-оплата заказа (см. `demoPaymentsEnabled`). Настоящее зачисление — только по вебхуку. */

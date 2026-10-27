@@ -5,11 +5,11 @@ import type { Model } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 const VENDOR_ICON: Record<string, string | null> = {
-  OpenAI: null,
-  Anthropic: "anthropic",
-  Google: "gemini",
   DeepSeek: "deepseek",
   Alibaba: "qwen",
+  "Moonshot AI": "moonshot",
+  Meta: "meta",
+  "Mistral AI": "mistral",
 };
 
 /** Карточка модели в стиле «платёжной карты» (реф. 4). */

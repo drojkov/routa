@@ -28,6 +28,10 @@ export function ModelDetail({ model: m, baseUrl }: { model: Model; baseUrl: stri
             <span>{m.vendor}</span>
             <span>·</span>
             <span>{dict.tiers[m.tier]}</span>
+            <span>·</span>
+            <span>
+              {d.openWeights}: {m.license}
+            </span>
             <span
               className={cn(
                 "ml-1 rounded-full px-2.5 py-0.5 text-xs font-medium",

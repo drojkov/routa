@@ -47,7 +47,8 @@ export const USD_RATES: Record<Currency, number> = {
 };
 
 /** Минимальное пополнение в USD. */
-export const MIN_TOPUP_USD = 5;
+/** Минимальный пакет пополнения (см. TOPUP_PACKAGES_USD в lib/billing.ts). */
+export const MIN_TOPUP_USD = 10;
 
 export const LOCALE_COOKIE = "NEXT_LOCALE";
 export const CURRENCY_COOKIE = "currency";

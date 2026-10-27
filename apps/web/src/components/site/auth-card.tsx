@@ -43,7 +43,13 @@ export function AuthCard({ mode, next }: { mode: "sign-in" | "sign-up"; next?: s
     setBusy("email");
     setError(null);
     const res = signUp
-      ? await authClient.signUp.email({ email, password, name: String(f.get("name")) || email.split("@")[0] })
+      ? await authClient.signUp.email({
+          email,
+          password,
+          name: String(f.get("name")) || email.split("@")[0],
+          // Ссылка из письма подтверждения ведёт в «Баланс»: без подтверждения пополнение закрыто.
+          callbackURL: href("/dashboard/billing?verified=1"),
+        })
       : await authClient.signIn.email({ email, password, rememberMe: f.get("remember") === "on" });
     if (res.error) {
       setBusy(null);

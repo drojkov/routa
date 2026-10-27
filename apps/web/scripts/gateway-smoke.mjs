@@ -20,7 +20,8 @@ const db = new Database(process.env.DATABASE_PATH ?? path.join(process.cwd(), "d
 db.pragma("foreign_keys = ON");
 
 const OPEN = "deepseek/deepseek-v3.1";
-const CLOSED = "anthropic/claude-sonnet-4.5";
+/** Убранная из каталога модель (GPT/Claude/Gemini сняты 2026-10-27) — теперь 404, как любая неизвестная. */
+const REMOVED = "anthropic/claude-sonnet-4.5";
 
 function makeUser(balanceUsd) {
   const userId = `smoke-${randomUUID()}`;
@@ -75,7 +76,8 @@ try {
     assert.equal(r.status, 200);
     const { data } = await r.json();
     assert.equal(data.find((m) => m.id === OPEN)?.available, true);
-    assert.equal(data.find((m) => m.id === CLOSED)?.available, false);
+    assert.equal(data.find((m) => m.id === REMOVED), undefined);
+    assert.ok(data.every((m) => m.available));
     assert.ok(data[0].pricing.input > 0);
   });
 
@@ -85,10 +87,10 @@ try {
     assert.equal((await r.json()).error.code, "invalid_api_key");
   });
 
-  await test("закрытая модель → 503 model_unavailable", async () => {
-    const r = await chat(rich.plain, { model: CLOSED, messages });
-    assert.equal(r.status, 503);
-    assert.equal((await r.json()).error.code, "model_unavailable");
+  await test("убранная закрытая модель → 404 model_not_found", async () => {
+    const r = await chat(rich.plain, { model: REMOVED, messages });
+    assert.equal(r.status, 404);
+    assert.equal((await r.json()).error.code, "model_not_found");
   });
 
   await test("неизвестная модель → 404 model_not_found", async () => {

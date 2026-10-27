@@ -9,7 +9,9 @@
     "lint": "eslint",
     "test:gateway": "node scripts/gateway-smoke.mjs",
     "test:gateway:live": "node scripts/gateway-live.mjs",
-    "geo:update": "node scripts/geo-update.mjs"
+    "geo:update": "node scripts/geo-update.mjs",
+    "evidence": "node scripts/evidence.mjs",
+    "refund": "node scripts/refund.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",

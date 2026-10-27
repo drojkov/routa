@@ -28,9 +28,9 @@ function useMetrics() {
 }
 
 const TASKS = [
-  { k: "code", i: Code2, pick: "anthropic/claude-sonnet-4.5" },
-  { k: "chat", i: MessagesSquare, pick: "openai/gpt-5-mini" },
-  { k: "docs", i: FileStack, pick: "google/gemini-2.5-pro" },
+  { k: "code", i: Code2, pick: "moonshotai/kimi-k2.6" },
+  { k: "chat", i: MessagesSquare, pick: "qwen/qwen3-235b-a22b-2507" },
+  { k: "docs", i: FileStack, pick: "meta-llama/llama-4-scout" },
   { k: "cheap", i: Workflow, pick: "deepseek/deepseek-v3.1" },
 ] as const;
 

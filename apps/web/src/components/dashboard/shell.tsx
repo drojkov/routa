@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import * as React from "react";
 import { LocaleSwitcher } from "@/components/site/locale-switcher";
+import { MerchantInfo } from "@/components/site/merchant-info";
 import { Logo } from "@/components/site/nav";
 import { useI18n } from "@/i18n/provider";
 import { authClient } from "@/lib/auth-client";
@@ -18,6 +19,8 @@ const TABS = [
   { path: "/billing", key: "billing" },
   { path: "/settings", key: "settings" },
 ] as const;
+
+const LEGAL_LINKS = ["terms", "privacy", "refunds", "acceptable-use"] as const;
 
 /** Каркас кабинета: шапка с балансом и вкладки разделов. */
 export function CabinetShell({ email, balanceUsd, children }: { email: string; balanceUsd: number; children: React.ReactNode }) {
@@ -88,7 +91,22 @@ export function CabinetShell({ email, balanceUsd, children }: { email: string; b
           ))}
         </nav>
       </header>
-      <main className="mx-auto w-full max-w-6xl px-4 pt-8 pb-24">{children}</main>
+      <main className="mx-auto w-full max-w-6xl px-4 pt-8 pb-16">{children}</main>
+      {/* Реквизиты продавца на каждой странице кабинета — путь к оплате идёт через него. */}
+      <footer className="border-t border-border">
+        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-6 md:flex-row md:items-start md:justify-between">
+          <MerchantInfo />
+          <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+            {LEGAL_LINKS.map((k) => (
+              <li key={k}>
+                <Link href={href(`/legal/${k}`)} className="hover:text-foreground">
+                  {dict.legalNames[k]}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </footer>
     </div>
   );
 }

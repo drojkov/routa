@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Billing } from "@/components/dashboard/billing";
 import { loadLocale } from "@/i18n/server";
 import { listLedger, requireUser } from "@/lib/account";
+import { getRefundableMicros, listRefundRequests } from "@/lib/refunds";
 import { listPayments } from "@/lib/usage";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/dashboard/billing">): Promise<Metadata> {
@@ -12,7 +13,7 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/dashboard/
 export default async function BillingPage({ params, searchParams }: PageProps<"/[lang]/dashboard/billing">) {
   const { lang } = await loadLocale(params);
   const user = await requireUser(lang);
-  const [ledger, orders, sp] = await Promise.all([listLedger(user.id, 200), listPayments(user.id), searchParams]);
+  const [ledger, orders, refunds, sp] = await Promise.all([listLedger(user.id, 200), listPayments(user.id), listRefundRequests(user.id), searchParams]);
   const topup = Number(sp.topup);
   return (
     <Billing
@@ -25,6 +26,11 @@ export default async function BillingPage({ params, searchParams }: PageProps<"/
         currency: o.currency,
         amountMinor: o.amountMinor,
       }))}
+      refunds={refunds.map((r) => ({ id: r.id, usd: r.amountMicros / 1_000_000, status: r.status, at: r.createdAt.getTime() }))}
+      refundableUsd={getRefundableMicros(user.id) / 1_000_000}
+      email={user.email}
+      emailVerified={user.emailVerified}
+      justVerified={sp.verified === "1"}
       initialTopUpUsd={Number.isFinite(topup) && topup > 0 ? topup : undefined}
       initialMethod={typeof sp.method === "string" ? sp.method : undefined}
     />

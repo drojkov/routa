@@ -15,11 +15,14 @@ This policy explains when and how you can get money back from Harvanera Limited 
 
 You can ask us to refund the part of your paid balance that you have not used, whenever you like, including when you close your account.
 
-- **How to ask:** Email [info@harvanera.com](mailto:info@harvanera.com) from the address on your account. Include the relevant transaction ID if you have it.
-- **What we refund:** The unused paid balance at the time of your request. We will stop that balance from being used while the request is processed.
+- **How to ask:** Sign in and press **Request refund** on the Billing page of your dashboard. You can also use our [contact form](/contact) or email [info@harvanera.com](mailto:info@harvanera.com) from the address on your account, including the relevant transaction ID if you have it.
+- **What we refund:** The unused paid balance at the time of your request. The dashboard shows this amount before you confirm. Promotional credit is used before paid balance and is never refunded.
+- **Hold:** When you submit a request, the requested amount is put on hold at once and cannot be spent while we review it. If we decline the request, the hold is released back to your balance.
+- **Identity check:** We process refund requests only for the account holder. A request made from the signed-in dashboard counts as confirmed. For requests by email, we may ask you to confirm from the email address on your account, and we may ask for the last four digits of the card used. We do not refund to a different card, account or person.
+- **Review:** We confirm receipt by email and review each request within 3 business days. We may decline or delay a request while a payment is disputed, or where we reasonably suspect fraud or a breach of our Terms; we will tell you why, unless the law prevents us.
 - **Deductions:** We do not deduct our payment processing fees from the refund. Any amount we are legally required to withhold or permitted to apply because of fraud, a chargeback or a serious breach is governed by the [Terms of Service](/legal/terms) and applicable law.
 - **Timing:** We send an approved refund within 10 business days of approval. Your payment provider may take additional time to show it.
-- **Method and currency:** We refund to the original payment method where possible. For details about a particular refund, email [info@harvanera.com](mailto:info@harvanera.com).
+- **Method and currency:** We refund only to the original payment method, in the currency of the original payment. If that is no longer possible (for example, the card has been closed), we will agree another method with you after verifying your identity. For details about a particular refund, email [info@harvanera.com](mailto:info@harvanera.com).
 - **Invoiced top-ups:** We normally refund by bank transfer to the account from which the payment came.
 
 ## 3. 14-day right of withdrawal (EU, EEA and UK consumers)

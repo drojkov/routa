@@ -8,7 +8,7 @@ Please read these Terms together with our [Privacy Policy](/legal/privacy), [Acc
 
 ## 1. What the Service is
 
-Harvanera is an AI API gateway. With one OpenAI-compatible API key, you can send requests to AI models developed by third parties (for example, DeepSeek, Qwen, Kimi, Llama and gpt-oss) and run by independent inference providers, currently DeepInfra, Inc. ("Model Providers"). Models marked as unavailable on the Service cannot be used until we make them available.
+Harvanera is an AI API gateway. With one OpenAI-compatible API key, you can send requests to open-weight AI models developed by third parties (for example, DeepSeek, Qwen, Kimi, Llama, GLM and Mistral) and run by independent inference providers, currently DeepInfra, Inc. ("Model Providers"). Models marked as unavailable on the Service cannot be used until we make them available.
 
 When you make a request, we forward its content, including prompts, files and parameters, to the provider operating the model you select. The Model Provider generates a response, which we return to you. We charge your prepaid balance for the request according to the model's listed price and the units processed.
 
@@ -88,7 +88,7 @@ You may request a refund of your unused paid balance under our [Refund Policy](/
 
 ## 6. Using the Service responsibly
 
-You must use the Service in accordance with our [Acceptable Use Policy](/legal/acceptable-use), applicable law, and the terms and usage policies of the provider of any model you use. These may include the [OpenAI Usage Policies](https://openai.com/policies/usage-policies), [Anthropic Usage Policy](https://www.anthropic.com/legal/aup), [Google Generative AI Prohibited Use Policy](https://policies.google.com/terms/generative-ai/use-policy), [DeepSeek Open Platform Terms of Service](https://cdn.deepseek.com/policies/en-US/deepseek-open-platform-terms-of-service.html) and [Alibaba Cloud Model Studio agreements](https://www.alibabacloud.com/help/en/model-studio/related-agreements), as applicable to the model and provider handling your request.
+You must use the Service in accordance with our [Acceptable Use Policy](/legal/acceptable-use), applicable law, the terms of the Model Provider handling your request (currently the [DeepInfra Terms of Service](https://deepinfra.com/terms)), and the licence and any use policy of the model you select, such as the Llama Acceptable Use Policies or the gpt-oss usage policy. The licence of each model is shown on its page in our catalogue.
 
 You must not:
 

@@ -139,11 +139,70 @@ export const payment = sqliteTable(
     status: text("status", { enum: ["pending", "paid", "failed", "canceled"] }).notNull().default("pending"),
     provider: text("provider"),
     providerRef: text("provider_ref"),
+    /** Для разбора чарджбэков: откуда создан заказ и когда принято согласие на немедленное начало услуги. */
+    ipAddress: text("ip_address"),
+    country: text("country"),
+    userAgent: text("user_agent"),
+    waiverAt: integer("waiver_at", { mode: "timestamp_ms" }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
   (t) => [index("payment_user_idx").on(t.userId)],
 );
+
+/**
+ * Журнал входов (доказательства для чарджбэков): сессии Better Auth удаляются при выходе,
+ * а эта запись остаётся. Пишется хуком session.create в lib/auth.ts.
+ */
+export const loginEvent = sqliteTable(
+  "login_event",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    ipAddress: text("ip_address"),
+    country: text("country"),
+    userAgent: text("user_agent"),
+    createdAt: createdAt(),
+  },
+  (t) => [index("login_event_user_idx").on(t.userId, t.createdAt)],
+);
+
+/**
+ * Заявка на возврат неиспользованного оплаченного баланса (Refund Policy §2).
+ * Сумма замораживается сразу: проводка refund с ref = `refund:<id>`. Отклонили — обратная проводка adjust.
+ * Сам возврат на карту делает поддержка вручную у провайдера оплаты.
+ */
+export const refundRequest = sqliteTable(
+  "refund_request",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    amountMicros: integer("amount_micros").notNull(),
+    status: text("status", { enum: ["pending", "approved", "rejected"] }).notNull().default("pending"),
+    reason: text("reason"),
+    ipAddress: text("ip_address"),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [index("refund_request_user_idx").on(t.userId)],
+);
+
+/** Сообщения из формы /contact. Хранятся в базе, даже если письмо в поддержку не ушло. */
+export const contactMessage = sqliteTable("contact_message", {
+  id: text("id").primaryKey(),
+  /** null — написал гость. */
+  userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  topic: text("topic").notNull(),
+  message: text("message").notNull(),
+  ipAddress: text("ip_address"),
+  createdAt: createdAt(),
+});
 
 /**
  * Журнал запросов к шлюзу (SPEC §5 п.5): метаданные без текста промптов.

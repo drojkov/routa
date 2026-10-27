@@ -8,6 +8,7 @@ import { useI18n } from "@/i18n/provider";
 import { API_BASE, MODELS } from "@/lib/site";
 
 const DEEPSEEK = MODELS.find((m) => m.id === "deepseek/deepseek-v3.1")!;
+const KIMI = MODELS.find((m) => m.id === "moonshotai/kimi-k2.6")!;
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -84,9 +85,9 @@ export function Hero() {
             <p className="text-[11px] text-white/75">{h.keyCreated}</p>
             <p className="font-mono text-sm font-medium">sk-harvanera-••••7f3a</p>
             <div className="mt-2 flex gap-1.5">
-              <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px]">GPT-5</span>
-              <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px]">Claude</span>
-              <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px]">+6</span>
+              <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px]">DeepSeek</span>
+              <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px]">Kimi</span>
+              <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px]">+{MODELS.length - 2}</span>
             </div>
             <div className="mt-2.5 flex items-center gap-2 rounded-xl bg-white px-2.5 py-1.5 text-xs font-medium text-foreground">
               <KeyRound className="size-3.5 text-brand-strong" /> {t(h.limit, { amount: money(50, { compact: true }) })}
@@ -152,13 +153,13 @@ export function Hero() {
         <Pop delay={0.6} rotate={3} className="absolute top-6 right-4 hidden lg:block">
           <div className="animate-float-slow w-64 rounded-2xl border border-border bg-card p-3.5 text-left shadow-float">
             <div className="flex items-center gap-2.5">
-              <div className="grid size-9 place-items-center rounded-full bg-gradient-to-br from-pink-200 to-pink-500">
+              <div className="grid size-9 place-items-center rounded-full bg-gradient-to-br from-slate-300 to-slate-700">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/logos/claude.svg" alt="" className="size-4 brightness-0 invert" />
+                <img src="/logos/moonshot.svg" alt="" className="size-4 brightness-0 invert" />
               </div>
               <div>
-                <p className="text-sm font-semibold">Claude Sonnet 4.5</p>
-                <p className="text-[11px] text-muted-foreground">{t(dict.units.tps, { n: 71 })} · TTFT {t(dict.units.sec, { n: 1.1 })}</p>
+                <p className="text-sm font-semibold">{KIMI.name}</p>
+                <p className="text-[11px] text-muted-foreground">{t(dict.units.tps, { n: KIMI.speed })} · TTFT {t(dict.units.sec, { n: KIMI.ttft })}</p>
               </div>
             </div>
             <div className="mt-3 flex justify-between text-[11px] text-muted-foreground">
@@ -216,8 +217,8 @@ export function Hero() {
         <div className="absolute inset-x-0 bottom-6 flex justify-center gap-3 md:gap-4">
           {[
             { s: "cursor", r: -8, y: 10 },
-            { s: "anthropic", r: 6, y: -8 },
-            { s: "gemini", r: -4, y: 14 },
+            { s: "moonshot", r: 6, y: -8 },
+            { s: "meta", r: -4, y: 14 },
             { s: "deepseek", r: 8, y: -4 },
             { s: "qwen", r: -6, y: 8 },
           ].map((it, i) => (
@@ -262,7 +263,7 @@ function CodeWindow() {
           {"  "}base_url=<span className="text-brand-strong">&quot;{API_BASE}&quot;</span>,{"\n"}
           {"  "}api_key=<span className="text-brand-strong">&quot;sk-harvanera-…&quot;</span>,{"\n"}){"\n"}
           r = client.chat.completions.create({"\n"}
-          {"  "}model=<span className="text-orange-600">&quot;anthropic/claude-sonnet-4.5&quot;</span>,{"\n"}
+          {"  "}model=<span className="text-orange-600">&quot;{KIMI.id}&quot;</span>,{"\n"}
           {"  "}messages=[…]){"\n"}
         </code>
       </pre>

@@ -3,6 +3,7 @@ import { CheckCircle2, Clock } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { MerchantInfo } from "@/components/site/merchant-info";
 import { db, schema } from "@/db";
 import { formatMoney, isCurrency, localePath } from "@/i18n/config";
 import { fmt } from "@/i18n/fmt";
@@ -10,6 +11,7 @@ import { loadLocale } from "@/i18n/server";
 import { requireUser } from "@/lib/account";
 import { demoPay } from "@/lib/actions/dashboard";
 import { demoPaymentsEnabled } from "@/lib/payments";
+import { BRAND } from "@/lib/site";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/dashboard/checkout/[id]">): Promise<Metadata> {
   const { dict } = await loadLocale(params);
@@ -50,6 +52,14 @@ export default async function CheckoutPage({ params }: PageProps<"/[lang]/dashbo
           )}
           <h1 className="mt-4 text-2xl font-semibold tracking-tight">{fmt(c.title, { id: `#${order.id.slice(0, 8).toUpperCase()}` })}</h1>
           <dl className="mt-6 space-y-3 text-sm">
+            <div className="flex justify-between gap-4">
+              <dt className="text-muted-foreground">{c.item}</dt>
+              <dd className="text-right">{fmt(c.description, { brand: BRAND })}</dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-muted-foreground">{c.orderDate}</dt>
+              <dd className="tabular-nums">{new Intl.DateTimeFormat(lang, { dateStyle: "medium", timeStyle: "short", timeZone: "UTC" }).format(order.createdAt)} UTC</dd>
+            </div>
             <div className="flex justify-between">
               <dt className="text-muted-foreground">{c.toPay}</dt>
               <dd className="font-semibold tabular-nums">{toPay}</dd>
@@ -68,6 +78,7 @@ export default async function CheckoutPage({ params }: PageProps<"/[lang]/dashbo
               </button>
             </form>
           )}
+          <MerchantInfo className="mt-6 rounded-2xl border border-border p-4" />
           <Link
             href={localePath(lang, "/dashboard/billing")}
             className="mt-6 inline-flex h-10 items-center rounded-full bg-foreground px-5 text-sm font-medium text-background"

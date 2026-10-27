@@ -1,27 +1,38 @@
 "use client";
 
-import { ArrowRight, Building2, CreditCard, Loader2, Smartphone } from "lucide-react";
+import { ArrowRight, Building2, CreditCard, Loader2, MailCheck, Smartphone } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
-import { MIN_TOPUP_USD, USD_RATES } from "@/i18n/config";
+import { MerchantInfo } from "@/components/site/merchant-info";
 import { fmtNodes } from "@/i18n/fmt";
 import { useI18n } from "@/i18n/provider";
-import { createTopUp } from "@/lib/actions/dashboard";
-import { MAX_TOPUP_USD } from "@/lib/billing";
+import { createTopUp, requestRefund, resendVerification } from "@/lib/actions/dashboard";
+import { nearestPackage, TOPUP_PACKAGES_USD } from "@/lib/billing";
 import { cn } from "@/lib/utils";
 import { PageTitle, Panel } from "./ui";
 
 type Entry = { id: string; kind: "bonus" | "topup" | "debit" | "refund" | "adjust"; usd: number; at: number; note: string | null };
 type Order = { id: string; status: "pending" | "paid" | "failed" | "canceled"; usd: number; at: number; currency: string; amountMinor: number };
+type Refund = { id: string; usd: number; status: "pending" | "approved" | "rejected"; at: number };
 
 export function Billing({
   ledger,
   orders,
+  refunds,
+  refundableUsd,
+  email,
+  emailVerified,
+  justVerified,
   initialTopUpUsd,
   initialMethod,
 }: {
   ledger: Entry[];
   orders: Order[];
+  refunds: Refund[];
+  refundableUsd: number;
+  email: string;
+  emailVerified: boolean;
+  justVerified?: boolean;
   initialTopUpUsd?: number;
   initialMethod?: string;
 }) {
@@ -32,10 +43,17 @@ export function Billing({
       <PageTitle title={b.title} sub={b.sub} />
       <div className="grid gap-4 lg:grid-cols-5">
         <div className="space-y-4 lg:col-span-2">
+          {!emailVerified && <VerifyEmail email={email} />}
+          {emailVerified && justVerified && (
+            <p className="flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+              <MailCheck className="size-4" /> {b.verify.verified}
+            </p>
+          )}
           <TopUp initialUsd={initialTopUpUsd} initialMethod={initialMethod} />
           <Orders orders={orders} />
         </div>
-        <div className="lg:col-span-3">
+        <div className="space-y-4 lg:col-span-3">
+          <RefundPanel refundableUsd={refundableUsd} refunds={refunds} />
           <History ledger={ledger} />
         </div>
       </div>
@@ -75,15 +93,42 @@ function Orders({ orders }: { orders: Order[] }) {
   );
 }
 
-/* ——— Пополнение ——— */
-const PRESETS = [10, 25, 100];
+/* ——— Подтверждение email: без него пополнение закрыто (защита от card testing) ——— */
+function VerifyEmail({ email }: { email: string }) {
+  const { dict, t, locale } = useI18n();
+  const v = dict.cab.billing.verify;
+  const [state, setState] = React.useState<"idle" | "sending" | "sent">("idle");
+  return (
+    <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+      <p className="font-medium">{v.title}</p>
+      <p className="mt-1 text-xs">{t(v.text, { email })}</p>
+      {state === "sent" ? (
+        <p className="mt-3 text-xs font-medium">{v.sent}</p>
+      ) : (
+        <button
+          type="button"
+          disabled={state === "sending"}
+          onClick={async () => {
+            setState("sending");
+            await resendVerification(locale);
+            setState("sent");
+          }}
+          className="mt-3 inline-flex h-8 items-center gap-1.5 rounded-full border border-amber-300 bg-white px-3 text-xs font-medium hover:bg-amber-100 disabled:opacity-70"
+        >
+          {state === "sending" && <Loader2 className="size-3.5 animate-spin" />}
+          {state === "sending" ? v.sending : v.resend}
+        </button>
+      )}
+    </div>
+  );
+}
 
+/* ——— Пополнение: только фиксированные пакеты ——— */
 export function TopUp({ initialUsd, initialMethod }: { initialUsd?: number; initialMethod?: string }) {
-  const { dict, href, money, t, currency, locale } = useI18n();
+  const { dict, href, money, currency, locale } = useI18n();
   const p = dict.pricing;
   const tp = dict.dashboard.topup;
-  const rate = USD_RATES[currency];
-  const [usd, setUsd] = React.useState(initialUsd ?? 25);
+  const [usd, setUsd] = React.useState<number>(initialUsd ? nearestPackage(initialUsd) : 25);
   const [method, setMethod] = React.useState(initialMethod ?? "card");
   const [waiver, setWaiver] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -95,17 +140,15 @@ export function TopUp({ initialUsd, initialMethod }: { initialUsd?: number; init
     { k: "invoice", t: p.invoice, i: Building2 },
   ];
   const active = methods.some((m) => m.k === method) ? method : "card";
-  const local = Math.round(usd * rate * 100) / 100;
+  const errors = { package: tp.errorPackage, waiver: tp.errorWaiver, unverified: tp.errorUnverified, too_many: tp.errorTooMany };
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (usd < MIN_TOPUP_USD) return setError(t(tp.errorMin, { amount: money(MIN_TOPUP_USD) }));
-    if (usd > MAX_TOPUP_USD) return setError(t(tp.errorMax, { amount: money(MAX_TOPUP_USD) }));
     if (!waiver) return setError(tp.errorWaiver);
     setError(null);
     start(async () => {
-      const res = await createTopUp({ amount: local, currency, waiver, lang: locale });
-      if (res && !res.ok) setError(res.error === "waiver" ? tp.errorWaiver : t(tp.errorMin, { amount: money(MIN_TOPUP_USD) }));
+      const res = await createTopUp({ usd, currency, waiver, lang: locale });
+      if (res && !res.ok) setError(errors[res.error]);
     });
   }
 
@@ -119,38 +162,24 @@ export function TopUp({ initialUsd, initialMethod }: { initialUsd?: number; init
     <Panel id="topup" title={tp.title}>
       <form onSubmit={onSubmit}>
         <p className="text-4xl font-semibold tracking-tight">{money(usd)}</p>
-        <div className="mt-4 grid grid-cols-3 gap-2">
-          {PRESETS.map((v) => (
+        <p className="mt-4 text-xs text-muted-foreground">{tp.packages}</p>
+        <div className="mt-1.5 grid grid-cols-3 gap-2" role="radiogroup" aria-label={tp.packages}>
+          {TOPUP_PACKAGES_USD.map((v) => (
             <button
               type="button"
+              role="radio"
+              aria-checked={usd === v}
               key={v}
               onClick={() => setUsd(v)}
               className={cn(
                 "rounded-xl border py-2 text-sm font-medium transition",
-                Math.abs(usd - v) < 1e-6 ? "border-foreground bg-foreground text-background" : "border-border hover:border-foreground/30",
+                usd === v ? "border-foreground bg-foreground text-background" : "border-border hover:border-foreground/30",
               )}
             >
               {money(v, { compact: true })}
             </button>
           ))}
         </div>
-        <label className="mt-2 block">
-          <span className="sr-only">
-            {tp.amount}, {currency}
-          </span>
-          <div className="relative">
-            <input
-              type="number"
-              min={Math.ceil(MIN_TOPUP_USD * rate)}
-              step="any"
-              required
-              value={local}
-              onChange={(e) => setUsd(Number(e.target.value) / rate)}
-              className="h-11 w-full rounded-xl border border-border bg-background px-3 pr-14 text-sm outline-none focus:border-brand focus:ring-3 focus:ring-brand/20"
-            />
-            <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-muted-foreground">{currency}</span>
-          </div>
-        </label>
 
         <p className="mt-4 text-xs text-muted-foreground">{tp.method}</p>
         <div className="mt-1.5 grid grid-cols-3 gap-2 text-xs">
@@ -196,7 +225,109 @@ export function TopUp({ initialUsd, initialMethod }: { initialUsd?: number; init
           {!pending && <ArrowRight className="size-4" />}
         </button>
         <p className="mt-2 text-center text-[11px] text-muted-foreground">{fmtNodes(tp.terms, { terms: doc("terms"), refunds: doc("refunds") })}</p>
+        {currency !== "USD" && <p className="mt-1 text-center text-[11px] text-muted-foreground/80">{p.chargedIn}</p>}
+        <MerchantInfo compact className="mt-3 border-t border-border pt-3" />
       </form>
+    </Panel>
+  );
+}
+
+/* ——— Возврат неиспользованного оплаченного баланса (Refund Policy §2) ——— */
+function RefundPanel({ refundableUsd, refunds }: { refundableUsd: number; refunds: Refund[] }) {
+  const { dict, money, t, href, date } = useI18n();
+  const r = dict.cab.billing.refund;
+  const [open, setOpen] = React.useState(false);
+  const [reason, setReason] = React.useState("");
+  const [msg, setMsg] = React.useState<{ ok: boolean; text: string } | null>(null);
+  const [pending, start] = React.useTransition();
+  const inReview = refunds.some((x) => x.status === "pending");
+  const tone = { pending: "bg-amber-100 text-amber-800", approved: "bg-emerald-100 text-emerald-800", rejected: "bg-muted text-muted-foreground" };
+
+  function submit() {
+    if (!window.confirm(t(r.confirm, { amount: money(refundableUsd) }))) return;
+    start(async () => {
+      const res = await requestRefund({ reason });
+      if (res.ok) {
+        setMsg({ ok: true, text: r.done });
+        setOpen(false);
+        setReason("");
+      } else setMsg({ ok: false, text: res.error === "pending" ? r.errorPending : r.errorNothing });
+    });
+  }
+
+  return (
+    <Panel
+      title={r.title}
+      action={
+        <Link href={href("/legal/refunds")} target="_blank" className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground">
+          {r.policy}
+        </Link>
+      }
+    >
+      <p className="text-sm text-muted-foreground">{r.text}</p>
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-xs text-muted-foreground">{r.available}</p>
+          <p className="text-xl font-semibold tabular-nums">{money(refundableUsd)}</p>
+        </div>
+        {!open && refundableUsd >= 0.01 && !inReview && (
+          <button
+            type="button"
+            onClick={() => {
+              setMsg(null);
+              setOpen(true);
+            }}
+            className="inline-flex h-9 items-center rounded-full border border-border px-4 text-sm font-medium hover:bg-muted"
+          >
+            {r.button}
+          </button>
+        )}
+      </div>
+      {refundableUsd < 0.01 && !inReview && !msg && <p className="mt-2 text-xs text-muted-foreground">{r.none}</p>}
+      {inReview && !msg && <p className="mt-2 text-xs text-muted-foreground">{r.errorPending}</p>}
+      {open && (
+        <div className="mt-3 space-y-2">
+          <label className="block text-xs text-muted-foreground">
+            {r.reason}
+            <textarea
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              maxLength={1000}
+              rows={2}
+              className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-brand focus:ring-3 focus:ring-brand/20"
+            />
+          </label>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={submit}
+            className="inline-flex h-9 items-center gap-1.5 rounded-full bg-foreground px-4 text-sm font-medium text-background disabled:opacity-70"
+          >
+            {pending && <Loader2 className="size-4 animate-spin" />}
+            {pending ? r.sending : r.button}
+          </button>
+        </div>
+      )}
+      {msg && (
+        <p role="status" className={cn("mt-3 rounded-lg px-3 py-2 text-xs", msg.ok ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-700")}>
+          {msg.text}
+        </p>
+      )}
+      {refunds.length > 0 && (
+        <div className="mt-4 border-t border-border pt-3">
+          <p className="text-xs text-muted-foreground">{r.requests}</p>
+          <ul className="mt-1 divide-y divide-border text-sm">
+            {refunds.map((x) => (
+              <li key={x.id} className="flex items-center justify-between gap-3 py-2">
+                <span className="tabular-nums">
+                  {money(x.usd)} <span className="ml-1 text-xs text-muted-foreground">{date(x.at, { day: "numeric", month: "short" })}</span>
+                </span>
+                <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-medium", tone[x.status])}>{r.status[x.status]}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </Panel>
   );
 }

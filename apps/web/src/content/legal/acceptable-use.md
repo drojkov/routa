@@ -4,17 +4,14 @@
 
 This policy sets out what you may not do with Harvanera's Service. It forms part of our [Terms of Service](/legal/terms) and applies to everyone who uses the Service, including anyone using a product you build on top of it.
 
-## 1. Model providers' policies apply too
+## 1. Model licences and provider terms apply too
 
-Every request you send is processed by a third-party model provider. In addition to this policy, you must follow the applicable terms and usage policies of the provider whose model you use:
+All models on the Service are open-weight models developed by third parties and run for us by an independent inference provider, currently DeepInfra, Inc. In addition to this policy, you must follow:
 
-- OpenAI: [Usage Policies](https://openai.com/policies/usage-policies)
-- Anthropic: [Usage Policy](https://www.anthropic.com/legal/aup)
-- Google: [Generative AI Prohibited Use Policy](https://policies.google.com/terms/generative-ai/use-policy)
-- DeepSeek: [Open Platform Terms of Service](https://cdn.deepseek.com/policies/en-US/deepseek-open-platform-terms-of-service.html)
-- Alibaba Cloud (Qwen): [Model Studio agreements](https://www.alibabacloud.com/help/en/model-studio/related-agreements)
+- the inference provider's terms: [DeepInfra Terms of Service](https://deepinfra.com/terms);
+- the licence and any use policy of the model you select. The licence of each model is shown on its page in our catalogue. Licences with their own use policies include the [Llama 4](https://www.llama.com/llama4/use-policy/), [Llama 3.3](https://www.llama.com/llama3_3/use-policy/) and [Llama 3.1](https://www.llama.com/llama3_1/use-policy/) Acceptable Use Policies, and the [gpt-oss usage policy](https://github.com/openai/gpt-oss/blob/main/USAGE_POLICY).
 
-If a provider's applicable policy is stricter than this one on a given point, the stricter rule applies to requests sent to that provider's models.
+If an applicable licence, use policy or provider term is stricter than this policy on a given point, the stricter rule applies to requests sent to that model.
 
 ## 2. Prohibited uses
 

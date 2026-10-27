@@ -18,14 +18,13 @@ import { useRouter } from "next/navigation";
 import * as React from "react";
 import { OPEN_COOKIE_SETTINGS } from "@/components/site/cookie-banner";
 import { LocaleSwitcher } from "@/components/site/locale-switcher";
-import { PendingButton } from "@/components/site/pending-button";
 import { Eyebrow, Reveal } from "@/components/site/reveal";
 import BeamBorder from "@/components/ui/border-beam";
 import { MarqueeLogoScroller } from "@/components/ui/marquee-logo-scroller";
-import { MIN_TOPUP_USD, USD_RATES } from "@/i18n/config";
+import { MAX_TOPUP_USD, MIN_TOPUP_USD, TOPUP_PACKAGES_USD } from "@/lib/billing";
 import { fmtNodes } from "@/i18n/fmt";
 import { useI18n } from "@/i18n/provider";
-import { API_BASE, BRAND, COMPANY, INTEGRATIONS, MODELS } from "@/lib/site";
+import { API_BASE, BRAND, COMPANY, INTEGRATIONS, MODELS, SUPPORT_RESPONSE_DAYS } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 /* ——— Лента моделей под hero (реф. 1) ——— */
@@ -130,90 +129,22 @@ function StepCard({ n, title, sub, children }: { n: number; title: string; sub: 
   );
 }
 
-/* ——— Отзыв + «с кем мы работаем» (реф. 2 + marquee-logo-scroller) ——— */
-// Имена и тексты — заглушки макета. До запуска заменить реальными отзывами (с согласия авторов) или убрать блок.
-/** Кавычки по правилам языка. */
-const QUOTE_MARKS: Record<string, [string, string]> = {
-  en: ["“", "”"],
-  ru: ["«", "»"],
-  es: ["«", "»"],
-  pt: ["“", "”"],
-  de: ["„", "“"],
-  fr: ["« ", " »"],
-  zh: ["“", "”"],
-  ja: ["「", "」"],
-};
-
-const PEOPLE = [
-  { name: "Anna Krylova", tint: "from-amber-200 to-orange-400" },
-  { name: "Lucas Moreau", tint: "from-sky-200 to-blue-500" },
-  { name: "Mei Tanaka", tint: "from-pink-200 to-fuchsia-500" },
-];
-
+/* ——— «С кем мы работаем» (marquee-logo-scroller) ———
+ * Блок отзывов убран 2026-10-27: отзывы были выдуманными (замечание эквайера). Вернуть — только реальные, с согласия авторов. */
 export function Testimonials() {
-  const { dict, t, locale } = useI18n();
-  const quotes = dict.testimonials.quotes;
-  const [open, close] = QUOTE_MARKS[locale];
-  const [i, setI] = React.useState(0);
-  React.useEffect(() => {
-    const id = setInterval(() => setI((v) => (v + 1) % quotes.length), 6000);
-    return () => clearInterval(id);
-  }, [quotes.length]);
-  const q = quotes[i];
-  const p = PEOPLE[i];
+  const { dict } = useI18n();
   return (
     <section className="mx-auto max-w-6xl px-4 pb-24">
-      <div className="mx-auto max-w-xl text-center">
-        <div
-          key={p.name}
-          aria-hidden
-          className={cn("mx-auto grid size-16 place-items-center rounded-full bg-gradient-to-br text-lg font-semibold text-white shadow-float", p.tint)}
-        >
-          {p.name
-            .split(" ")
-            .map((w) => w[0])
-            .join("")}
-        </div>
-        <p className="mt-4 text-xl font-semibold">{q.title}</p>
-        <p className="mt-2 text-muted-foreground">
-          {open}
-          {q.text}
-          {close}
-        </p>
-        <p className="mt-3 text-sm text-muted-foreground/70">
-          — {p.name}, {q.role}
-        </p>
-        <div className="mt-6 flex justify-center gap-2">
-          {PEOPLE.map((x, k) => (
-            <button
-              key={x.name}
-              onClick={() => setI(k)}
-              aria-label={t(dict.testimonials.review, { n: k + 1 })}
-              aria-pressed={k === i}
-              className={cn(
-                "rounded-xl border px-3 py-1.5 text-xs transition",
-                k === i ? "border-foreground/10 bg-card font-medium shadow-soft" : "border-transparent text-muted-foreground",
-              )}
-            >
-              {x.name.split(" ")[0]}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="mt-16">
-        <MarqueeLogoScroller
-          title={dict.testimonials.integrationsTitle}
-          description={dict.testimonials.integrationsText}
-          logos={INTEGRATIONS.map((x) => ({ src: x.logo, alt: x.name, gradient: x.gradient }))}
-          speed="normal"
-        />
-      </div>
+      <MarqueeLogoScroller
+        title={dict.testimonials.integrationsTitle}
+        description={dict.testimonials.integrationsText}
+        logos={INTEGRATIONS.map((x) => ({ src: x.logo, alt: x.name, gradient: x.gradient }))}
+        speed="normal"
+      />
     </section>
   );
 }
 
-/* ——— Возможности: бенто (реф. 5) ——— */
 export function Features() {
   const { dict, href, money, t } = useI18n();
   const f = dict.features;
@@ -369,13 +300,11 @@ function AnalyticsBars() {
 
 /* ——— Пополнение (кнопка сабмит + border-beam) ——— */
 const DEEPSEEK = MODELS.find((m) => m.id === "deepseek/deepseek-v3.1")!;
-const PRESETS_USD = [10, 25, 100];
 
 export function Pricing() {
   const { dict, href, money, num, t, currency } = useI18n();
   const router = useRouter();
   const p = dict.pricing;
-  const rate = USD_RATES[currency];
   const [usd, setUsd] = React.useState(25);
   const [method, setMethod] = React.useState<string>("card");
   const methods = [
@@ -416,7 +345,7 @@ export function Pricing() {
           </p>
 
           <div className="mt-5 grid grid-cols-3 gap-2">
-            {PRESETS_USD.map((v) => (
+            {TOPUP_PACKAGES_USD.map((v) => (
               <button
                 type="button"
                 key={v}
@@ -430,23 +359,6 @@ export function Pricing() {
               </button>
             ))}
           </div>
-          <label className="mt-3 block">
-            <span className="sr-only">
-              {p.custom}, {currency}
-            </span>
-            <div className="relative">
-              <input
-                type="number"
-                min={Math.ceil(MIN_TOPUP_USD * rate)}
-                step="any"
-                required
-                value={Math.round(usd * rate * 100) / 100}
-                onChange={(e) => setUsd(Number(e.target.value) / rate)}
-                className="h-11 w-full rounded-xl border border-border bg-background px-3 pr-14 text-sm outline-none focus:border-brand focus:ring-3 focus:ring-brand/20"
-              />
-              <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-muted-foreground">{currency}</span>
-            </div>
-          </label>
 
           <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
             {methods.map(({ k, t: label, i: Icon }) => (
@@ -471,7 +383,7 @@ export function Pricing() {
           >
             {active === "invoice" ? p.invoiceCta : t(p.pay, { amount: money(usd) })} <ArrowRight className="size-4" />
           </button>
-          <p className="mt-3 text-center text-[11px] text-muted-foreground">{t(p.min, { amount: money(MIN_TOPUP_USD) })}</p>
+          <p className="mt-3 text-center text-[11px] text-muted-foreground">{t(p.min, { min: money(MIN_TOPUP_USD), max: money(MAX_TOPUP_USD) })}</p>
           {currency !== "USD" && <p className="mt-1 text-center text-[11px] text-muted-foreground/80">{p.chargedIn}</p>}
         </form>
       </BeamBorder>
@@ -565,37 +477,40 @@ export function CtaFooter() {
               </li>
             </ul>
           </div>
+          {/* Реквизиты и контакты поддержки — на каждой странице (требование эквайера). */}
           <div>
-            <p className="text-sm font-medium">{f.newsletterTitle}</p>
-            <form id="subscribe" className="mt-3 flex gap-2 rounded-full bg-white/10 p-1" onSubmit={(e) => e.preventDefault()}>
-              <input
-                type="email"
-                required
-                aria-label={dict.auth.email}
-                placeholder={f.emailPlaceholder}
-                className="min-w-0 flex-1 bg-transparent px-3 text-sm text-white outline-none placeholder:text-white/40"
-              />
-              <PendingButton
-                type="submit"
-                pendingLabel={f.subscribing}
-                doneLabel={f.subscribed}
-                className="h-9 rounded-full bg-white px-4 text-black hover:bg-white/90"
-              >
-                {f.subscribe}
-              </PendingButton>
-            </form>
-            <p className="mt-2 text-[11px] text-white/40">
-              {fmtNodes(f.newsletterNote, {
-                privacy: (
-                  <Link key="p" href={href("/legal/privacy")} className="underline underline-offset-2 hover:text-white">
-                    {dict.legalNames.privacy}
-                  </Link>
-                ),
-              })}
-            </p>
+            <p className="text-xs font-medium tracking-wider text-white/40 uppercase">{f.support}</p>
+            <address className="mt-3 space-y-1 text-sm text-white/60 not-italic">
+              <p className="text-white/80">{COMPANY.legalName}</p>
+              <p className="text-xs">{t(dict.merchant.regNo, { n: COMPANY.crNumber })}</p>
+              <p className="text-xs">{COMPANY.address}</p>
+              <p className="pt-1">
+                <a href={`mailto:${COMPANY.email}`} className="hover:text-white">
+                  {COMPANY.email}
+                </a>
+              </p>
+              <p>
+                <Link href={href("/contact")} className="underline underline-offset-2 hover:text-white">
+                  {f.contactUs}
+                </Link>
+              </p>
+              <p className="text-xs text-white/40">{t(dict.merchant.response, { days: SUPPORT_RESPONSE_DAYS })}</p>
+            </address>
           </div>
         </div>
-        <p className="relative mt-10 text-xs text-white/35">
+        {/* Знаки платёжных систем: официальные цвета, без изменений пропорций (правила брендов Visa и Mastercard). */}
+        <div className="relative mt-10 flex items-center gap-2">
+          {[
+            { src: "/logos/visa.svg", alt: "Visa", w: "w-10" },
+            { src: "/logos/mastercard.svg", alt: "Mastercard", w: "w-8" },
+          ].map((c) => (
+            <span key={c.alt} className="grid h-7 w-12 place-items-center rounded-md bg-white">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={c.src} alt={c.alt} className={`${c.w} h-auto`} />
+            </span>
+          ))}
+        </div>
+        <p className="relative mt-4 text-xs text-white/35">
           {t(f.rights, { year: new Date().getFullYear(), company: COMPANY.legalName })} {t(f.registered, { jurisdiction: COMPANY.jurisdiction })}{" "}
           {/* Атрибуция обязательна по лицензии базы DB-IP Lite (CC BY 4.0), см. lib/geo.ts */}
           {fmtNodes(f.geo, {

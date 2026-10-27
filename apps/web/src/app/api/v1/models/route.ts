@@ -2,7 +2,7 @@ import { MODELS } from "@/lib/site";
 
 /**
  * GET /v1/models — формат OpenAI плюс цены (SPEC §7). Публичный, без ключа.
- * Модели «скоро» (GPT, Claude…) тоже в списке, с available: false — клиент видит, что они появятся.
+ * Модели с available: false (временно отключённые) тоже в списке — клиент видит, что ID зарезервирован.
  */
 export function GET() {
   const data = MODELS.map((m) => ({
