@@ -28,7 +28,6 @@ COPY --from=build /app/src/content ./src/content
 COPY --from=build /app/scripts ./scripts
 RUN mkdir -p /data && chown node:node /data
 USER node
-VOLUME /data
 EXPOSE 3000
 # коммит сборки — виден в `docker inspect`
 ARG CI_COMMIT_SHA=dev
