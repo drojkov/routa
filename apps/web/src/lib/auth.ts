@@ -5,7 +5,7 @@ import { nextCookies } from "better-auth/next-js";
 import { db, schema } from "@/db";
 import { SIGNUP_BONUS_USD } from "@/lib/billing";
 import { escapeHtml, sendEmail } from "@/lib/email";
-import { countryOf } from "@/lib/geo";
+import { CLIENT_IP_HEADERS, countryOf } from "@/lib/geo";
 
 const env = process.env;
 
@@ -41,8 +41,8 @@ export const auth = betterAuth({
       await sendEmail({ to: user.email, subject: "Harvanera: confirm your email", text, html });
     },
   },
-  // Railway кладёт IP клиента в X-Real-IP (см. lib/geo.ts) — тот же порядок и здесь.
-  advanced: { ipAddress: { ipAddressHeaders: ["x-real-ip", "x-forwarded-for"] } },
+  // Те же заголовки IP, что у геоблокировки (CLIENT_IP_HEADERS в lib/geo.ts).
+  advanced: { ipAddress: { ipAddressHeaders: CLIENT_IP_HEADERS } },
   // Вход только по email и паролю (Google убран 2026-10-27).
   user: { deleteUser: { enabled: true } },
   databaseHooks: {

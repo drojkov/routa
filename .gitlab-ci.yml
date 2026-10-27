@@ -1,18 +1,85 @@
-# Деплой Harvanera на Railway из GitLab.
-# Пуш в main → `railway up` в проект harvanera, сервис web.
-# Railway сам берёт папку /apps/web (Root Directory в настройках сервиса),
-# поэтому заливаем репозиторий целиком — как при деплое из GitHub.
+# Harvanera: сборка Docker-образа и деплой на сервер витрин (см. deploy/DEPLOY.md).
 #
-# Нужна CI/CD-переменная RAILWAY_TOKEN (Masked + Protected): токен проекта
-# harvanera для окружения production (Railway → Project Settings → Tokens).
-# Пока переменной нет, job не запускается.
+# main      → build:image  → образ :latest и :<sha> в реестре проекта → deploy:production (кнопка)
+# остальные → build:image  (кнопка) → образ :<ветка>-<sha>, без деплоя
+#
+# deploy:production тянет образ своего коммита (SITE_TAG=<sha>), перед этим делает бэкап базы,
+# после — ждёт healthcheck. Перезапуск deploy:production в старом пайплайне — это откат.
+#
+# CI/CD-переменные (Settings → CI/CD → Variables):
+#   DEPLOY_HOST          адрес сервера
+#   DEPLOY_USER          SSH-пользователь, которому можно docker
+#   DEPLOY_SSH_KEY       приватный ключ (тип File, Protected)
+#   DEPLOY_DIR           папка с docker-compose.yml и .env, по умолчанию /home/harvanera
+#   DEPLOY_PORT          SSH-порт, по умолчанию 22
+#   DEPLOY_KNOWN_HOSTS   вывод ssh-keyscan; если пусто — job сам делает ssh-keyscan
+# Пока переменных нет, deploy:production останавливается и называет недостающую.
+#
+# deploy-railway — старый прод, работает до переключения DNS на сервер; потом удалить job
+# и переменную RAILWAY_TOKEN.
 
-stages:
-  - deploy
+stages: [build, deploy]
+
+build:image:
+  stage: build
+  image: docker:27
+  services: ["docker:27-dind"]
+  variables:
+    TAG: "$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA"
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+  script:
+    - |
+      if [ "$CI_COMMIT_BRANCH" = main ]; then set -- -t "$CI_REGISTRY_IMAGE:latest" -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
+      else set -- -t "$CI_REGISTRY_IMAGE:$TAG"; fi
+      docker build --pull --build-arg CI_COMMIT_SHA=$CI_COMMIT_SHA "$@" apps/web
+      for t in "$@"; do [ "$t" = -t ] || docker push "$t"; done
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH
+      when: manual
+      allow_failure: true
+
+deploy:production:
+  stage: deploy
+  image: alpine:3.20
+  needs: ["build:image"]
+  resource_group: production
+  environment:
+    name: production
+    url: https://harvanera.com
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: manual
+  script:
+    - |
+      for v in DEPLOY_HOST DEPLOY_USER DEPLOY_SSH_KEY; do
+        eval "x=\${$v:-}"; [ -n "$x" ] || { echo "CI-переменная $v не задана"; exit 1; }
+      done
+    - apk add --no-cache openssh-client >/dev/null
+    - eval "$(ssh-agent -s)" >/dev/null
+    - if [ -f "$DEPLOY_SSH_KEY" ]; then ssh-add "$DEPLOY_SSH_KEY"; else echo "$DEPLOY_SSH_KEY" | tr -d '\r' | ssh-add -; fi
+    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+    - if [ -n "${DEPLOY_KNOWN_HOSTS:-}" ]; then echo "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts; else ssh-keyscan -p "${DEPLOY_PORT:-22}" "$DEPLOY_HOST" > ~/.ssh/known_hosts; fi
+    # job-токен логинит сервер в реестр только на время деплоя; бэкап базы — до миграций нового образа
+    - |
+      printf '%s' "$CI_JOB_TOKEN" | ssh -p "${DEPLOY_PORT:-22}" "$DEPLOY_USER@$DEPLOY_HOST" "set -e; cd '${DEPLOY_DIR:-/home/harvanera}';
+        export DOCKER_CONFIG=\$(mktemp -d); trap 'rm -rf \$DOCKER_CONFIG' EXIT;
+        docker login -u gitlab-ci-token --password-stdin '$CI_REGISTRY' >/dev/null;
+        export SITE_TAG='$CI_COMMIT_SHORT_SHA' HARVANERA_IMAGE='$CI_REGISTRY_IMAGE';
+        if [ -n \"\$(docker compose ps -q web)\" ]; then docker compose exec -T web node scripts/db-backup.mjs --keep 30; fi;
+        docker compose pull && docker compose up -d;
+        for i in \$(seq 1 40); do
+          s=\$(docker inspect -f '{{.State.Health.Status}}' \$(docker compose ps -q web));
+          [ \"\$s\" = healthy ] && { echo 'healthy: $CI_COMMIT_SHORT_SHA'; docker compose ps; exit 0; };
+          sleep 3;
+        done;
+        docker compose logs --tail 50 web; exit 1"
 
 deploy-railway:
   stage: deploy
   image: node:22-alpine
+  needs: []
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $RAILWAY_TOKEN'
   script:

@@ -84,9 +84,23 @@ export function geoBlockEnabled() {
   return process.env.GEO_BLOCK !== "off";
 }
 
-/** IP клиента: Railway кладёт его в X-Real-IP; запасной вариант — первый адрес X-Forwarded-For. */
+/**
+ * Заголовки с IP клиента, по порядку. Railway кладёт IP в X-Real-IP (по умолчанию).
+ * За Cloudflare на своём сервере — CLIENT_IP_HEADERS=cf-connecting-ip,x-real-ip,x-forwarded-for.
+ * Первым ставить только заголовок, который прокси перед сайтом всегда перезаписывает, иначе IP подделывается.
+ */
+export const CLIENT_IP_HEADERS = (process.env.CLIENT_IP_HEADERS ?? "x-real-ip,x-forwarded-for")
+  .split(",")
+  .map((h) => h.trim().toLowerCase())
+  .filter(Boolean);
+
+/** IP клиента по CLIENT_IP_HEADERS; из списка через запятую (X-Forwarded-For) — первый адрес. */
 export function clientIp(headers: Headers) {
-  return headers.get("x-real-ip")?.trim() || headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null;
+  for (const name of CLIENT_IP_HEADERS) {
+    const ip = headers.get(name)?.split(",")[0]?.trim();
+    if (ip) return ip;
+  }
+  return null;
 }
 
 export function countryOf(ip: string | null) {
