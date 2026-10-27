@@ -23,3 +23,16 @@ grep -oE '^EMAIL_[A-Z_]+=' .env | tr '\n' ' '; echo
 grep -E '^EMAIL_(HOST|PORT)=' .env
 echo "== строки [email] из логов за 2 часа:"
 docker compose logs --since 2h web 2>&1 | grep '\[email\]' | tail -20
+echo "== кто слушает почтовые порты на этом хосте:"
+(ss -ltnp 2>/dev/null || netstat -ltnp 2>/dev/null) | grep -E ':(25|465|587|2525)\b' || echo "  никто"
+echo "== почтовые контейнеры:"
+docker ps --format '{{.Names}}  {{.Image}}  {{.Ports}}' | grep -iE 'mail|postfix|smtp|exim|dovecot' || echo "  нет"
+echo "== маршрут по умолчанию:"; ip route 2>/dev/null | grep default
+echo "== /etc/hosts:"; grep -iE 'mail|dev-store|harvanera' /etc/hosts || echo "  ничего"
+echo "== порт 587 по внутренним адресам (с хоста):"
+GW=$(ip route 2>/dev/null | awk '/default/{print $3; exit}')
+for h in 127.0.0.1 192.168.32.3 172.17.0.1 $GW; do
+  nc -z -w 3 $h 587 2>/dev/null && echo "  $h:587 open" || echo "  $h:587 closed"
+done
+echo "== SMTP-приветствие по внутренним адресам:"
+for h in 127.0.0.1 $GW; do printf "  $h: "; (sleep 2; printf 'QUIT\r\n') | nc -w 4 $h 587 2>/dev/null | head -1 || echo; done
