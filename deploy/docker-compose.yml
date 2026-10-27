@@ -6,7 +6,7 @@
 # База SQLite — ./data/app.db, бэкапы — ./data/backups/ (переживают обновления).
 services:
   web:
-    image: ${HARVANERA_IMAGE:-gitlab.q-tech.host:5050/v.davlitbaev/routa}:${SITE_TAG:-latest}
+    image: ${HARVANERA_IMAGE:-gitlab.q-tech.host:5050/showcases/routa}:${SITE_TAG:-latest}
     restart: unless-stopped
     env_file: .env
     environment:

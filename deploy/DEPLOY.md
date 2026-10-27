@@ -11,13 +11,13 @@
 | `deploy/docker-compose.yml` | контейнер `web` на `127.0.0.1:3070`, база в `./data` |
 | `deploy/env.example` | список переменных для `.env` |
 | `deploy/setup.sh` | первый запуск на сервере |
-| `.gitlab-ci.yml` | `build:image` → реестр `gitlab.q-tech.host:5050/v.davlitbaev/routa`, кнопка `deploy:production` |
+| `.gitlab-ci.yml` | `build:image` → реестр `gitlab.q-tech.host:5050/showcases/routa`, кнопка `deploy:production` |
 | `apps/web/scripts/db-backup.mjs` | согласованная копия SQLite на ходу (перенос и бэкапы) |
 
 ## Что нужно от девопса
 
 1. **Сервер и папка**: `/home/harvanera`, пользователь с правом `docker` и SSH-ключ для деплоя из CI.
-2. **CI/CD-переменные** в проекте `v.davlitbaev/routa`: `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY` (тип File, Protected),
+2. **CI/CD-переменные** в проекте `showcases/routa`: `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY` (тип File, Protected),
    при необходимости `DEPLOY_PORT`, `DEPLOY_DIR`, `DEPLOY_KNOWN_HOSTS`.
 3. **Раннер с Docker** (`docker:dind`, privileged) для проекта и включённый Container Registry. Если проще —
    перенести проект в группу `showcases`, там это уже есть.
