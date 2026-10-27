@@ -2,14 +2,10 @@ stages:
   - build
   - deploy
 
-variables:
-  IMAGE_NAME: harvanera
-  BUILD_CONTEXT: apps/web
-
 build:
   image: docker:27.5.1
   stage: build
-  tags: [showcases]
+  tags: [analytic]
   retry:
     max: 2
     when:
@@ -20,10 +16,9 @@ build:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
   script:
     # the runner's Docker keeps the layer cache between jobs, so no --cache-from is needed
-    - IMG="$CI_REGISTRY_IMAGE/$IMAGE_NAME"
-    - docker build --pull --build-arg CI_COMMIT_SHA="$CI_COMMIT_SHA" -t "$IMG:latest" -t "$IMG:$CI_COMMIT_SHORT_SHA" "$BUILD_CONTEXT"
-    - docker push "$IMG:latest"
-    - docker push "$IMG:$CI_COMMIT_SHORT_SHA"
+    - docker build --pull --build-arg CI_COMMIT_SHA="$CI_COMMIT_SHA" -t "$CI_REGISTRY_IMAGE:latest" -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" apps/web
+    - docker push "$CI_REGISTRY_IMAGE:latest"
+    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
   after_script:
     - docker logout "$CI_REGISTRY" || true
   rules:
@@ -32,7 +27,7 @@ build:
 deploy:
   image: alpine:latest
   stage: deploy
-  tags: [showcases]
+  tags: [analytic]
   resource_group: production
   needs:
     - build
@@ -46,9 +41,9 @@ deploy:
       printf 'Host deploy\n  HostName %s\n  User %s\n  Port %s\n' \
         "$SSH_HOST" "$SSH_USER" "${SSH_PORT:-22}" > ~/.ssh/config
   script:
-    # 1. files: compose file
-    - ssh deploy "mkdir -p '$DEPLOY_PATH'"
-    - cat "${COMPOSE_SRC:-deploy/docker-compose.yml}" | ssh deploy "cat > '$DEPLOY_PATH/docker-compose.yml'"
+    # 1. files: compose + data dir for SQLite (owner uid 1000 = user "node" in the image)
+    - ssh deploy "mkdir -p '$DEPLOY_PATH/data/backups' && chown -R 1000:1000 '$DEPLOY_PATH/data'"
+    - cat deploy/docker-compose.yml | ssh deploy "cat > '$DEPLOY_PATH/docker-compose.yml'"
 
     # 2. .env: from the ENV_FILE variable if present, otherwise keep what is on the server
     - |
@@ -64,7 +59,7 @@ deploy:
 
     # 3. pin the image version in the server's .env
     - |
-      ssh deploy "cd '$DEPLOY_PATH' && { grep -v -E '^(REGISTRY_IMAGE|IMAGE_TAG)=' .env || true; printf 'REGISTRY_IMAGE=%s\nIMAGE_TAG=%s\n' '$CI_REGISTRY_IMAGE' '$CI_COMMIT_SHORT_SHA'; } > .env.new && chmod 600 .env.new && mv .env.new .env"
+      ssh deploy "cd '$DEPLOY_PATH' && { grep -v -E '^(HARVANERA_IMAGE|SITE_TAG)=' .env || true; printf 'HARVANERA_IMAGE=%s\nSITE_TAG=%s\n' '$CI_REGISTRY_IMAGE' '$CI_COMMIT_SHORT_SHA'; } > .env.new && chmod 600 .env.new && mv .env.new .env"
 
     # 4. registry login on the server (password goes through stdin)
     - echo "$CI_REGISTRY_PASSWORD" | ssh deploy "docker login -u '$CI_REGISTRY_USER' --password-stdin '$CI_REGISTRY'"
@@ -74,7 +69,7 @@ deploy:
 
     # 6. smoke check: wait for the container HEALTHCHECK from the Dockerfile to become healthy (~90s)
     - |
-      ssh deploy "cd '$DEPLOY_PATH' && SVC='${COMPOSE_SERVICE:-web}'; CID=\$(docker compose ps -q \"\$SVC\"); for i in \$(seq 1 18); do st=\$(docker inspect --format '{{.State.Health.Status}}' \"\$CID\" 2>/dev/null); echo \"health: \$st\"; [ \"\$st\" = healthy ] && exit 0; sleep 5; done; docker compose ps; docker compose logs --tail=50 \"\$SVC\"; exit 1"
+      ssh deploy "cd '$DEPLOY_PATH' && CID=\$(docker compose ps -q web); for i in \$(seq 1 18); do st=\$(docker inspect --format '{{.State.Health.Status}}' \"\$CID\" 2>/dev/null); echo \"health: \$st\"; [ \"\$st\" = healthy ] && exit 0; sleep 5; done; docker compose ps; docker compose logs --tail=50 web; exit 1"
 
     # 7. cleanup
     - ssh deploy "docker image prune -f"
