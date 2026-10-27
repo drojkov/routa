@@ -5,7 +5,7 @@ stages:
 build:
   image: docker:27.5.1
   stage: build
-  tags: [analytic]
+  tags: [showcases]
   retry:
     max: 2
     when:
@@ -27,7 +27,7 @@ build:
 deploy:
   image: alpine:latest
   stage: deploy
-  tags: [analytic]
+  tags: [showcases]
   resource_group: production
   needs:
     - build
