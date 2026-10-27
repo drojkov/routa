@@ -37,7 +37,7 @@ Nothing in these Terms removes any consumer right that applicable law does not a
 
 ### 4.1 Creating an account
 
-You can sign up with an email address and password or with Google. You must provide accurate information and keep it up to date.
+You can sign up with an email address and password. You must provide accurate information and keep it up to date.
 
 ### 4.2 Keeping your account secure
 

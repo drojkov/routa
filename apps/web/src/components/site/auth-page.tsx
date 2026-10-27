@@ -1,14 +1,7 @@
 import "server-only";
-import { AuthCard, type ProviderMode } from "@/components/site/auth-card";
+import { AuthCard } from "@/components/site/auth-card";
 import { LocaleSwitcher } from "@/components/site/locale-switcher";
 import { Logo } from "@/components/site/nav";
-import { DEMO_OAUTH, OAUTH } from "@/lib/auth";
-
-/** Какой режим у кнопки Google: настоящий OAuth, демо-вход или скрыта. */
-export function authProviders(): Record<"google", ProviderMode> {
-  const mode = (on: boolean): ProviderMode => (on ? "live" : DEMO_OAUTH ? "demo" : "off");
-  return { google: mode(OAUTH.google) };
-}
 
 export function AuthPage(props: React.ComponentProps<typeof AuthCard>) {
   return (

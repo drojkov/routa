@@ -10,15 +10,6 @@ const env = process.env;
 const SITE_URL = "https://harvanera.com";
 const PROD_ORIGINS = [SITE_URL, "https://www.harvanera.com", "https://web-production-06476.up.railway.app"];
 
-/**
- * Какие провайдеры реально настроены. Без ключей кнопка работает в демо-режиме
- * (см. demoSocialSignIn) — только вне production или с AUTH_DEMO_OAUTH=true.
- */
-export const OAUTH = {
-  google: !!(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET),
-};
-export const DEMO_OAUTH = env.AUTH_DEMO_OAUTH === "true" || (env.NODE_ENV !== "production" && env.AUTH_DEMO_OAUTH !== "false");
-
 export const auth = betterAuth({
   appName: "Harvanera",
   // Прод — боевой домен (BETTER_AUTH_URL — для стенда); в dev — из запроса (localhost, туннели).
@@ -33,10 +24,7 @@ export const auth = betterAuth({
     // Почтового провайдера пока нет: подтверждение email и сброс пароля включаются вместе с ним.
     requireEmailVerification: false,
   },
-  socialProviders: OAUTH.google
-    ? { google: { clientId: env.GOOGLE_CLIENT_ID!, clientSecret: env.GOOGLE_CLIENT_SECRET!, prompt: "select_account" } }
-    : {},
-  account: { accountLinking: { enabled: true, trustedProviders: ["google"] } },
+  // Вход только по email и паролю (Google убран 2026-10-27).
   user: { deleteUser: { enabled: true } },
   databaseHooks: {
     user: {

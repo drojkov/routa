@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AuthPage, authProviders } from "@/components/site/auth-page";
+import { AuthPage } from "@/components/site/auth-page";
 import { loadLocale } from "@/i18n/server";
 import { redirectIfSignedIn } from "@/lib/account";
 
@@ -12,5 +12,5 @@ export default async function SignUpPage({ params, searchParams }: PageProps<"/[
   const { lang } = await loadLocale(params);
   const { next } = await searchParams;
   await redirectIfSignedIn(lang, typeof next === "string" ? next : undefined);
-  return <AuthPage mode="sign-up" providers={authProviders()} next={typeof next === "string" ? next : undefined} />;
+  return <AuthPage mode="sign-up" next={typeof next === "string" ? next : undefined} />;
 }

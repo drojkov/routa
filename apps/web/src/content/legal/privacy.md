@@ -14,7 +14,7 @@ We decide how and why we process information about visitors, account holders and
 
 | Category | What it may include | How we receive it |
 | --- | --- | --- |
-| Account and sign-in information | Email address, account identifier, authentication information, and any name or profile details you provide | From you or, if you choose Google sign-in, from Google |
+| Account and sign-in information | Email address, account identifier, authentication information, and any name or profile details you provide | From you |
 | Billing and transaction information | Top-up amount and currency, resulting USD balance, exchange rate shown at checkout, payment status, transaction references, refunds and invoice details | From you, our payment service provider and our own transaction records |
 | API request metadata | Model selected, usage units such as input and output tokens, charge, timestamp, API key identifier, IP address and request status | Generated when you use the Service |
 | Technical and security information | IP address, browser or device information, session information and security events | From your device and our systems |
@@ -22,7 +22,7 @@ We decide how and why we process information about visitors, account holders and
 | Support communications | Messages you send us, any documents you provide in support of a request, and our replies | From you and our support records |
 | Request content | Prompts, files, parameters and model responses | From API requests you make or that are made using your account |
 
-An email address or a supported Google sign-in is needed to create an account. Payment details are needed to add paid balance. API request metadata is needed to deliver and bill requests. If you do not provide information needed for one of these purposes, we may be unable to provide that part of the Service. Support messages and optional profile details are voluntary.
+An email address and password are needed to create an account. Payment details are needed to add paid balance. API request metadata is needed to deliver and bill requests. If you do not provide information needed for one of these purposes, we may be unable to provide that part of the Service. Support messages and optional profile details are voluntary.
 
 Card payments are handled by a third-party payment service provider. We do not request or store your full payment-card number. The payment provider sends us information needed to confirm and administer the transaction. It may also perform its own fraud and payment checks under its privacy notice.
 
@@ -65,7 +65,6 @@ We disclose personal data only as needed for the purposes above, to the followin
 
 - **Model Providers:** the provider of the model you select receives request content and the technical information needed to process it. Currently this is DeepInfra, Inc. (United States), which runs the models available on the Service. We will update this list before any other provider receives request content. A provider's own terms and privacy notice may govern some of its processing.
 - **Service providers:** companies that provide hosting, technical infrastructure, payment processing, authentication, email delivery or customer-support services. They receive only the information needed for their role.
-- **Google:** if you choose Google sign-in, information is exchanged to authenticate your account.
 - **Professional advisers and transaction parties:** lawyers, accountants, auditors and, if relevant, a purchaser or successor to our business, subject to appropriate protections.
 - **Public authorities and other parties:** where disclosure is required by law, necessary to protect legal rights or needed to respond to a valid legal request.
 

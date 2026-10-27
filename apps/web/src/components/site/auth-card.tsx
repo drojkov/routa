@@ -7,24 +7,12 @@ import * as React from "react";
 import { Component as CardShell, Field } from "@/components/ui/sign-in-card-2";
 import { fmtNodes } from "@/i18n/fmt";
 import { useI18n } from "@/i18n/provider";
-import { demoSocialSignIn } from "@/lib/actions/auth";
 import { authClient } from "@/lib/auth-client";
 import { safeNext } from "@/lib/safe-next";
 import { BRAND } from "@/lib/site";
 
-export type ProviderMode = "live" | "demo" | "off";
-type Provider = "google";
-
-/** Вход и регистрация: email + пароль или Google. */
-export function AuthCard({
-  mode,
-  providers,
-  next,
-}: {
-  mode: "sign-in" | "sign-up";
-  providers: Record<Provider, ProviderMode>;
-  next?: string;
-}) {
+/** Вход и регистрация: email + пароль. */
+export function AuthCard({ mode, next }: { mode: "sign-in" | "sign-up"; next?: string }) {
   const { dict, href, money, t } = useI18n();
   const a = dict.auth;
   const router = useRouter();
@@ -33,7 +21,7 @@ export function AuthCard({
 
   const [showPassword, setShowPassword] = React.useState(false);
   const [focused, setFocused] = React.useState<string | null>(null);
-  const [busy, setBusy] = React.useState<"email" | Provider | null>(null);
+  const [busy, setBusy] = React.useState<"email" | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [consent, setConsent] = React.useState(false);
   const [adult, setAdult] = React.useState(false);
@@ -65,37 +53,11 @@ export function AuthCard({
     router.refresh();
   }
 
-  async function onSocial(p: Provider) {
-    if (!consentsOk) return setError(a.errors.consent);
-    setBusy(p);
-    setError(null);
-    try {
-      if (providers[p] === "demo") {
-        await demoSocialSignIn(p, target, href("/dashboard"));
-        return;
-      }
-      const res = await authClient.signIn.social({
-        provider: p,
-        callbackURL: target,
-        errorCallbackURL: href(signUp ? "/sign-up" : "/sign-in"),
-      });
-      if (res.error) throw new Error(res.error.message);
-    } catch (err) {
-      // redirect() из server action приходит как исключение — это не ошибка.
-      if (err && typeof err === "object" && "digest" in err && String(err.digest).startsWith("NEXT_REDIRECT")) throw err;
-      setBusy(null);
-      setError(a.errors.unavailable);
-    }
-  }
-
   const legalLink = (doc: "terms" | "privacy") => (
     <Link key={doc} href={href(`/legal/${doc}`)} target="_blank" className="text-teal-300 underline-offset-2 hover:underline">
       {dict.legalNames[doc]}
     </Link>
   );
-
-  const visible = (["google"] as const).filter((p) => providers[p] !== "off");
-  const demo = visible.some((p) => providers[p] === "demo");
 
   return (
     <CardShell wide={signUp}>
@@ -106,29 +68,6 @@ export function AuthCard({
         <h1 className="text-2xl font-semibold tracking-tight text-white">{signUp ? a.signUpTitle : a.signInTitle}</h1>
         <p className="mt-1 text-sm text-white/55">{signUp ? t(a.signUpSub, { amount: money(1) }) : a.signInSub}</p>
       </div>
-
-      {visible.length > 0 && (
-        <>
-          <div className="grid gap-2">
-            {visible.map((p) => (
-              <button
-                key={p}
-                type="button"
-                disabled={!!busy}
-                onClick={() => onSocial(p)}
-                className="flex h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 text-sm text-white/85 transition hover:bg-white/10 disabled:opacity-60"
-              >
-                {busy === p ? <Loader2 className="size-4 animate-spin" /> : <GoogleIcon />}
-                {a[p]}
-              </button>
-            ))}
-          </div>
-          {demo && <p className="mt-2 text-center text-[11px] leading-snug text-amber-200/70">{a.demo}</p>}
-          <div className="flex items-center gap-3 py-4 text-[11px] tracking-wider text-white/35 uppercase">
-            <span className="h-px flex-1 bg-white/10" /> {a.or} <span className="h-px flex-1 bg-white/10" />
-          </div>
-        </>
-      )}
 
       <form onSubmit={onSubmit} className="space-y-3" noValidate={false}>
         {signUp && (
@@ -246,19 +185,5 @@ function Check({ checked, onChange, children }: { checked: boolean; onChange: (v
       />
       <span>{children}</span>
     </label>
-  );
-}
-
-function GoogleIcon() {
-  return (
-    <svg viewBox="0 0 48 48" className="size-4" aria-hidden>
-      <path
-        fill="#FFC107"
-        d="M43.6 20.1H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.7-.4-3.9z"
-      />
-      <path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z" />
-      <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2A11.9 11.9 0 0 1 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z" />
-      <path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3a12 12 0 0 1-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.7-.4-3.9z" />
-    </svg>
   );
 }
