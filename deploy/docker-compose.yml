@@ -1,4 +1,4 @@
-# Harvanera на сервере витрин. Папка (например /home/harvanera) с этим файлом, setup.sh, env.example и .env.
+# Harvanera на сервере витрин. Папка (например /home/routa) с этим файлом, setup.sh, env.example и .env.
 # Первый запуск: sudo sh setup.sh — создаёт .env и data/, потом запускает контейнер (см. DEPLOY.md).
 # Обновление: docker compose pull && docker compose up -d (или кнопка deploy:production в GitLab).
 #

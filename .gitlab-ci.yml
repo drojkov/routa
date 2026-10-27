@@ -1,18 +1,15 @@
 # Harvanera: сборка Docker-образа и деплой на сервер витрин (см. deploy/DEPLOY.md).
 #
-# main      → build:image  → образ :latest и :<sha> в реестре проекта → deploy:production (кнопка)
+# main      → build:image  → образ :latest и :<sha> в реестре проекта → deploy:production (сам)
 # остальные → build:image  (кнопка) → образ :<ветка>-<sha>, без деплоя
 #
 # deploy:production тянет образ своего коммита (SITE_TAG=<sha>), перед этим делает бэкап базы,
 # после — ждёт healthcheck. Перезапуск deploy:production в старом пайплайне — это откат.
 #
-# CI/CD-переменные (Settings → CI/CD → Variables):
-#   DEPLOY_HOST          адрес сервера
-#   DEPLOY_USER          SSH-пользователь, которому можно docker
-#   DEPLOY_SSH_KEY       приватный ключ (тип File, Protected)
-#   DEPLOY_DIR           папка с docker-compose.yml и .env, по умолчанию /home/harvanera
-#   DEPLOY_PORT          SSH-порт, по умолчанию 22
-#   DEPLOY_KNOWN_HOSTS   вывод ssh-keyscan; если пусто — job сам делает ssh-keyscan
+# CI/CD-переменные (Settings → CI/CD → Variables), как на остальных витринах:
+#   SSH_HOST, SSH_PORT, SSH_USER   сервер витрин
+#   SSH_PRIVATE_KEY                приватный ключ (текстом или тип File)
+#   DEPLOY_PATH                    папка с docker-compose.yml и .env, по умолчанию /home/routa
 # Пока переменных нет, deploy:production останавливается и называет недостающую.
 #
 # deploy-railway — старый прод, работает до переключения DNS на сервер; потом удалить job
@@ -50,28 +47,31 @@ deploy:production:
     url: https://harvanera.com
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
-      when: manual
   script:
     - |
-      for v in DEPLOY_HOST DEPLOY_USER DEPLOY_SSH_KEY; do
+      for v in SSH_HOST SSH_USER SSH_PRIVATE_KEY; do
         eval "x=\${$v:-}"; [ -n "$x" ] || { echo "CI-переменная $v не задана"; exit 1; }
       done
     - apk add --no-cache openssh-client >/dev/null
     - eval "$(ssh-agent -s)" >/dev/null
-    - if [ -f "$DEPLOY_SSH_KEY" ]; then ssh-add "$DEPLOY_SSH_KEY"; else echo "$DEPLOY_SSH_KEY" | tr -d '\r' | ssh-add -; fi
+    - if [ -f "$SSH_PRIVATE_KEY" ]; then ssh-add "$SSH_PRIVATE_KEY"; else echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -; fi
     - mkdir -p ~/.ssh && chmod 700 ~/.ssh
-    - if [ -n "${DEPLOY_KNOWN_HOSTS:-}" ]; then echo "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts; else ssh-keyscan -p "${DEPLOY_PORT:-22}" "$DEPLOY_HOST" > ~/.ssh/known_hosts; fi
-    # job-токен логинит сервер в реестр только на время деплоя; бэкап базы — до миграций нового образа
+    - ssh-keyscan -p "${SSH_PORT:-22}" -H "$SSH_HOST" >> ~/.ssh/known_hosts
+    # job-токен логинит сервер в реестр только на время деплоя; бэкап базы — до миграций нового образа.
+    # Сервис в compose может называться не web — тогда бэкап и проверка здоровья пропускаются.
     - |
-      printf '%s' "$CI_JOB_TOKEN" | ssh -p "${DEPLOY_PORT:-22}" "$DEPLOY_USER@$DEPLOY_HOST" "set -e; cd '${DEPLOY_DIR:-/home/harvanera}';
+      printf '%s' "$CI_JOB_TOKEN" | ssh -p "${SSH_PORT:-22}" "$SSH_USER@$SSH_HOST" "set -e; cd '${DEPLOY_PATH:-/home/routa}';
         export DOCKER_CONFIG=\$(mktemp -d); trap 'rm -rf \$DOCKER_CONFIG' EXIT;
         docker login -u gitlab-ci-token --password-stdin '$CI_REGISTRY' >/dev/null;
         export SITE_TAG='$CI_COMMIT_SHORT_SHA' HARVANERA_IMAGE='$CI_REGISTRY_IMAGE';
-        if [ -n \"\$(docker compose ps -q web)\" ]; then docker compose exec -T web node scripts/db-backup.mjs --keep 30; fi;
+        id=\$(docker compose ps -q web 2>/dev/null || true);
+        if [ -n \"\$id\" ]; then docker compose exec -T web node scripts/db-backup.mjs --keep 30 || true; fi;
         docker compose pull && docker compose up -d;
+        id=\$(docker compose ps -q web 2>/dev/null || true);
+        [ -n \"\$id\" ] || { docker compose ps; exit 0; };
         for i in \$(seq 1 40); do
-          s=\$(docker inspect -f '{{.State.Health.Status}}' \$(docker compose ps -q web));
-          [ \"\$s\" = healthy ] && { echo 'healthy: $CI_COMMIT_SHORT_SHA'; docker compose ps; exit 0; };
+          s=\$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' \$id);
+          case \$s in healthy|none) echo \"\$s: $CI_COMMIT_SHORT_SHA\"; docker compose ps; exit 0;; esac;
           sleep 3;
         done;
         docker compose logs --tail 50 web; exit 1"

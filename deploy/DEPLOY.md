@@ -11,14 +11,14 @@
 | `deploy/docker-compose.yml` | контейнер `web` на `127.0.0.1:3070`, база в `./data` |
 | `deploy/env.example` | список переменных для `.env` |
 | `deploy/setup.sh` | первый запуск на сервере |
-| `.gitlab-ci.yml` | `build:image` → реестр `gitlab.q-tech.host:5050/showcases/routa`, кнопка `deploy:production` |
+| `.gitlab-ci.yml` | `build:image` → реестр `gitlab.q-tech.host:5050/showcases/routa`, `deploy:production` при пуше в `main` |
 | `apps/web/scripts/db-backup.mjs` | согласованная копия SQLite на ходу (перенос и бэкапы) |
 
 ## Что нужно от девопса
 
-1. **Сервер и папка**: `/home/harvanera`, пользователь с правом `docker` и SSH-ключ для деплоя из CI.
-2. **CI/CD-переменные** в проекте `showcases/routa`: `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY` (тип File, Protected),
-   при необходимости `DEPLOY_PORT`, `DEPLOY_DIR`, `DEPLOY_KNOWN_HOSTS`.
+1. **Сервер и папка**: `/home/routa`, пользователь с правом `docker` и SSH-ключ для деплоя из CI.
+2. **CI/CD-переменные** в проекте `showcases/routa` — как на остальных витринах: `SSH_HOST`, `SSH_PORT`, `SSH_USER`,
+   `SSH_PRIVATE_KEY`, `DEPLOY_PATH` (папка на сервере, по умолчанию `/home/routa`). Уже заведены.
 3. **Раннер с Docker** (`docker:dind`, privileged) для проекта и включённый Container Registry. Если проще —
    перенести проект в группу `showcases`, там это уже есть.
 4. **Прокси** `harvanera.com` и `www.harvanera.com` → `127.0.0.1:3070` с TLS. Передавать `Host`, `X-Forwarded-Proto`,
@@ -56,7 +56,7 @@ Caddy: `harvanera.com, www.harvanera.com { reverse_proxy 127.0.0.1:3070 { flush_
 ## Первый запуск
 
 1. Слить `dev` → `main` (по команде владельца), дождаться `build:image` в GitLab — появится образ `:latest`.
-2. На сервере: скопировать `deploy/docker-compose.yml`, `deploy/setup.sh`, `deploy/env.example` в `/home/harvanera`.
+2. На сервере: скопировать `deploy/docker-compose.yml`, `deploy/setup.sh`, `deploy/env.example` в `/home/routa`.
 3. `docker login gitlab.q-tech.host:5050` (deploy token с `read_registry`) — для ручных `pull`; CI логинится сам.
 4. `sudo sh setup.sh` — создаст `.env` и остановится. Заполнить `.env` значениями из
    Railway → harvanera → web → Variables (`BETTER_AUTH_SECRET` — **тот же**, иначе слетят сессии; ключи DeepInfra, пароль почты).
@@ -76,8 +76,8 @@ railway ssh -- node -e "require('better-sqlite3')('/data/app.db',{readonly:true}
 railway ssh -- sha256sum /data/export.db
 railway ssh -- base64 -w0 /data/export.db > export.b64
 base64 -d -i export.b64 -o app.db && shasum -a 256 app.db   # сумма должна совпасть
-scp app.db <user>@<сервер>:/home/harvanera/data/app.db
-ssh <user>@<сервер> 'sudo chown 1000:1000 /home/harvanera/data/app.db'
+scp app.db <user>@<сервер>:/home/routa/data/app.db
+ssh <user>@<сервер> 'sudo chown 1000:1000 /home/routa/data/app.db'
 railway ssh -- rm /data/export.db
 ```
 
@@ -86,7 +86,7 @@ railway ssh -- rm /data/export.db
 
 ## Обновление и откат
 
-- Из GitLab: пайплайн `main` → кнопка **deploy:production**. Делает бэкап базы, тянет образ этого коммита, ждёт healthy.
+- Из GitLab: деплой идёт сам при пуше в `main`; откат — перезапустить **deploy:production** в старом пайплайне. Делает бэкап базы, тянет образ этого коммита, ждёт healthy.
 - Откат: **deploy:production** в пайплайне старого коммита. Миграции базы назад не откатываются — если новая версия
   меняла схему, восстановить базу из `data/backups/` (бэкап делается перед каждым деплоем).
 - Вручную: `SITE_TAG=<короткий sha>` в `.env`, `docker compose up -d`.
@@ -96,7 +96,7 @@ railway ssh -- rm /data/export.db
 Перед каждым деплоем из CI — автоматически (последние 30). Ежедневно — cron на хосте:
 
 ```cron
-30 3 * * * cd /home/harvanera && docker compose exec -T web node scripts/db-backup.mjs --keep 14 >> data/backups/cron.log 2>&1
+30 3 * * * cd /home/routa && docker compose exec -T web node scripts/db-backup.mjs --keep 14 >> data/backups/cron.log 2>&1
 ```
 
 Восстановление: `docker compose stop web`, скопировать нужный `data/backups/app-*.db` в `data/app.db`,
