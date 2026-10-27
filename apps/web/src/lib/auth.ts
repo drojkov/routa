@@ -7,6 +7,9 @@ import { SIGNUP_BONUS_USD } from "@/lib/billing";
 
 const env = process.env;
 
+const SITE_URL = "https://harvanera.com";
+const PROD_ORIGINS = [SITE_URL, "https://www.harvanera.com", "https://web-production-06476.up.railway.app"];
+
 /**
  * Какие провайдеры реально настроены. Без ключей кнопка работает в демо-режиме
  * (см. demoSocialSignIn) — только вне production или с AUTH_DEMO_OAUTH=true.
@@ -18,9 +21,12 @@ export const DEMO_OAUTH = env.AUTH_DEMO_OAUTH === "true" || (env.NODE_ENV !== "p
 
 export const auth = betterAuth({
   appName: "Harvanera",
+  // Прод — боевой домен (BETTER_AUTH_URL — для стенда); в dev — из запроса (localhost, туннели).
+  // Без этого Better Auth считал своим railway-адрес и отвечал 403 Invalid origin на harvanera.com.
+  baseURL: env.BETTER_AUTH_URL ?? (env.NODE_ENV === "production" ? SITE_URL : undefined),
   database: drizzleAdapter(db, { provider: "sqlite", schema }),
-  // Dev через туннель (см. DEV_TUNNELS в next.config.ts).
-  trustedOrigins: env.NODE_ENV === "production" ? [] : ["https://*.serveousercontent.com", "https://*.free.pinggy.net", "https://*.run.pinggy-free.link","https://*.lhr.life", "https://*.trycloudflare.com"],
+  // Прод: боевой домен и адрес Railway. Dev: туннели (см. DEV_TUNNELS в next.config.ts).
+  trustedOrigins: env.NODE_ENV === "production" ? PROD_ORIGINS : ["https://*.serveousercontent.com", "https://*.free.pinggy.net", "https://*.run.pinggy-free.link","https://*.lhr.life", "https://*.trycloudflare.com"],
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
