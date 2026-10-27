@@ -503,8 +503,10 @@ export function CtaFooter() {
           {[
             { src: "/logos/visa.svg", alt: "Visa", w: "w-10" },
             { src: "/logos/mastercard.svg", alt: "Mastercard", w: "w-8" },
+            // Поставлено по решению владельца (2026-10-27), хотя компания не сертифицирована — см. CLAUDE.md.
+            { src: "/logos/pci-dss.svg", alt: "PCI DSS", w: "w-12", box: "w-16" },
           ].map((c) => (
-            <span key={c.alt} className="grid h-7 w-12 place-items-center rounded-md bg-white">
+            <span key={c.alt} className={`grid h-7 ${c.box ?? "w-12"} place-items-center rounded-md bg-white`}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={c.src} alt={c.alt} className={`${c.w} h-auto`} />
             </span>
