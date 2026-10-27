@@ -6,13 +6,11 @@
 # База SQLite — ./data/app.db, бэкапы — ./data/backups/ (переживают обновления).
 services:
   web:
-    image: ${REGISTRY_IMAGE:-gitlab.q-tech.host:5050/showcases/routa}/harvanera:${IMAGE_TAG:-latest}
+    image: ${HARVANERA_IMAGE:-gitlab.q-tech.host:5050/showcases/routa}:${SITE_TAG:-latest}
     restart: unless-stopped
     env_file: .env
     environment:
       DATABASE_PATH: /data/app.db
-    ports:
-      - 127.0.0.1:${SITE_PORT:-3070}:3000
     volumes:
       - ./data:/data
     security_opt: ["no-new-privileges:true"]
@@ -20,3 +18,28 @@ services:
     logging:
       driver: json-file
       options: { max-size: 10m, max-file: "5" }
+    networks:
+      - traefik-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-net"
+ 
+      # HTTPS Router
+      - "traefik.http.routers.harvanera-secure.rule=Host(`${SITE_HOST:?set SITE_HOST in .env}`)"
+      - "traefik.http.routers.harvanera-secure.entrypoints=websecure"
+      - "traefik.http.routers.harvanera-secure.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.harvanera-secure.service=harvanera-secure"
+ 
+      # Service definition
+      - "traefik.http.services.harvanera-secure.loadbalancer.server.port=3000"
+ 
+      # HTTP Router (for redirection)
+      - "traefik.http.routers.harvanera-http.rule=Host(`${SITE_HOST}`)"
+      - "traefik.http.routers.harvanera-http.entrypoints=web"
+      - "traefik.http.routers.harvanera-http.middlewares=redirect-to-https"
+      - "traefik.http.routers.harvanera-http.service=noop@internal"
+ 
+networks:
+  traefik-net:
+    external: true
+
