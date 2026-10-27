@@ -38,7 +38,8 @@ export const auth = betterAuth({
 <p><a href="${escapeHtml(url)}" style="display:inline-block;background:#111;color:#fff;padding:10px 18px;border-radius:999px;text-decoration:none">Confirm email</a></p>
 <p style="color:#666;font-size:12px">The link is valid for 24 hours. If you didn't create an account, ignore this email.</p>
 </div>`;
-      await sendEmail({ to: user.email, subject: "Harvanera: confirm your email", text, html });
+      // В фоне: пользователь не ждёт почтовый сервер (ошибки sendEmail пишет в лог сам).
+      void sendEmail({ to: user.email, subject: "Harvanera: confirm your email", text, html });
     },
   },
   // Те же заголовки IP, что у геоблокировки (CLIENT_IP_HEADERS в lib/geo.ts).
