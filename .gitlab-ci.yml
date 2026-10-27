@@ -1,87 +1,84 @@
-# Harvanera: сборка Docker-образа и деплой на сервер витрин (см. deploy/DEPLOY.md).
-#
-# main      → build:image  → образ :latest и :<sha> в реестре проекта → deploy:production (сам)
-# остальные → build:image  (кнопка) → образ :<ветка>-<sha>, без деплоя
-#
-# deploy:production тянет образ своего коммита (SITE_TAG=<sha>), перед этим делает бэкап базы,
-# после — ждёт healthcheck. Перезапуск deploy:production в старом пайплайне — это откат.
-#
-# CI/CD-переменные (Settings → CI/CD → Variables), как на остальных витринах:
-#   SSH_HOST, SSH_PORT, SSH_USER   сервер витрин
-#   SSH_PRIVATE_KEY                приватный ключ (текстом или тип File)
-#   DEPLOY_PATH                    папка с docker-compose.yml и .env, по умолчанию /home/routa
-# Пока переменных нет, deploy:production останавливается и называет недостающую.
-#
-# deploy-railway — старый прод, работает до переключения DNS на сервер; потом удалить job
-# и переменную RAILWAY_TOKEN.
+stages:
+  - build
+  - deploy
 
-stages: [build, deploy]
+variables:
+  IMAGE_NAME: harvanera
+  BUILD_CONTEXT: apps/web
 
-build:image:
+build:
+  image: docker:27.5.1
   stage: build
-  image: docker:27
-  services: ["docker:27-dind"]
-  variables:
-    TAG: "$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA"
+  tags: [showcases]
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
   before_script:
+    - docker info
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
   script:
-    - |
-      if [ "$CI_COMMIT_BRANCH" = main ]; then set -- -t "$CI_REGISTRY_IMAGE:latest" -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
-      else set -- -t "$CI_REGISTRY_IMAGE:$TAG"; fi
-      docker build --pull --build-arg CI_COMMIT_SHA=$CI_COMMIT_SHA "$@" apps/web
-      for t in "$@"; do [ "$t" = -t ] || docker push "$t"; done
+    # the runner's Docker keeps the layer cache between jobs, so no --cache-from is needed
+    - IMG="$CI_REGISTRY_IMAGE/$IMAGE_NAME"
+    - docker build --pull --build-arg CI_COMMIT_SHA="$CI_COMMIT_SHA" -t "$IMG:latest" -t "$IMG:$CI_COMMIT_SHORT_SHA" "$BUILD_CONTEXT"
+    - docker push "$IMG:latest"
+    - docker push "$IMG:$CI_COMMIT_SHORT_SHA"
+  after_script:
+    - docker logout "$CI_REGISTRY" || true
   rules:
-    - if: $CI_COMMIT_BRANCH == "main"
-    - if: $CI_COMMIT_BRANCH
-      when: manual
-      allow_failure: true
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-deploy:production:
+deploy:
+  image: alpine:latest
   stage: deploy
-  image: alpine:3.20
-  needs: ["build:image"]
+  tags: [showcases]
   resource_group: production
-  environment:
-    name: production
-    url: https://harvanera.com
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
-  script:
-    - |
-      for v in SSH_HOST SSH_USER SSH_PRIVATE_KEY; do
-        eval "x=\${$v:-}"; [ -n "$x" ] || { echo "CI-переменная $v не задана"; exit 1; }
-      done
-    - apk add --no-cache openssh-client >/dev/null
-    - eval "$(ssh-agent -s)" >/dev/null
-    - if [ -f "$SSH_PRIVATE_KEY" ]; then ssh-add "$SSH_PRIVATE_KEY"; else echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -; fi
+  needs:
+    - build
+  before_script:
+    - apk add --no-cache openssh-client
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh && chmod 700 ~/.ssh
     - ssh-keyscan -p "${SSH_PORT:-22}" -H "$SSH_HOST" >> ~/.ssh/known_hosts
-    # job-токен логинит сервер в реестр только на время деплоя; бэкап базы — до миграций нового образа.
-    # Сервис в compose может называться не web — тогда бэкап и проверка здоровья пропускаются.
     - |
-      printf '%s' "$CI_JOB_TOKEN" | ssh -p "${SSH_PORT:-22}" "$SSH_USER@$SSH_HOST" "set -e; cd '${DEPLOY_PATH:-/home/routa}';
-        export DOCKER_CONFIG=\$(mktemp -d); trap 'rm -rf \$DOCKER_CONFIG' EXIT;
-        docker login -u gitlab-ci-token --password-stdin '$CI_REGISTRY' >/dev/null;
-        export SITE_TAG='$CI_COMMIT_SHORT_SHA' HARVANERA_IMAGE='$CI_REGISTRY_IMAGE';
-        id=\$(docker compose ps -q web 2>/dev/null || true);
-        if [ -n \"\$id\" ]; then docker compose exec -T web node scripts/db-backup.mjs --keep 30 || true; fi;
-        docker compose pull && docker compose up -d;
-        id=\$(docker compose ps -q web 2>/dev/null || true);
-        [ -n \"\$id\" ] || { docker compose ps; exit 0; };
-        for i in \$(seq 1 40); do
-          s=\$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' \$id);
-          case \$s in healthy|none) echo \"\$s: $CI_COMMIT_SHORT_SHA\"; docker compose ps; exit 0;; esac;
-          sleep 3;
-        done;
-        docker compose logs --tail 50 web; exit 1"
-
-deploy-railway:
-  stage: deploy
-  image: node:22-alpine
-  needs: []
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main" && $RAILWAY_TOKEN'
+      printf 'Host deploy\n  HostName %s\n  User %s\n  Port %s\n' \
+        "$SSH_HOST" "$SSH_USER" "${SSH_PORT:-22}" > ~/.ssh/config
   script:
-    - npm install -g @railway/cli@5.71.0
-    - railway up --ci --service 25c6f588-510c-4c4b-87dc-9e05177559fb --message "GitLab $CI_COMMIT_SHORT_SHA"
+    # 1. files: compose file
+    - ssh deploy "mkdir -p '$DEPLOY_PATH'"
+    - cat "${COMPOSE_SRC:-deploy/docker-compose.yml}" | ssh deploy "cat > '$DEPLOY_PATH/docker-compose.yml'"
+
+    # 2. .env: from the ENV_FILE variable if present, otherwise keep what is on the server
+    - |
+      if [ -n "${ENV_FILE:-}" ] && [ -f "$ENV_FILE" ]; then
+        echo "writing .env from ENV_FILE"
+        ssh deploy "umask 077 && cat > '$DEPLOY_PATH/.env'" < "$ENV_FILE"
+      fi
+    - |
+      if ! ssh deploy "test -f '$DEPLOY_PATH/.env'"; then
+        echo "ERROR: no .env on the server and ENV_FILE is not set"
+        exit 1
+      fi
+
+    # 3. pin the image version in the server's .env
+    - |
+      ssh deploy "cd '$DEPLOY_PATH' && { grep -v -E '^(REGISTRY_IMAGE|IMAGE_TAG)=' .env || true; printf 'REGISTRY_IMAGE=%s\nIMAGE_TAG=%s\n' '$CI_REGISTRY_IMAGE' '$CI_COMMIT_SHORT_SHA'; } > .env.new && chmod 600 .env.new && mv .env.new .env"
+
+    # 4. registry login on the server (password goes through stdin)
+    - echo "$CI_REGISTRY_PASSWORD" | ssh deploy "docker login -u '$CI_REGISTRY_USER' --password-stdin '$CI_REGISTRY'"
+
+    # 5. pull and restart
+    - ssh deploy "cd '$DEPLOY_PATH' && docker compose pull && docker compose up -d --remove-orphans"
+
+    # 6. smoke check: wait for the container HEALTHCHECK from the Dockerfile to become healthy (~90s)
+    - |
+      ssh deploy "cd '$DEPLOY_PATH' && SVC='${COMPOSE_SERVICE:-web}'; CID=\$(docker compose ps -q \"\$SVC\"); for i in \$(seq 1 18); do st=\$(docker inspect --format '{{.State.Health.Status}}' \"\$CID\" 2>/dev/null); echo \"health: \$st\"; [ \"\$st\" = healthy ] && exit 0; sleep 5; done; docker compose ps; docker compose logs --tail=50 \"\$SVC\"; exit 1"
+
+    # 7. cleanup
+    - ssh deploy "docker image prune -f"
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  environment:
+    name: production
