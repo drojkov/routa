@@ -11,7 +11,7 @@
 | `deploy/docker-compose.yml` | контейнер `web` на `127.0.0.1:3070`, база в `./data` |
 | `deploy/env.example` | список переменных для `.env` |
 | `deploy/setup.sh` | первый запуск на сервере |
-| `.gitlab-ci.yml` | `build:image` → реестр `gitlab.q-tech.host:5050/showcases/routa`, `deploy:production` при пуше в `main` |
+| `.gitlab-ci.yml` | при пуше в `dev` (основная ветка): `build` → образ `gitlab.q-tech.host:5050/showcases/routa/harvanera`, `deploy` — compose на сервер, `REGISTRY_IMAGE`/`IMAGE_TAG` в `.env`, `pull && up -d` |
 | `apps/web/scripts/db-backup.mjs` | согласованная копия SQLite на ходу (перенос и бэкапы) |
 
 ## Что нужно от девопса
@@ -55,9 +55,10 @@ Caddy: `harvanera.com, www.harvanera.com { reverse_proxy 127.0.0.1:3070 { flush_
 
 ## Первый запуск
 
-1. Слить `dev` → `main` (по команде владельца), дождаться `build:image` в GitLab — появится образ `:latest`.
-2. На сервере: скопировать `deploy/docker-compose.yml`, `deploy/setup.sh`, `deploy/env.example` в `/home/routa`.
-3. `docker login gitlab.q-tech.host:5050` (deploy token с `read_registry`) — для ручных `pull`; CI логинится сам.
+1. Пуш в `dev` — job `build` соберёт образ, `deploy` положит `docker-compose.yml` в `$DEPLOY_PATH`.
+   Пока на сервере нет `.env` (и не задана file-переменная `ENV_FILE`), `deploy` останавливается.
+2. На сервер в `/home/routa` дополнительно: `deploy/setup.sh`, `deploy/env.example`.
+3. CI сам логинит сервер в реестр; для ручных `pull` — `docker login gitlab.q-tech.host:5050`.
 4. `sudo sh setup.sh` — создаст `.env` и остановится. Заполнить `.env` значениями из
    Railway → harvanera → web → Variables (`BETTER_AUTH_SECRET` — **тот же**, иначе слетят сессии; ключи DeepInfra, пароль почты).
 5. Перенести базу (ниже), потом снова `sudo sh setup.sh` — поднимет контейнер и дождётся healthcheck.
@@ -86,10 +87,10 @@ railway ssh -- rm /data/export.db
 
 ## Обновление и откат
 
-- Из GitLab: деплой идёт сам при пуше в `main`; откат — перезапустить **deploy:production** в старом пайплайне. Делает бэкап базы, тянет образ этого коммита, ждёт healthy.
-- Откат: **deploy:production** в пайплайне старого коммита. Миграции базы назад не откатываются — если новая версия
-  меняла схему, восстановить базу из `data/backups/` (бэкап делается перед каждым деплоем).
-- Вручную: `SITE_TAG=<короткий sha>` в `.env`, `docker compose up -d`.
+- Из GitLab: деплой идёт сам при пуше в `dev`; тянет образ этого коммита (`IMAGE_TAG`), ждёт healthy.
+- Откат: перезапустить job **deploy** в пайплайне старого коммита. Миграции базы назад не откатываются — если новая
+  версия меняла схему, восстановить базу из `data/backups/`. Бэкап перед деплоем CI сейчас не делает — только cron (ниже).
+- Вручную: `IMAGE_TAG=<короткий sha>` в `.env`, `docker compose up -d`.
 
 ## Бэкапы
 
