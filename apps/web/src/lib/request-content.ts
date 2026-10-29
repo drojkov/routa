@@ -1,5 +1,5 @@
 import "server-only";
-import { and, eq, lt } from "drizzle-orm";
+import { and, eq, gte } from "drizzle-orm";
 import { db, schema } from "@/db";
 
 /** Логирование текстов запросов (Terms §7.4, Privacy §3): включается пользователем в настройках. */
@@ -16,19 +16,12 @@ export async function logContentEnabled(userId: string) {
   return row?.logContent ?? false;
 }
 
-let lastPurge = 0;
-
-/** Удаляет тексты старше срока хранения. Не чаще раза в час — вызывается из шлюза при записи. */
-export function purgeExpiredContent(now = Date.now()) {
-  if (now - lastPurge < 3_600_000) return;
-  lastPurge = now;
-  const cutoff = new Date(now - CONTENT_RETENTION_DAYS * 86_400_000);
-  db.delete(schema.requestContent).where(lt(schema.requestContent.createdAt, cutoff)).run();
-}
+/** Тексты старше срока не показываем, даже если плановая чистка (db/index.ts) ещё не дошла до них. */
+export const contentCutoff = () => new Date(Date.now() - CONTENT_RETENTION_DAYS * 86_400_000);
 
 export function getRequestContent(userId: string, id: string) {
   return db.query.requestContent.findFirst({
     columns: { request: true, response: true },
-    where: and(eq(schema.requestContent.id, id), eq(schema.requestContent.userId, userId)),
+    where: and(eq(schema.requestContent.id, id), eq(schema.requestContent.userId, userId), gte(schema.requestContent.createdAt, contentCutoff())),
   });
 }

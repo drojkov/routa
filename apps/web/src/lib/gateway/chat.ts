@@ -43,6 +43,7 @@ export async function runChat(request: Request, actor: Actor, requestId = newReq
   const route = resolveModel(body.model);
   if (!route.ok) return fail(route.code);
   if (actor.allowedModels && !actor.allowedModels.includes(route.model.id)) return fail("model_not_allowed");
+  if (actor.blockedModels?.includes(route.model.id)) return fail("model_blocked");
 
   const denied = await precheck(actor, route.model, body);
   if (denied) return fail(denied);

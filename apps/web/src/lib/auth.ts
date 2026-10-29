@@ -1,7 +1,9 @@
 import "server-only";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { APIError } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
+import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { SIGNUP_BONUS_USD } from "@/lib/billing";
 import { escapeHtml, sendEmail } from "@/lib/email";
@@ -14,6 +16,9 @@ const PROD_ORIGINS = [SITE_URL, "https://www.harvanera.com", "https://web-produc
 
 export const auth = betterAuth({
   appName: "Harvanera",
+  // Во время `next build` модули маршрутов загружаются без секретов — заглушка, чтобы Better Auth не ругался.
+  // В работе — только BETTER_AUTH_SECRET.
+  secret: env.BETTER_AUTH_SECRET ?? (env.NEXT_PHASE === "phase-production-build" ? "build-only-placeholder-secret-never-used-at-runtime" : undefined),
   // Прод — боевой домен (BETTER_AUTH_URL — для стенда); в dev — из запроса (localhost, туннели).
   // Без этого Better Auth считал своим railway-адрес и отвечал 403 Invalid origin на harvanera.com.
   baseURL: env.BETTER_AUTH_URL ?? (env.NODE_ENV === "production" ? SITE_URL : undefined),
@@ -43,12 +48,28 @@ export const auth = betterAuth({
     },
   },
   // Те же заголовки IP, что у геоблокировки (CLIENT_IP_HEADERS в lib/geo.ts).
-  advanced: { ipAddress: { ipAddressHeaders: CLIENT_IP_HEADERS } },
+  advanced: {
+    ipAddress: { ipAddressHeaders: CLIENT_IP_HEADERS },
+    // Имя cookie сессии — ровно как в Cookie Policy: `better-auth.session_token`, без префикса __Secure-.
+    // Флаг Secure ставим сами (на проде — https).
+    useSecureCookies: false,
+    defaultCookieAttributes: { secure: env.NODE_ENV === "production" },
+  },
   // Вход только по email и паролю (Google убран 2026-10-27).
-  user: { deleteUser: { enabled: true } },
+  // Удаления аккаунта нет: закрытие — lib/account-close.ts (финансовые записи хранятся, Privacy §7).
+  user: { deleteUser: { enabled: false } },
   databaseHooks: {
     session: {
       create: {
+        // Закрытый или заблокированный поддержкой аккаунт войти не может (Terms §11).
+        before: async (sess) => {
+          const u = await db.query.user.findFirst({
+            columns: { suspendedAt: true, closedAt: true },
+            where: eq(schema.user.id, sess.userId),
+          });
+          if (u?.closedAt) throw new APIError("FORBIDDEN", { message: "This account has been closed." });
+          if (u?.suspendedAt) throw new APIError("FORBIDDEN", { message: "This account is suspended. Contact info@harvanera.com." });
+        },
         // Журнал входов для разбора чарджбэков (сессии удаляются при выходе, журнал — нет).
         after: async (sess) => {
           await db.insert(schema.loginEvent).values({
@@ -80,7 +101,8 @@ export const auth = betterAuth({
       },
     },
   },
-  rateLimit: { enabled: true, window: 60, max: 30 },
+  // Регистрации — не больше 3 в час с одного IP (Privacy §4: автоматические сигналы подозрительных регистраций).
+  rateLimit: { enabled: true, window: 60, max: 30, customRules: { "/sign-up/email": { window: 3600, max: 3 } } },
   plugins: [
     nextCookies(), // последним: проставляет cookie из server actions
   ],

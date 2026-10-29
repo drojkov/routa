@@ -12,6 +12,7 @@
     "geo:update": "node scripts/geo-update.mjs",
     "evidence": "node scripts/evidence.mjs",
     "refund": "node scripts/refund.mjs",
+    "account": "node scripts/account.mjs",
     "db:backup": "node scripts/db-backup.mjs"
   },
   "dependencies": {

@@ -1,7 +1,8 @@
 import { auth } from "@/lib/auth";
 import { newRequestId, runChat } from "@/lib/gateway/chat";
 import { apiError } from "@/lib/gateway/errors";
-import { logContentEnabled } from "@/lib/request-content";
+import { accountState } from "@/lib/gateway/meter";
+import { clientIp } from "@/lib/geo";
 
 /**
  * Чат в кабинете: тот же шлюз, но платит владелец сессии, ключ не нужен.
@@ -29,6 +30,8 @@ export async function POST(request: Request) {
   };
   const proxied = new Request(request.url, { method: "POST", body: JSON.stringify(body), signal: request.signal });
   const userId = session.user.id;
-  const actor = { userId, keyId: null, limitMicros: null, allowedModels: null, logContent: await logContentEnabled(userId) };
+  const state = await accountState(userId);
+  if (!state) return apiError("account_suspended", requestId);
+  const actor = { userId, keyId: null, limitMicros: null, allowedModels: null, ...state, ip: clientIp(request.headers) };
   return runChat(proxied, actor, requestId);
 }

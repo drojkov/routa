@@ -1,7 +1,7 @@
 import { getSessionCookie } from "better-auth/cookies";
 import { type NextRequest, NextResponse } from "next/server";
 import { DEFAULT_LOCALE, isLocale, LOCALE_COOKIE } from "@/i18n/config";
-import { GEO_BYPASS_COOKIE, isBlocked } from "@/lib/geo";
+import { GEO_BYPASS_COOKIE, hasBypass, isBlocked } from "@/lib/geo";
 
 /**
  * 0. Геоблокировка (Terms §2, `lib/geo.ts`): из закрытых стран недоступен сам сервис — вход,
@@ -22,7 +22,8 @@ export function proxy(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.searchParams.delete("geo_bypass");
     const res = NextResponse.redirect(url);
-    res.cookies.set(GEO_BYPASS_COOKIE, bypassParam, { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 31536000 });
+    // Служебная cookie команды — только при верном токене (обычным посетителям не ставится, Cookie Policy §2).
+    if (hasBypass(bypassParam)) res.cookies.set(GEO_BYPASS_COOKIE, bypassParam, { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 31536000 });
     return res;
   }
 

@@ -36,6 +36,10 @@ export default async function CheckoutPage({ params }: PageProps<"/[lang]/dashbo
   const minor = currency === "JPY" ? 1 : 100;
   const toPay = new Intl.NumberFormat(lang, { style: "currency", currency }).format(order.amountMinor / minor);
   const paid = order.status === "paid";
+  const invoice = order.method === "invoice";
+  // Курс, по которому посчитана сумма к оплате (Terms §5.2): валюта оплаты за 1 USD.
+  const rate = order.amountMinor / minor / (order.amountMicros / 1_000_000);
+  const rateText = `1 USD = ${new Intl.NumberFormat(lang, { maximumFractionDigits: 4 }).format(rate)} ${currency}`;
 
   return (
     <div>
@@ -64,12 +68,18 @@ export default async function CheckoutPage({ params }: PageProps<"/[lang]/dashbo
               <dt className="text-muted-foreground">{c.toPay}</dt>
               <dd className="font-semibold tabular-nums">{toPay}</dd>
             </div>
+            {currency !== "USD" && (
+              <div className="flex justify-between">
+                <dt className="text-muted-foreground">{c.rate}</dt>
+                <dd className="tabular-nums">{rateText}</dd>
+              </div>
+            )}
             <div className="flex justify-between">
               <dt className="text-muted-foreground">{c.toCredit}</dt>
               <dd className="font-semibold tabular-nums">{formatMoney(order.amountMicros / 1_000_000, "USD", lang)}</dd>
             </div>
           </dl>
-          <p className="mt-6 rounded-2xl bg-muted px-4 py-3 text-sm text-muted-foreground">{paid ? c.paidText : c.text}</p>
+          <p className="mt-6 rounded-2xl bg-muted px-4 py-3 text-sm text-muted-foreground">{paid ? c.paidText : invoice ? c.invoiceText : c.text}</p>
           {!paid && order.status === "pending" && demoPaymentsEnabled() && (
             <form action={demoPay.bind(null, { id: order.id, lang })} className="mt-4 rounded-2xl border border-dashed border-border p-4">
               <p className="text-xs text-muted-foreground">{c.demoNote}</p>

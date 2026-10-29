@@ -3,25 +3,56 @@ import { and, eq, gte, isNull, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { getBalanceMicros, hashKey } from "@/lib/account";
 import { KEY_PREFIX } from "@/lib/billing";
-import { clip, logContentEnabled, purgeExpiredContent } from "@/lib/request-content";
+import { clientIp } from "@/lib/geo";
+import { clip } from "@/lib/request-content";
 import type { Model } from "@/lib/site";
 
 /**
  * Кто платит за запрос. keyId = null — чат в кабинете (по сессии, без ключа).
  * allowedModels = null — ключу доступны все модели. logContent — хранить тексты запроса и ответа.
  */
-export type Actor = { userId: string; keyId: string | null; limitMicros: number | null; allowedModels: string[] | null; logContent: boolean };
+export type Actor = {
+  userId: string;
+  keyId: string | null;
+  limitMicros: number | null;
+  allowedModels: string[] | null;
+  /** Модели, закрытые аккаунту поддержкой (AUP §4). */
+  blockedModels: string[] | null;
+  logContent: boolean;
+  /** IP клиента — пишется в request_log (Terms §7.4). */
+  ip: string | null;
+};
 
-/** Authorization: Bearer sk-harvanera-… → активный (не отозванный и не выключенный) ключ или null. */
-export async function authenticate(request: Request): Promise<Actor | null> {
+/** Состояние аккаунта для шлюза: null — аккаунт закрыт или заблокирован поддержкой. */
+export async function accountState(userId: string) {
+  const u = await db.query.user.findFirst({
+    columns: { logContent: true, blockedModels: true, suspendedAt: true, closedAt: true },
+    where: eq(schema.user.id, userId),
+  });
+  if (!u || u.suspendedAt || u.closedAt) return null;
+  return { logContent: u.logContent, blockedModels: u.blockedModels ?? null };
+}
+
+/**
+ * Authorization: Bearer sk-harvanera-… → активный ключ (не отозван, не выключен владельцем, не заблокирован поддержкой).
+ * null — ключа нет; "suspended" — аккаунт заблокирован или закрыт.
+ */
+export async function authenticate(request: Request): Promise<Actor | "suspended" | null> {
   const header = request.headers.get("authorization") ?? "";
   const plain = header.replace(/^Bearer\s+/i, "").trim();
   if (!plain.startsWith(KEY_PREFIX)) return null;
   const key = await db.query.apiKey.findFirst({
     columns: { id: true, userId: true, limitMicros: true, lastUsedAt: true, allowedModels: true },
-    where: and(eq(schema.apiKey.hash, hashKey(plain)), isNull(schema.apiKey.revokedAt), isNull(schema.apiKey.disabledAt)),
+    where: and(
+      eq(schema.apiKey.hash, hashKey(plain)),
+      isNull(schema.apiKey.revokedAt),
+      isNull(schema.apiKey.disabledAt),
+      isNull(schema.apiKey.blockedAt),
+    ),
   });
   if (!key) return null;
+  const state = await accountState(key.userId);
+  if (!state) return "suspended";
   // last_used_at с точностью до минуты — не пишем в БД на каждый запрос.
   if (!key.lastUsedAt || Date.now() - key.lastUsedAt.getTime() > 60_000) {
     await db.update(schema.apiKey).set({ lastUsedAt: new Date() }).where(eq(schema.apiKey.id, key.id));
@@ -31,7 +62,9 @@ export async function authenticate(request: Request): Promise<Actor | null> {
     keyId: key.id,
     limitMicros: key.limitMicros,
     allowedModels: key.allowedModels ?? null,
-    logContent: await logContentEnabled(key.userId),
+    blockedModels: state.blockedModels,
+    logContent: state.logContent,
+    ip: clientIp(request.headers),
   };
 }
 
@@ -113,6 +146,7 @@ export function settle(s: Settlement) {
         estimated: s.estimated ?? false,
         latencyMs: s.latencyMs ?? null,
         ttftMs: s.ttftMs ?? null,
+        ipAddress: s.actor.ip,
       })
       .onConflictDoNothing()
       .run();
@@ -129,6 +163,5 @@ export function settle(s: Settlement) {
         .run();
     }
   });
-  if (s.content) purgeExpiredContent();
   return cost;
 }

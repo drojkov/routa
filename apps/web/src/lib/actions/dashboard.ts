@@ -1,14 +1,17 @@
 "use server";
 
-import { and, eq, gte, isNull } from "drizzle-orm";
+import { and, eq, gte, isNull, or } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { db, schema } from "@/db";
 import { type Currency, isCurrency, isLocale, USD_RATES } from "@/i18n/config";
 import { currentUserId, generateKey } from "@/lib/account";
+import { closeAccount } from "@/lib/account-close";
 import { auth } from "@/lib/auth";
-import { ORDER_LIMITS, parseTopUpUsd, toMicros } from "@/lib/billing";
+import { isPaymentMethod, ORDER_LIMITS, parseTopUpUsd, toMicros } from "@/lib/billing";
+import { getDictionary } from "@/i18n/get-dictionary";
+import { notifyInvoiceRequest } from "@/lib/payments";
 import { clientIp, countryOf } from "@/lib/geo";
 import { creditPayment, demoPaymentsEnabled } from "@/lib/payments";
 import { createRefundRequest, notifyRefundRequest } from "@/lib/refunds";
@@ -116,7 +119,7 @@ export async function revokeApiKey(id: string) {
   revalidatePath("/[lang]/dashboard", "layout");
 }
 
-export type TopUpResult = { ok: false; error: "amount" | "waiver" | "unverified" | "too_many" };
+export type TopUpResult = { ok: false; error: "amount" | "waiver" | "unverified" | "too_many" | "details" };
 
 /**
  * Создаёт заказ на пополнение и ведёт на страницу оплаты.
@@ -125,7 +128,15 @@ export type TopUpResult = { ok: false; error: "amount" | "waiver" | "unverified"
  * IP, страна, браузер и время согласия сохраняются в заказе — для разбора чарджбэков.
  * Провайдер оплаты подключается на следующем этапе: его вебхук вызывает creditPayment().
  */
-export async function createTopUp(input: { usd: number; currency: string; waiver: boolean; lang: string }): Promise<TopUpResult> {
+export async function createTopUp(input: {
+  usd: number;
+  currency: string;
+  waiver: boolean;
+  lang: string;
+  method?: string;
+  /** Реквизиты компании для счёта (method = invoice, Terms §5.2). */
+  billingDetails?: string;
+}): Promise<TopUpResult> {
   const h = await headers();
   const session = await auth.api.getSession({ headers: h });
   if (!session) throw new Error("Unauthorized");
@@ -137,15 +148,20 @@ export async function createTopUp(input: { usd: number; currency: string; waiver
   // Согласие на немедленное начало услуги (отказ от 14-дневного права отзыва для потраченного) — ЕС/UK.
   if (!input.waiver) return { ok: false, error: "waiver" };
   if (!session.user.emailVerified) return { ok: false, error: "unverified" };
+  const method = isPaymentMethod(input.method) ? input.method : "card";
+  const billingDetails = method === "invoice" ? (input.billingDetails ?? "").trim().slice(0, 2000) : "";
+  if (method === "invoice" && billingDetails.length < 10) return { ok: false, error: "details" };
 
   const now = Date.now();
-  const recent = await db
+  const orders = await db
     .select({ status: schema.payment.status, createdAt: schema.payment.createdAt })
     .from(schema.payment)
-    .where(and(eq(schema.payment.userId, userId), gte(schema.payment.createdAt, new Date(now - 60 * 60_000))));
-  const pendingHour = recent.filter((o) => o.status === "pending").length;
-  const lastTen = recent.filter((o) => o.createdAt.getTime() > now - 10 * 60_000).length;
-  if (pendingHour >= ORDER_LIMITS.pendingPerHour || lastTen >= ORDER_LIMITS.perTenMinutes) return { ok: false, error: "too_many" };
+    .where(and(eq(schema.payment.userId, userId), or(eq(schema.payment.status, "pending"), gte(schema.payment.createdAt, new Date(now - 10 * 60_000)))));
+  const open = orders.filter((o) => o.status === "pending").length;
+  const lastTen = orders.filter((o) => o.createdAt.getTime() > now - 10 * 60_000).length;
+  if (open >= ORDER_LIMITS.openPending || lastTen >= ORDER_LIMITS.perTenMinutes) return { ok: false, error: "too_many" };
+  // Текст согласия ровно в том виде, в каком его видел клиент (Refund Policy §3.4).
+  const waiverText = (await getDictionary(lang)).dashboard.topup.waiver;
 
   const minor = currency === "JPY" ? 1 : 100;
   const ip = clientIp(h);
@@ -161,7 +177,11 @@ export async function createTopUp(input: { usd: number; currency: string; waiver
     country: countryOf(ip),
     userAgent: h.get("user-agent")?.slice(0, 500) ?? null,
     waiverAt: new Date(),
+    waiverText,
+    method,
+    billingDetails: billingDetails || null,
   });
+  if (method === "invoice") void notifyInvoiceRequest({ id, email: session.user.email, usd, details: billingDetails });
   redirect(`/${lang}/dashboard/checkout/${id}`);
 }
 
@@ -223,4 +243,13 @@ export async function deleteRequestContent() {
 export async function readRequestContent(id: string) {
   const userId = await currentUserId();
   return (await getRequestContent(userId, id)) ?? null;
+}
+
+/** Закрыть свой аккаунт (Terms §11.1): см. lib/account-close.ts. */
+export async function closeMyAccount(lang: string) {
+  const h = await headers();
+  const session = await auth.api.getSession({ headers: h });
+  if (!session) throw new Error("Unauthorized");
+  await closeAccount(session.user.id, clientIp(h));
+  redirect(`/${isLocale(lang) ? lang : "en"}`);
 }

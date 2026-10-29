@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import * as React from "react";
 import { LocaleSwitcher } from "@/components/site/locale-switcher";
+import { OPEN_COOKIE_SETTINGS } from "@/components/site/cookie-banner";
 import { MerchantInfo } from "@/components/site/merchant-info";
 import { Logo } from "@/components/site/nav";
 import { useI18n } from "@/i18n/provider";
@@ -104,6 +105,11 @@ export function CabinetShell({ email, balanceUsd, children }: { email: string; b
                 </Link>
               </li>
             ))}
+            <li>
+              <button type="button" onClick={() => window.dispatchEvent(new Event(OPEN_COOKIE_SETTINGS))} className="hover:text-foreground">
+                {dict.footer.cookieSettings}
+              </button>
+            </li>
           </ul>
         </div>
       </footer>

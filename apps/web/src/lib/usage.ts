@@ -1,6 +1,7 @@
 import "server-only";
 import { and, desc, eq, gte, isNotNull, isNull, lt, sql, type SQL } from "drizzle-orm";
 import { db, schema } from "@/db";
+import { contentCutoff } from "@/lib/request-content";
 
 /** Выборки по журналу запросов (request_log) для кабинета: активность, расход по ключам и моделям. */
 
@@ -103,7 +104,7 @@ export async function listRequests(userId: string, f: RequestFilter, limit = 50)
     })
     .from(r)
     .leftJoin(schema.apiKey, eq(schema.apiKey.id, r.apiKeyId))
-    .leftJoin(schema.requestContent, eq(schema.requestContent.id, r.id))
+    .leftJoin(schema.requestContent, and(eq(schema.requestContent.id, r.id), gte(schema.requestContent.createdAt, contentCutoff())))
     .where(and(...where))
     .orderBy(desc(r.createdAt))
     .limit(limit);

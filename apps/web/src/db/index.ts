@@ -22,7 +22,31 @@ function open() {
   sqlite.pragma("foreign_keys = ON");
   const db = drizzle(sqlite, { schema });
   migrate(db, { migrationsFolder: path.join(process.cwd(), "drizzle") });
+  if (!building) scheduleMaintenance(sqlite);
   return db;
+}
+
+/** Тексты запросов храним 30 дней (Privacy §7; CONTENT_RETENTION_DAYS в lib/request-content.ts). */
+const CONTENT_RETENTION_MS = 30 * 86_400_000;
+/** Неоплаченный заказ закрывается через сутки (Terms §5.3 — лимит открытых заказов, ORDER_LIMITS). */
+export const ORDER_TTL_MS = 24 * 3_600_000;
+
+/**
+ * Плановая чистка: при открытии базы и затем раз в час. Работает в процессе сервера, без внешнего cron.
+ * Заказ, оплаченный после закрытия, всё равно зачислится — creditPayment принимает и закрытые по сроку.
+ */
+function scheduleMaintenance(sqlite: Database.Database) {
+  const run = () => {
+    try {
+      const now = Date.now();
+      sqlite.prepare("delete from request_content where created_at < ?").run(now - CONTENT_RETENTION_MS);
+      sqlite.prepare("update payment set status = 'canceled', updated_at = ? where status = 'pending' and created_at < ?").run(now, now - ORDER_TTL_MS);
+    } catch (e) {
+      console.error("[db] maintenance failed", e);
+    }
+  };
+  run();
+  setInterval(run, 3_600_000).unref();
 }
 
 // В dev модуль перезагружается при правках — держим одно соединение на процесс.

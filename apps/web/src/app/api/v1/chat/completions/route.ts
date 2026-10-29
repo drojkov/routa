@@ -7,5 +7,6 @@ export async function POST(request: Request) {
   const requestId = newRequestId();
   const actor = await authenticate(request);
   if (!actor) return apiError("invalid_api_key", requestId);
+  if (actor === "suspended") return apiError("account_suspended", requestId);
   return runChat(request, actor, requestId);
 }

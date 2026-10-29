@@ -18,8 +18,14 @@ export function parseTopUpUsd(v: unknown): number | null {
   return usd >= MIN_TOPUP_USD && usd <= MAX_TOPUP_USD ? usd : null;
 }
 
-/** Антифрод заказов: не больше N неоплаченных заказов в час и M заказов за 10 минут. */
-export const ORDER_LIMITS = { pendingPerHour: 5, perTenMinutes: 3 };
+/**
+ * Антифрод заказов (Terms §5.3): не больше N открытых неоплаченных заказов одновременно и M заказов за 10 минут.
+ * Неоплаченный заказ закрывается сам через сутки (db/index.ts, ORDER_TTL_MS).
+ */
+export const ORDER_LIMITS = { openPending: 5, perTenMinutes: 3 };
+export const PAYMENT_METHODS = ["card", "wallet", "invoice"] as const;
+export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
+export const isPaymentMethod = (v: unknown): v is PaymentMethod => (PAYMENT_METHODS as readonly unknown[]).includes(v);
 
 export const toMicros = (usd: number) => Math.round(usd * 1_000_000);
 export const fromMicros = (micros: number) => micros / 1_000_000;

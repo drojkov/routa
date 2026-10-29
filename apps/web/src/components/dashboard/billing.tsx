@@ -133,6 +133,7 @@ export function TopUp({ initialUsd, initialMethod }: { initialUsd?: number; init
   const usd = parseTopUpUsd(amount);
   const [method, setMethod] = React.useState(initialMethod ?? "card");
   const [waiver, setWaiver] = React.useState(false);
+  const [details, setDetails] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
   const [pending, start] = React.useTransition();
 
@@ -143,15 +144,16 @@ export function TopUp({ initialUsd, initialMethod }: { initialUsd?: number; init
   ];
   const active = methods.some((m) => m.k === method) ? method : "card";
   const errorAmount = t(tp.errorAmount, { min: money(MIN_TOPUP_USD), max: money(MAX_TOPUP_USD) });
-  const errors = { amount: errorAmount, waiver: tp.errorWaiver, unverified: tp.errorUnverified, too_many: tp.errorTooMany };
+  const errors = { amount: errorAmount, waiver: tp.errorWaiver, unverified: tp.errorUnverified, too_many: tp.errorTooMany, details: tp.errorDetails };
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (usd === null) return setError(errorAmount);
+    if (active === "invoice" && details.trim().length < 10) return setError(tp.errorDetails);
     if (!waiver) return setError(tp.errorWaiver);
     setError(null);
     start(async () => {
-      const res = await createTopUp({ usd, currency, waiver, lang: locale });
+      const res = await createTopUp({ usd, currency, waiver, lang: locale, method: active, billingDetails: details });
       if (res && !res.ok) setError(errors[res.error]);
     });
   }
@@ -193,6 +195,19 @@ export function TopUp({ initialUsd, initialMethod }: { initialUsd?: number; init
             </button>
           ))}
         </div>
+
+        {active === "invoice" && (
+          <label className="mt-4 block">
+            <span className="text-xs text-muted-foreground">{tp.details}</span>
+            <textarea
+              value={details}
+              onChange={(e) => setDetails(e.target.value)}
+              rows={3}
+              maxLength={2000}
+              className="mt-1.5 w-full rounded-xl border border-border bg-transparent px-3 py-2 text-sm outline-none focus:border-foreground"
+            />
+          </label>
+        )}
 
         <label className="mt-4 flex cursor-pointer items-start gap-2 text-xs leading-snug text-muted-foreground">
           <input

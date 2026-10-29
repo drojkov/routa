@@ -19,6 +19,13 @@ export const user = sqliteTable("user", {
   image: text("image"),
   /** Хранить тексты запросов и ответов (Terms §7.4, Privacy §3). По умолчанию выключено. */
   logContent: integer("log_content", { mode: "boolean" }).notNull().default(false),
+  /** Аккаунт закрыт (Terms §11.1): ключи отозваны, вход невозможен, личные данные обезличены (lib/account-close.ts). */
+  closedAt: integer("closed_at", { mode: "timestamp_ms" }),
+  /** Заблокирован поддержкой (Terms §11.2, AUP §4): вход и API закрыты. Снимает только поддержка (scripts/account.mjs). */
+  suspendedAt: integer("suspended_at", { mode: "timestamp_ms" }),
+  suspendReason: text("suspend_reason"),
+  /** Модели, закрытые этому аккаунту поддержкой (AUP §4). */
+  blockedModels: text("blocked_models", { mode: "json" }).$type<string[]>(),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });
@@ -97,6 +104,8 @@ export const apiKey = sqliteTable(
     disabledAt: integer("disabled_at", { mode: "timestamp_ms" }),
     /** Белый список моделей (id из каталога); null — все модели. */
     allowedModels: text("allowed_models", { mode: "json" }).$type<string[]>(),
+    /** Заблокирован поддержкой (Terms §11.2, AUP §4) — владелец сам не включит. */
+    blockedAt: integer("blocked_at", { mode: "timestamp_ms" }),
     revokedAt: integer("revoked_at", { mode: "timestamp_ms" }),
   },
   (t) => [index("api_key_user_idx").on(t.userId)],
@@ -137,6 +146,9 @@ export const payment = sqliteTable(
     currency: text("currency").notNull(),
     amountMinor: integer("amount_minor").notNull(),
     status: text("status", { enum: ["pending", "paid", "failed", "canceled"] }).notNull().default("pending"),
+    /** Способ оплаты, выбранный в форме. invoice — счёт для компании (Terms §5.2), реквизиты в billingDetails. */
+    method: text("method", { enum: ["card", "wallet", "invoice"] }).notNull().default("card"),
+    billingDetails: text("billing_details"),
     provider: text("provider"),
     providerRef: text("provider_ref"),
     /** Для разбора чарджбэков: откуда создан заказ и когда принято согласие на немедленное начало услуги. */
@@ -144,6 +156,8 @@ export const payment = sqliteTable(
     country: text("country"),
     userAgent: text("user_agent"),
     waiverAt: integer("waiver_at", { mode: "timestamp_ms" }),
+    /** Точный текст согласия, который видел клиент (Refund Policy §3.4). */
+    waiverText: text("waiver_text"),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -231,6 +245,8 @@ export const requestLog = sqliteTable(
     estimated: integer("estimated", { mode: "boolean" }).notNull().default(false),
     latencyMs: integer("latency_ms"),
     ttftMs: integer("ttft_ms"),
+    /** IP клиента (Terms §7.4, Privacy §2). */
+    ipAddress: text("ip_address"),
     createdAt: createdAt(),
   },
   (t) => [index("request_log_user_idx").on(t.userId, t.createdAt), index("request_log_key_idx").on(t.apiKeyId, t.createdAt)],

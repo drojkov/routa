@@ -1,5 +1,5 @@
 import "server-only";
-import { and, desc, eq, like, sql } from "drizzle-orm";
+import { and, desc, eq, like, or, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { escapeHtml, sendEmail } from "@/lib/email";
 import { BRAND, COMPANY } from "@/lib/site";
@@ -29,7 +29,11 @@ export function refundableMicrosTx(tx: Tx, userId: string) {
   const balance = sumWhere(tx, and(u));
   const paid = sumWhere(tx, and(u, eq(schema.ledger.kind, "topup")));
   const refunded = sumWhere(tx, and(u, eq(schema.ledger.kind, "refund"))); // отрицательное
-  const released = sumWhere(tx, and(u, eq(schema.ledger.kind, "adjust"), like(schema.ledger.ref, "refund-release:%")));
+  // Возвращённые на баланс: отклонённые заявки и исправления ошибок списания (scripts/account.mjs credit).
+  const released = sumWhere(
+    tx,
+    and(u, eq(schema.ledger.kind, "adjust"), or(like(schema.ledger.ref, "refund-release:%"), like(schema.ledger.ref, "correction:%"))),
+  );
   return Math.max(0, Math.min(balance, paid + refunded + released));
 }
 

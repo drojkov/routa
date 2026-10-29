@@ -1,5 +1,5 @@
 import "server-only";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { en } from "@/i18n/dictionaries/en";
 import { escapeHtml, sendEmail, siteUrl } from "@/lib/email";
@@ -22,11 +22,12 @@ function creditOnce(paymentId: string, provider: string, providerRef?: string) {
     const order = tx.select().from(schema.payment).where(eq(schema.payment.id, paymentId)).get();
     if (!order) return { ok: false as const, error: "not_found" as const };
     if (order.status === "paid") return { ok: true as const, already: true };
-    if (order.status !== "pending") return { ok: false as const, error: "not_pending" as const };
+    // canceled — заказ, закрытый по сроку (db/index.ts): деньги пришли позже — всё равно зачисляем.
+    if (order.status !== "pending" && order.status !== "canceled") return { ok: false as const, error: "not_pending" as const };
 
     tx.update(schema.payment)
       .set({ status: "paid", provider, providerRef: providerRef ?? null })
-      .where(and(eq(schema.payment.id, paymentId), eq(schema.payment.status, "pending")))
+      .where(and(eq(schema.payment.id, paymentId), inArray(schema.payment.status, ["pending", "canceled"])))
       .run();
     tx.insert(schema.ledger)
       .values({ id: crypto.randomUUID(), userId: order.userId, kind: "topup", amountMicros: order.amountMicros, ref: paymentId })
@@ -109,4 +110,17 @@ export function demoPaymentsEnabled() {
   const flag = process.env.PAYMENTS_DEMO;
   if (flag) return flag === "true";
   return process.env.NODE_ENV !== "production";
+}
+
+/** Запрос счёта для компании (Terms §5.2): письмо в поддержку. Счёт выставляется вручную, оплату отмечает `npm run account invoice-paid`. */
+export async function notifyInvoiceRequest(input: { id: string; email: string; usd: number; details: string }) {
+  const ref = input.id.slice(0, 8).toUpperCase();
+  const amount = `USD ${input.usd.toFixed(2)}`;
+  const text = `Invoice requested for order #${ref} (${input.id})\nAccount: ${input.email}\nAmount: ${amount}\n\nBilling details:\n${input.details}\n\nAfter payment is received: npm run account invoice-paid ${input.id}`;
+  await sendEmail({
+    to: COMPANY.email,
+    subject: `[invoice] #${ref} ${amount} — ${input.email}`,
+    text,
+    html: `<pre style="font-family:system-ui,sans-serif;white-space:pre-wrap">${escapeHtml(text)}</pre>`,
+  });
 }

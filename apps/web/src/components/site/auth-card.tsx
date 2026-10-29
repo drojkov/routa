@@ -50,7 +50,8 @@ export function AuthCard({ mode, next }: { mode: "sign-in" | "sign-up"; next?: s
           // Ссылка из письма подтверждения ведёт в «Баланс»: без подтверждения пополнение закрыто.
           callbackURL: href("/dashboard/billing?verified=1"),
         })
-      : await authClient.signIn.email({ email, password, rememberMe: f.get("remember") === "on" });
+      : // Всегда «запомнить»: cookie dont_remember нет в Cookie Policy.
+        await authClient.signIn.email({ email, password, rememberMe: true });
     if (res.error) {
       setBusy(null);
       return setError(errorText(res.error.code));
@@ -136,11 +137,7 @@ export function AuthCard({ mode, next }: { mode: "sign-in" | "sign-up"; next?: s
               {a.age}
             </Check>
           </div>
-        ) : (
-          <label className="flex cursor-pointer items-center gap-2 pt-1 text-xs text-white/55">
-            <input type="checkbox" name="remember" defaultChecked className="size-3.5 accent-teal-400" /> {a.remember}
-          </label>
-        )}
+        ) : null}
 
         {error && (
           <p role="alert" className="rounded-lg border border-red-400/30 bg-red-500/10 px-3 py-2 text-xs text-red-200">

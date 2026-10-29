@@ -4,8 +4,7 @@ import { Check, Download, Loader2, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 import { useI18n } from "@/i18n/provider";
-import { deleteRequestContent, setLogContent } from "@/lib/actions/dashboard";
-import { authClient } from "@/lib/auth-client";
+import { closeMyAccount, deleteRequestContent, setLogContent } from "@/lib/actions/dashboard";
 import { cn } from "@/lib/utils";
 import { PageTitle, Panel } from "./ui";
 
@@ -37,11 +36,10 @@ export function Settings({ user, logging }: { user: { name: string; email: strin
   );
 }
 
-/* ——— Данные и удаление аккаунта (GDPR ст. 15, 17, 20) ——— */
+/* ——— Данные и закрытие аккаунта (Privacy §9, Terms §11.1) ——— */
 function Privacy() {
-  const { dict, href } = useI18n();
+  const { dict, locale } = useI18n();
   const s = dict.dashboard.settings;
-  const router = useRouter();
   const [busy, setBusy] = React.useState(false);
   return (
     <Panel title={s.title}>
@@ -63,13 +61,14 @@ function Privacy() {
             onClick={async () => {
               if (!confirm(s.deleteConfirm)) return;
               setBusy(true);
-              const res = await authClient.deleteUser();
-              if (res.error) {
+              try {
+                await closeMyAccount(locale);
+              } catch (e) {
+                // redirect() из server action приходит сюда как исключение — это успех.
+                if (e && typeof e === "object" && "digest" in e && String(e.digest).startsWith("NEXT_REDIRECT")) throw e;
                 setBusy(false);
-                return alert(dict.auth.errors.generic);
+                alert(dict.auth.errors.generic);
               }
-              router.push(href("/"));
-              router.refresh();
             }}
             className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-1.5 font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-60"
           >

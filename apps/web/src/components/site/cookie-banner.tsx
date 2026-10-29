@@ -57,7 +57,10 @@ export function CookieBanner() {
     // Состояние из cookie доступно только в браузере — синхронизируем после монтирования.
     /* eslint-disable react-hooks/set-state-in-effect */
     setGpc(signal);
-    if (saved) {
+    if (saved && signal && (saved.analytics || saved.marketing)) {
+      // GPC — отказ от аналитики и маркетинга (Cookie Policy §4), даже если раньше было «Принять всё».
+      writeConsent(false, false, true);
+    } else if (saved) {
       setAnalytics(saved.analytics);
       setMarketing(saved.marketing);
     } else {
