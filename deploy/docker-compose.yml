@@ -11,6 +11,9 @@ services:
     env_file: .env
     environment:
       DATABASE_PATH: /data/app.db
+      # Почтовик компании по внутреннему адресу: mail.harvanera.com — внешний IP этого же сервера, изнутри NAT не пускает
+      # (найден задачей mail-check, проверен mail-fix). Здесь, а не в .env: .env при деплое переписывается из ENV_FILE.
+      EMAIL_HOST: ${EMAIL_HOST_INTERNAL:-192.168.32.4}
     volumes:
       - ./data:/data
     security_opt: ["no-new-privileges:true"]

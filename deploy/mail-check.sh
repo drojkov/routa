@@ -45,3 +45,4 @@ echo "== SMTP-приветствия найденных:"
 [ -n "$NET" ] && for i in $(seq 1 254); do
   ( nc -z -w 1 "$NET.$i" 587 2>/dev/null && printf "  $NET.$i:587 %s\n" "$( (sleep 2; printf 'QUIT\r\n') | nc -w 4 $NET.$i 587 2>/dev/null | head -1)" ) &
 done; wait
+echo "== EMAIL_HOST в контейнере: $(docker compose exec -T web printenv EMAIL_HOST)"
