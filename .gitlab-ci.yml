@@ -22,6 +22,8 @@ build:
   after_script:
     - docker logout "$CI_REGISTRY" || true
   rules:
+    - if: $SUPPORT_CMD
+      when: never
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 deploy:
@@ -74,6 +76,8 @@ deploy:
     # 7. cleanup
     - ssh deploy "docker image prune -f"
   rules:
+    - if: $SUPPORT_CMD
+      when: never
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   environment:
     name: production
@@ -94,6 +98,33 @@ mail-check:
   script:
     - ssh deploy "cd '$DEPLOY_PATH' && sh -s" < deploy/mail-check.sh
   rules:
+    - if: $SUPPORT_CMD
+      when: never
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       when: manual
       allow_failure: true
+
+# Команды поддержки на сервере (npm run account|refund|contact|notice|evidence|db:backup).
+# Запуск: Build → Pipelines → Run pipeline на dev с переменной SUPPORT_CMD, например
+# `account verify-email x@example.com` или `refund reject abc12 "duplicate payment"`.
+# Сборки и деплоя такой пайплайн не делает. Скрипт — deploy/support.sh.
+support:
+  image: alpine:latest
+  stage: deploy
+  tags: [showcases]
+  before_script:
+    - apk add --no-cache openssh-client
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+    - ssh-keyscan -p "${SSH_PORT:-22}" -H "$SSH_HOST" >> ~/.ssh/known_hosts
+    - |
+      printf 'Host deploy\n  HostName %s\n  User %s\n  Port %s\n' \
+        "$SSH_HOST" "$SSH_USER" "${SSH_PORT:-22}" > ~/.ssh/config
+  script:
+    # Аргументы разбирает shell на сервере — кавычки работают; ; | & ` $ < > запрещены.
+    - |
+      case "$SUPPORT_CMD" in *[\;\|\&\`\$\<\>]*) echo "SUPPORT_CMD: запрещённые символы"; exit 1 ;; esac
+    - ssh deploy "cd '$DEPLOY_PATH' && sh -s -- $SUPPORT_CMD" < deploy/support.sh
+  rules:
+    - if: $SUPPORT_CMD && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

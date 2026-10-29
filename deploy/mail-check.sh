@@ -36,3 +36,12 @@ for h in 127.0.0.1 192.168.32.3 172.17.0.1 $GW; do
 done
 echo "== SMTP-приветствие по внутренним адресам:"
 for h in 127.0.0.1 $GW; do printf "  $h: "; (sleep 2; printf 'QUIT\r\n') | nc -w 4 $h 587 2>/dev/null | head -1 || echo; done
+echo "== почтовые порты в локальной сети $(ip -4 addr show eth0 2>/dev/null | awk '/inet /{print $2; exit}') (только проверка подключения):"
+NET=$(ip -4 addr show eth0 2>/dev/null | awk '/inet /{split($2,a,"."); print a[1]"."a[2]"."a[3]; exit}')
+[ -n "$NET" ] && for i in $(seq 1 254); do
+  ( for p in 25 465 587; do nc -z -w 1 "$NET.$i" $p 2>/dev/null && echo "  $NET.$i:$p open"; done ) &
+done; wait
+echo "== SMTP-приветствия найденных:"
+[ -n "$NET" ] && for i in $(seq 1 254); do
+  ( nc -z -w 1 "$NET.$i" 587 2>/dev/null && printf "  $NET.$i:587 %s\n" "$( (sleep 2; printf 'QUIT\r\n') | nc -w 4 $NET.$i 587 2>/dev/null | head -1)" ) &
+done; wait

@@ -22,7 +22,7 @@ function open() {
   sqlite.pragma("foreign_keys = ON");
   const db = drizzle(sqlite, { schema });
   migrate(db, { migrationsFolder: path.join(process.cwd(), "drizzle") });
-  if (!building) scheduleMaintenance(sqlite);
+  if (!building) scheduleMaintenance(sqlite, file);
   return db;
 }
 
@@ -40,8 +40,9 @@ const LOG_RETENTION_MS = 730 * 86_400_000;
  * Плановая чистка: при открытии базы и затем раз в час. Работает в процессе сервера, без внешнего cron.
  * Заказ, оплаченный после закрытия, всё равно зачислится — creditPayment принимает и закрытые по сроку.
  */
-function scheduleMaintenance(sqlite: Database.Database) {
+function scheduleMaintenance(sqlite: Database.Database, file: string) {
   const run = () => {
+    void dailyBackup(sqlite, file);
     try {
       const now = Date.now();
       sqlite.prepare("delete from request_content where created_at < ?").run(now - CONTENT_RETENTION_MS);
@@ -60,6 +61,28 @@ function scheduleMaintenance(sqlite: Database.Database) {
   };
   run();
   setInterval(run, 3_600_000).unref();
+}
+
+/** Privacy §7: бэкапы хранятся 14 дней. Копия раз в сутки — в production (или DB_BACKUP=on), DB_BACKUP=off — выключить. */
+const BACKUP_KEEP = 14;
+const BACKUP_EVERY_MS = 23 * 3_600_000;
+
+async function dailyBackup(sqlite: Database.Database, file: string) {
+  const on = process.env.DB_BACKUP ? process.env.DB_BACKUP === "on" : process.env.NODE_ENV === "production";
+  if (!on) return;
+  try {
+    const dir = path.join(path.dirname(file), "backups");
+    fs.mkdirSync(dir, { recursive: true });
+    const files = fs.readdirSync(dir).filter((f) => /^app-.*\.db$/.test(f)).sort();
+    const last = files.at(-1);
+    if (last && Date.now() - fs.statSync(path.join(dir, last)).mtimeMs < BACKUP_EVERY_MS) return;
+    const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+    await sqlite.backup(path.join(dir, `app-${stamp}.db`));
+    for (const f of [...files, `app-${stamp}.db`].sort().slice(0, -BACKUP_KEEP)) fs.rmSync(path.join(dir, f), { force: true });
+    console.log(`[db] backup app-${stamp}.db`);
+  } catch (e) {
+    console.error("[db] backup failed", e);
+  }
 }
 
 // В dev модуль перезагружается при правках — держим одно соединение на процесс.
