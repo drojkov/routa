@@ -5,8 +5,7 @@
  *   node scripts/evidence.mjs <payment-id>            # JSON в stdout
  *   node scripts/evidence.mjs <payment-id> > case.json
  *
- * База — DATABASE_PATH или data/app.db. На Railway: `railway ssh`, затем
- * `DATABASE_PATH=/data/app.db node scripts/evidence.mjs <id>`.
+ * База — DATABASE_PATH или data/app.db. На сервере: `docker compose exec web npm run evidence <id>`.
  *
  * Что внутри: аккаунт (дата регистрации, подтверждён ли email), заказ (сумма, IP, страна, браузер,
  * время согласия на немедленное начало услуги), входы в аккаунт до и после оплаты, проводки баланса,

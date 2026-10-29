@@ -9,7 +9,7 @@
  *
  * Сроки (Refund Policy §2): рассмотреть за 3 рабочих дня, отправить деньги за 10 рабочих дней после одобрения.
  *
- * База — DATABASE_PATH или data/app.db (на Railway: `railway ssh`, DATABASE_PATH=/data/app.db).
+ * База — DATABASE_PATH или data/app.db (на сервере: docker compose exec web npm run refund …).
  * Сумма заморожена ещё при создании заявки (проводка refund, ref `refund:<id>`), поэтому approve только
  * меняет статус, а reject добавляет обратную проводку adjust (ref `refund-release:<id>`).
  * Письмо клиенту об итоге пока отправляется вручную.

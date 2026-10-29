@@ -7,12 +7,12 @@ import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { SIGNUP_BONUS_USD } from "@/lib/billing";
 import { escapeHtml, sendEmail } from "@/lib/email";
-import { CLIENT_IP_HEADERS, countryOf } from "@/lib/geo";
+import { CLIENT_IP_HEADER, CLIENT_IP_HEADERS, countryOf } from "@/lib/geo";
 
 const env = process.env;
 
 const SITE_URL = "https://harvanera.com";
-const PROD_ORIGINS = [SITE_URL, "https://www.harvanera.com", "https://web-production-06476.up.railway.app"];
+const PROD_ORIGINS = [SITE_URL, "https://www.harvanera.com"];
 
 export const auth = betterAuth({
   appName: "Harvanera",
@@ -20,10 +20,10 @@ export const auth = betterAuth({
   // В работе — только BETTER_AUTH_SECRET.
   secret: env.BETTER_AUTH_SECRET ?? (env.NEXT_PHASE === "phase-production-build" ? "build-only-placeholder-secret-never-used-at-runtime" : undefined),
   // Прод — боевой домен (BETTER_AUTH_URL — для стенда); в dev — из запроса (localhost, туннели).
-  // Без этого Better Auth считал своим railway-адрес и отвечал 403 Invalid origin на harvanera.com.
+  // Без этого Better Auth брал адрес из запроса и отвечал 403 Invalid origin на harvanera.com.
   baseURL: env.BETTER_AUTH_URL ?? (env.NODE_ENV === "production" ? SITE_URL : undefined),
   database: drizzleAdapter(db, { provider: "sqlite", schema }),
-  // Прод: боевой домен и адрес Railway. Dev: туннели (см. DEV_TUNNELS в next.config.ts).
+  // Прод: боевой домен и www. Dev: туннели (см. DEV_TUNNELS в next.config.ts).
   trustedOrigins: env.NODE_ENV === "production" ? PROD_ORIGINS : ["https://*.serveousercontent.com", "https://*.free.pinggy.net", "https://*.run.pinggy-free.link","https://*.lhr.life", "https://*.trycloudflare.com"],
   emailAndPassword: {
     enabled: true,
@@ -49,7 +49,8 @@ export const auth = betterAuth({
   },
   // Те же заголовки IP, что у геоблокировки (CLIENT_IP_HEADERS в lib/geo.ts).
   advanced: {
-    ipAddress: { ipAddressHeaders: CLIENT_IP_HEADERS },
+    // IP считает proxy.ts (с учётом Cloudflare); запасные — если запрос прошёл мимо него.
+    ipAddress: { ipAddressHeaders: [CLIENT_IP_HEADER, ...CLIENT_IP_HEADERS] },
     // Имя cookie сессии — ровно как в Cookie Policy: `better-auth.session_token`, без префикса __Secure-.
     // Флаг Secure ставим сами (на проде — https).
     useSecureCookies: false,

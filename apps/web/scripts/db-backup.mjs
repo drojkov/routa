@@ -5,7 +5,6 @@
  *   node scripts/db-backup.mjs --keep 14       — после копии оставить 14 последних файлов в backups/
  *
  * База — DATABASE_PATH или data/app.db. В контейнере: docker compose exec web node scripts/db-backup.mjs
- * На Railway (перенос): railway ssh, затем DATABASE_PATH=/data/app.db node scripts/db-backup.mjs /data/export.db
  */
 import Database from "better-sqlite3";
 import fs from "node:fs";

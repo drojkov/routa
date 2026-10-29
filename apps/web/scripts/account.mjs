@@ -15,7 +15,7 @@
  *   npm run account invoice-paid <payment-id>          # деньги по счёту пришли: зачислить и отправить подтверждение
  *     (идёт через работающий сервер: нужен ADMIN_TOKEN в окружении сервера и скрипта; PORT — порт сервера, по умолчанию 3000)
  *
- * База — DATABASE_PATH или data/app.db (на Railway: `railway ssh`, DATABASE_PATH=/data/app.db).
+ * База — DATABASE_PATH или data/app.db (на сервере: docker compose exec web npm run account …).
  * Закрытие повторяет lib/account-close.ts: правки вносить в оба места.
  */
 import Database from "better-sqlite3";

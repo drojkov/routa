@@ -1,7 +1,7 @@
 import { getSessionCookie } from "better-auth/cookies";
 import { type NextRequest, NextResponse } from "next/server";
 import { DEFAULT_LOCALE, isLocale, LOCALE_COOKIE } from "@/i18n/config";
-import { GEO_BYPASS_COOKIE, hasBypass, isBlocked } from "@/lib/geo";
+import { CLIENT_IP_HEADER, GEO_BYPASS_COOKIE, hasBypass, isBlocked, resolveClientIp } from "@/lib/geo";
 
 /**
  * 0. Геоблокировка (Terms §2, `lib/geo.ts`): из закрытых стран недоступен сам сервис — вход,
@@ -12,10 +12,17 @@ import { GEO_BYPASS_COOKIE, hasBypass, isBlocked } from "@/lib/geo";
  * 2. Кабинет без cookie сессии → на вход. Это быстрая проверка; настоящая — в layout кабинета.
  * Вход/регистрация с сессией → в кабинет: это делают сами страницы (`redirectIfSignedIn`), по базе.
  * Здесь видна только cookie, а с протухшей cookie такой редирект зацикливался с кабинетом.
+ * IP клиента считается здесь один раз (Cloudflare или напрямую — `resolveClientIp`) и уходит дальше
+ * в CLIENT_IP_HEADER: его читают Better Auth (лимит регистраций, журнал входов), действия кабинета и шлюз.
  */
 export function proxy(request: NextRequest) {
   const { pathname, search, searchParams } = request.nextUrl;
   const [, first, second] = pathname.split("/");
+  const ip = resolveClientIp(request.headers);
+  const forwardHeaders = new Headers(request.headers);
+  if (ip) forwardHeaders.set(CLIENT_IP_HEADER, ip);
+  else forwardHeaders.delete(CLIENT_IP_HEADER);
+  const next = () => NextResponse.next({ request: { headers: forwardHeaders } });
 
   const bypassParam = searchParams.get("geo_bypass");
   if (bypassParam) {
@@ -29,13 +36,13 @@ export function proxy(request: NextRequest) {
 
   const isApi = first === "api" || first === "v1";
   if (isApi) {
-    if (isServiceApi(pathname) && isBlocked(request.headers, request.cookies.get(GEO_BYPASS_COOKIE)?.value)) {
+    if (isServiceApi(pathname) && isBlocked(ip, request.cookies.get(GEO_BYPASS_COOKIE)?.value)) {
       return Response.json(
         { error: { message: "Harvanera is not available in your country or region.", type: "permission_error", code: "region_unavailable" } },
         { status: 451 },
       );
     }
-    return NextResponse.next();
+    return next();
   }
 
   if (first === "ru") {
@@ -53,7 +60,7 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (SERVICE_PAGES.has(second) && isBlocked(request.headers, request.cookies.get(GEO_BYPASS_COOKIE)?.value)) {
+  if (SERVICE_PAGES.has(second) && isBlocked(ip, request.cookies.get(GEO_BYPASS_COOKIE)?.value)) {
     const url = request.nextUrl.clone();
     url.pathname = `/${first}/unavailable`;
     url.search = "";
@@ -67,13 +74,13 @@ export function proxy(request: NextRequest) {
     url.search = `?next=${encodeURIComponent(pathname + search)}`;
     return NextResponse.redirect(url);
   }
-  return NextResponse.next();
+  return next();
 }
 
 /** Страницы сервиса (закрываются геоблокировкой); остальное — витрина. */
 const SERVICE_PAGES = new Set(["sign-in", "sign-up", "dashboard"]);
 
-/** API сервиса: вход, кабинет, чат, шлюз. Каталог моделей — открытый (он же healthcheck Railway). */
+/** API сервиса: вход, кабинет, чат, шлюз. Каталог моделей — открытый (он же healthcheck контейнера). */
 function isServiceApi(pathname: string) {
   if (pathname === "/v1/models" || pathname === "/api/v1/models") return false;
   return /^\/(v1|api\/(v1|auth|playground|account))(\/|$)/.test(pathname);

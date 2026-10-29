@@ -38,7 +38,21 @@ services:
       - "traefik.http.routers.harvanera-http.entrypoints=web"
       - "traefik.http.routers.harvanera-http.middlewares=redirect-to-https"
       - "traefik.http.routers.harvanera-http.service=noop@internal"
- 
+
+      # www.SITE_HOST → SITE_HOST (301). Сертификат на www Traefik получает сам.
+      - "traefik.http.routers.harvanera-www.rule=Host(`www.${SITE_HOST}`)"
+      - "traefik.http.routers.harvanera-www.entrypoints=websecure"
+      - "traefik.http.routers.harvanera-www.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.harvanera-www.middlewares=harvanera-to-apex"
+      - "traefik.http.routers.harvanera-www.service=noop@internal"
+      - "traefik.http.routers.harvanera-www-http.rule=Host(`www.${SITE_HOST}`)"
+      - "traefik.http.routers.harvanera-www-http.entrypoints=web"
+      - "traefik.http.routers.harvanera-www-http.middlewares=harvanera-to-apex"
+      - "traefik.http.routers.harvanera-www-http.service=noop@internal"
+      - "traefik.http.middlewares.harvanera-to-apex.redirectregex.regex=^https?://www\\.(.+)"
+      - "traefik.http.middlewares.harvanera-to-apex.redirectregex.replacement=https://$${1}"
+      - "traefik.http.middlewares.harvanera-to-apex.redirectregex.permanent=true"
+
 networks:
   traefik-net:
     external: true
