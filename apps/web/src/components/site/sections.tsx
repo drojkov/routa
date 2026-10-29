@@ -21,7 +21,8 @@ import { LocaleSwitcher } from "@/components/site/locale-switcher";
 import { Eyebrow, Reveal } from "@/components/site/reveal";
 import BeamBorder from "@/components/ui/border-beam";
 import { MarqueeLogoScroller } from "@/components/ui/marquee-logo-scroller";
-import { MAX_TOPUP_USD, MIN_TOPUP_USD, TOPUP_PACKAGES_USD } from "@/lib/billing";
+import { MAX_TOPUP_USD, MIN_TOPUP_USD, parseTopUpUsd } from "@/lib/billing";
+import { TopUpAmount } from "@/components/site/topup-amount";
 import { fmtNodes } from "@/i18n/fmt";
 import { useI18n } from "@/i18n/provider";
 import { API_BASE, BRAND, COMPANY, INTEGRATIONS, MODELS, SUPPORT_RESPONSE_DAYS } from "@/lib/site";
@@ -305,7 +306,8 @@ export function Pricing() {
   const { dict, href, money, num, t, currency } = useI18n();
   const router = useRouter();
   const p = dict.pricing;
-  const [usd, setUsd] = React.useState(25);
+  const [amount, setAmount] = React.useState("25");
+  const usd = parseTopUpUsd(amount);
   const [method, setMethod] = React.useState<string>("card");
   const methods = [
     { k: "card", t: p.card, i: CreditCard },
@@ -335,30 +337,19 @@ export function Pricing() {
           className="rounded-[28px] bg-card p-6 shadow-float md:p-8"
           onSubmit={(e) => {
             e.preventDefault();
+            if (usd === null) return;
             router.push(href(`/dashboard/billing?topup=${usd}&method=${active}`));
           }}
         >
           <p className="text-sm text-muted-foreground">{p.formLabel}</p>
-          <p className="mt-1 text-4xl font-semibold tracking-tight">{money(usd)}</p>
-          <p className="text-xs text-muted-foreground">
-            {t(p.approx, { n: num(Math.round(usd / DEEPSEEK.typical), 0), model: DEEPSEEK.name })}
-          </p>
-
-          <div className="mt-5 grid grid-cols-3 gap-2">
-            {TOPUP_PACKAGES_USD.map((v) => (
-              <button
-                type="button"
-                key={v}
-                onClick={() => setUsd(v)}
-                className={cn(
-                  "rounded-xl border py-2.5 text-sm font-medium transition",
-                  usd === v ? "border-foreground bg-foreground text-background" : "border-border hover:border-foreground/30",
-                )}
-              >
-                {money(v, { compact: true })}
-              </button>
-            ))}
+          <div className="mt-3">
+            <TopUpAmount value={amount} onChange={setAmount} label={p.amount} invalid={amount !== "" && usd === null} />
           </div>
+          {usd !== null && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              {t(p.approx, { n: num(Math.round(usd / DEEPSEEK.typical), 0), model: DEEPSEEK.name })}
+            </p>
+          )}
 
           <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
             {methods.map(({ k, t: label, i: Icon }) => (
@@ -379,9 +370,10 @@ export function Pricing() {
 
           <button
             type="submit"
-            className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-medium text-primary-foreground transition hover:bg-primary/90 active:scale-[0.99]"
+            disabled={usd === null}
+            className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-medium text-primary-foreground transition hover:bg-primary/90 active:scale-[0.99] disabled:opacity-60"
           >
-            {active === "invoice" ? p.invoiceCta : t(p.pay, { amount: money(usd) })} <ArrowRight className="size-4" />
+            {active === "invoice" ? p.invoiceCta : t(p.pay, { amount: money(usd ?? 0) })} <ArrowRight className="size-4" />
           </button>
           <p className="mt-3 text-center text-[11px] text-muted-foreground">{t(p.min, { min: money(MIN_TOPUP_USD), max: money(MAX_TOPUP_USD) })}</p>
           {currency !== "USD" && <p className="mt-1 text-center text-[11px] text-muted-foreground/80">{p.chargedIn}</p>}

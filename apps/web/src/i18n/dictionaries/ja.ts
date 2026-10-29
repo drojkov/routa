@@ -99,7 +99,8 @@ export const ja: Dictionary = {
     invoice: "法人請求書",
     pay: "次へ — {amount}",
     invoiceCta: "請求書を依頼",
-    min: "固定パッケージ {min} ～ {max} · 決済完了後に反映",
+    min: "{min} ～ {max} の任意の金額 · 決済完了後に反映",
+    amount: "金額（USD）",
     chargedIn: "残高は USD で管理されます。他の通貨の金額はその日のレートで換算されます。",
   },
   faq: {
@@ -372,14 +373,15 @@ export const ja: Dictionary = {
     },
     topup: {
       title: "残高をチャージ",
-      packages: "パッケージを選択",
+      amount: "金額（USD）",
+      presets: "よく使う金額",
       method: "支払い方法",
       waiver:
         "サービスの即時提供を希望し、使用済みのクレジットについては 14 日間の撤回権を失うことを理解しています。",
       terms: "続行すると、{terms}と{refunds}に同意したものとみなされます。",
       continue: "お支払いへ進む",
       creating: "注文を作成中…",
-      errorPackage: "パッケージを選択してください。",
+      errorAmount: "{min} ～ {max} の金額を入力してください（小数点以下2桁まで）。",
       errorWaiver: "続けるにはチェックボックスをオンにしてください。",
       errorUnverified: "チャージの前にメールアドレスを確認してください。",
       errorTooMany: "短時間の注文が多すぎます。未完了の注文を完了するか、しばらく待ってからもう一度お試しください。",

@@ -99,7 +99,8 @@ export const zh: Dictionary = {
     invoice: "企业发票",
     pay: "继续 — {amount}",
     invoiceCta: "申请发票",
-    min: "固定充值档位 {min} 至 {max} · 付款到账后入账",
+    min: "可充值 {min} 至 {max} 之间的任意金额 · 付款到账后入账",
+    amount: "金额（USD）",
     chargedIn: "余额以 USD 计。其他货币金额按当日汇率换算。",
   },
   faq: {
@@ -372,14 +373,15 @@ export const zh: Dictionary = {
     },
     topup: {
       title: "充值余额",
-      packages: "选择充值档位",
+      amount: "金额（USD）",
+      presets: "快捷金额",
       method: "支付方式",
       waiver:
         "我要求立即开始提供服务，并了解对于已使用的额度，我将失去 14 天撤回权。",
       terms: "继续即表示你同意{terms}和{refunds}。",
       continue: "前往支付",
       creating: "正在创建订单…",
-      errorPackage: "请选择一个充值档位。",
+      errorAmount: "请输入 {min} 至 {max} 之间的金额，最多两位小数。",
       errorWaiver: "请勾选确认后继续。",
       errorUnverified: "充值前请先验证你的邮箱。",
       errorTooMany: "短时间内订单过多。请先完成或等待未结订单，稍后再试。",

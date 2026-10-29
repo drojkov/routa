@@ -2,7 +2,7 @@
 
 **Effective date: 30 September 2026**
 
-This Privacy Policy explains how **Harvanera Limited** ("Harvanera", "we", "us" or "our") handles personal data when you visit our website, create an account, make a payment, contact us or use our dashboard and API (together, the "Service"). Please read it together with our [Terms of Service](/legal/terms), [Cookie Policy](/legal/cookies)
+This Privacy Policy explains how **Harvanera Limited** ("Harvanera", "we", "us" or "our") handles personal data when you visit our website, create an account, make a payment, contact us or use our dashboard and API (together, the "Service"). Please read it together with our [Terms of Service](/legal/terms), [Cookie Policy](/legal/cookies).
 
 ## 1. Who is responsible for your data
 
@@ -15,11 +15,13 @@ We decide how and why we process information about visitors, account holders and
 | Category | What it may include | How we receive it |
 | --- | --- | --- |
 | Account and sign-in information | Email address, account identifier, authentication information, and any name or profile details you provide | From you |
-| Billing and transaction information | Top-up amount and currency, resulting USD balance, exchange rate shown at checkout, payment status, transaction references, refunds and invoice details | From you, our payment service provider and our own transaction records |
+| Billing and transaction information | Top-up amount and payment currency, resulting USD balance, exchange rate shown at checkout, payment status, transaction references, refund requests and invoice details | From you, our payment service provider and our own transaction records |
+| Order and consent records | For each top-up order: the IP address, approximate country derived from it, browser information and the time you gave the consent shown at checkout | Generated when you place an order |
 | API request metadata | Model selected, usage units such as input and output tokens, charge, timestamp, API key identifier, IP address and request status | Generated when you use the Service |
-| Technical and security information | IP address, browser or device information, session information and security events | From your device and our systems |
+| Technical and security information | IP address, approximate country derived from the IP address, browser or device information, session information and security events | From your device and our systems |
+| Sign-in history | For each sign-in: the time, IP address, approximate country derived from it and browser information. This record is kept after you sign out | Generated when you sign in |
 | Settings and preferences | API key names and spending limits, language and currency preferences, and whether you enabled request logging | From your account settings and use of the Service |
-| Support communications | Messages you send us, any documents you provide in support of a request, and our replies | From you and our support records |
+| Support communications | Messages you send us by email or through our contact form (including the name, email address and topic you enter and the IP address the form was sent from), any documents you provide in support of a request, and our replies | From you and our support records |
 | Request content | Prompts, files, parameters and model responses | From API requests you make or that are made using your account |
 
 An email address and password are needed to create an account. Payment details are needed to add paid balance. API request metadata is needed to deliver and bill requests. If you do not provide information needed for one of these purposes, we may be unable to provide that part of the Service. Support messages and optional profile details are voluntary.
@@ -41,7 +43,8 @@ We use personal data to:
 - register and authenticate accounts, manage API keys and settings, forward requests to the selected Model Provider and return responses;
 - display usage, calculate charges, process top-ups and refunds, and issue receipts or invoices;
 - answer questions, investigate support requests and communicate service or account changes;
-- keep the Service secure, detect fraud or abuse, enforce our Terms and comply with applicable sanctions and other legal requirements;
+- keep the Service secure, detect fraud or abuse, enforce our Terms and comply with applicable sanctions and other legal requirements, including by determining your approximate country from your IP address to apply the location restrictions in our Terms;
+- verify payments and respond to payment disputes and chargebacks, including by providing order, consent and sign-in records to our payment service provider and card networks;
 - maintain business, tax and accounting records and establish, exercise or defend legal claims; and
 - operate necessary website and account features and honour the privacy choices available on the Service.
 
@@ -51,7 +54,7 @@ Where EU or UK data protection law applies to processing for which we are the co
 | --- | --- |
 | Creating an account, delivering requests, maintaining a prepaid balance and providing requested support | Performance of our contract with you, or steps taken at your request before entering it |
 | Tax and accounting records, and compliance with legal requirements that apply to us | Compliance with a legal obligation |
-| Security, fraud prevention, abuse investigations, service administration and the defence of claims | Our legitimate interests in protecting the Service, our users and our legal rights, unless those interests are overridden by your rights |
+| Security, fraud prevention, sign-in and order records, location restrictions, payment-dispute handling, abuse investigations, service administration and the defence of claims | Our legitimate interests in protecting the Service, our users and our legal rights, unless those interests are overridden by your rights |
 | Request content logging that you choose to enable | Providing the logging feature you request as part of the Service |
 | Optional cookies or direct marketing, if introduced and where consent is required | Your consent, which you can withdraw |
 
@@ -65,6 +68,7 @@ We disclose personal data only as needed for the purposes above, to the followin
 
 - **Model Providers:** the provider of the model you select receives request content and the technical information needed to process it. Currently this is DeepInfra, Inc. (United States), which runs the models available on the Service. We will update this list before any other provider receives request content. A provider's own terms and privacy notice may govern some of its processing.
 - **Service providers:** companies that provide hosting, technical infrastructure, payment processing, authentication, email delivery or customer-support services. They receive only the information needed for their role.
+- **Payment service provider and card networks:** where a payment is disputed or a chargeback is raised, the order, consent and sign-in records needed to respond to it.
 - **Professional advisers and transaction parties:** lawyers, accountants, auditors and, if relevant, a purchaser or successor to our business, subject to appropriate protections.
 - **Public authorities and other parties:** where disclosure is required by law, necessary to protect legal rights or needed to respond to a valid legal request.
 
@@ -85,8 +89,8 @@ We keep personal data for the time needed for the purpose for which it was colle
 | Account information and settings | While the account is open, then only as long as needed to complete closure, resolve outstanding matters or meet a legal duty |
 | Request metadata | As needed to show usage, calculate charges, investigate errors or abuse and handle disputes; no longer than necessary for those purposes |
 | Request content when logging is off | Processed to fulfil the request; not stored by us as a request history |
-| Request content when logging is on | Stored to provide the feature while logging is enabled and for the period needed to manage existing logs; we may keep limited information for an unresolved security or legal matter where permitted |
-| Security logs and support communications | For as long as needed to investigate security events, respond to you, resolve disputes or protect legal rights |
+| Request content when logging is on | Kept for **30 days**, then deleted automatically; we may keep limited information for an unresolved security or legal matter where permitted |
+| Security logs, sign-in history, order and consent records, and support communications | For as long as needed to investigate security events, respond to you, resolve payment disputes and chargebacks or protect legal rights |
 | Business and accounting records | For at least seven years after the transactions they document where Hong Kong record-keeping law applies, and longer only if another legal duty or unresolved claim requires it |
 
 Model Providers and payment service providers have their own retention practices. Their privacy notices may apply to information they receive. Turning off request logging or closing your Harvanera account does not itself delete records held by those independent providers.

@@ -99,7 +99,8 @@ export const fr: Dictionary = {
     invoice: "Facture entreprise",
     pay: "Continuer — {amount}",
     invoiceCta: "Demander une facture",
-    min: "Forfaits fixes de {min} à {max} · crédité dès réception du paiement",
+    min: "Montant libre de {min} à {max} · crédité dès réception du paiement",
+    amount: "Montant en USD",
     chargedIn: "Le solde est tenu en USD. Les montants dans d’autres devises sont convertis au taux du jour.",
   },
   faq: {
@@ -372,14 +373,15 @@ export const fr: Dictionary = {
     },
     topup: {
       title: "Recharger le solde",
-      packages: "Choisissez un forfait",
+      amount: "Montant en USD",
+      presets: "Montants rapides",
       method: "Moyen de paiement",
       waiver:
         "Je demande que le service commence immédiatement et je comprends que je perds mon droit de rétractation de 14 jours pour le crédit déjà utilisé.",
       terms: "En continuant, vous acceptez les {terms} et la {refunds}.",
       continue: "Continuer vers le paiement",
       creating: "Création de la commande…",
-      errorPackage: "Veuillez choisir l’un des forfaits.",
+      errorAmount: "Saisissez un montant de {min} à {max}, avec deux décimales au plus.",
       errorWaiver: "Veuillez cocher la case pour continuer.",
       errorUnverified: "Confirmez votre adresse e-mail avant de recharger.",
       errorTooMany: "Trop de commandes en peu de temps. Terminez vos commandes en cours ou patientez, puis réessayez plus tard.",

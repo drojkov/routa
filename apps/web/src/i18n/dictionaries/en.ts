@@ -101,7 +101,8 @@ export const en = {
     invoice: "Company invoice",
     pay: "Continue — {amount}",
     invoiceCta: "Request an invoice",
-    min: "Fixed packages from {min} to {max} · credited once the payment clears",
+    min: "Any amount from {min} to {max} · credited once the payment clears",
+    amount: "Amount in USD",
     chargedIn: "Balance is kept in USD. Amounts in other currencies are converted at the day's rate.",
   },
   faq: {
@@ -374,14 +375,15 @@ export const en = {
     },
     topup: {
       title: "Top up balance",
-      packages: "Choose a package",
+      amount: "Amount in USD",
+      presets: "Quick amounts",
       method: "Payment method",
       waiver:
         "I ask for the service to start immediately and understand that I lose my 14-day right of withdrawal for the credit I've already used.",
       terms: "By continuing you agree to the {terms} and the {refunds}.",
       continue: "Continue to payment",
       creating: "Creating order…",
-      errorPackage: "Please choose one of the packages.",
+      errorAmount: "Enter an amount from {min} to {max}, up to two decimal places.",
       errorWaiver: "Please confirm the checkbox to continue.",
       errorUnverified: "Confirm your email address before topping up.",
       errorTooMany: "Too many orders in a short time. Please complete or wait for your open orders, then try again later.",

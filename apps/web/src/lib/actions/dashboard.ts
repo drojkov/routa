@@ -8,7 +8,7 @@ import { db, schema } from "@/db";
 import { type Currency, isCurrency, isLocale, USD_RATES } from "@/i18n/config";
 import { currentUserId, generateKey } from "@/lib/account";
 import { auth } from "@/lib/auth";
-import { isTopUpPackage, ORDER_LIMITS, toMicros } from "@/lib/billing";
+import { ORDER_LIMITS, parseTopUpUsd, toMicros } from "@/lib/billing";
 import { clientIp, countryOf } from "@/lib/geo";
 import { creditPayment, demoPaymentsEnabled } from "@/lib/payments";
 import { createRefundRequest, notifyRefundRequest } from "@/lib/refunds";
@@ -116,11 +116,11 @@ export async function revokeApiKey(id: string) {
   revalidatePath("/[lang]/dashboard", "layout");
 }
 
-export type TopUpResult = { ok: false; error: "package" | "waiver" | "unverified" | "too_many" };
+export type TopUpResult = { ok: false; error: "amount" | "waiver" | "unverified" | "too_many" };
 
 /**
  * Создаёт заказ на пополнение и ведёт на страницу оплаты.
- * Сумма — только один из фиксированных пакетов (TOPUP_PACKAGES_USD), в USD; к оплате — пересчёт в валюту показа.
+ * Сумма — произвольная, в USD до цента, в границах MIN/MAX_TOPUP_USD; к оплате — пересчёт в валюту показа.
  * Пополнять можно только с подтверждённым email; число заказов ограничено (защита от card testing).
  * IP, страна, браузер и время согласия сохраняются в заказе — для разбора чарджбэков.
  * Провайдер оплаты подключается на следующем этапе: его вебхук вызывает creditPayment().
@@ -132,7 +132,8 @@ export async function createTopUp(input: { usd: number; currency: string; waiver
   const userId = session.user.id;
   const currency: Currency = isCurrency(input.currency) ? input.currency : "USD";
   const lang = isLocale(input.lang) ? input.lang : "en";
-  if (!isTopUpPackage(input.usd)) return { ok: false, error: "package" };
+  const usd = parseTopUpUsd(input.usd);
+  if (usd === null) return { ok: false, error: "amount" };
   // Согласие на немедленное начало услуги (отказ от 14-дневного права отзыва для потраченного) — ЕС/UK.
   if (!input.waiver) return { ok: false, error: "waiver" };
   if (!session.user.emailVerified) return { ok: false, error: "unverified" };
@@ -152,9 +153,9 @@ export async function createTopUp(input: { usd: number; currency: string; waiver
   await db.insert(schema.payment).values({
     id,
     userId,
-    amountMicros: toMicros(input.usd),
+    amountMicros: toMicros(usd),
     currency,
-    amountMinor: Math.round(input.usd * USD_RATES[currency] * minor),
+    amountMinor: Math.round(usd * USD_RATES[currency] * minor),
     status: "pending",
     ipAddress: ip,
     country: countryOf(ip),

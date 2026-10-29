@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Billing } from "@/components/dashboard/billing";
 import { loadLocale } from "@/i18n/server";
 import { listLedger, requireUser } from "@/lib/account";
+import { parseTopUpUsd } from "@/lib/billing";
 import { getRefundableMicros, listRefundRequests } from "@/lib/refunds";
 import { listPayments } from "@/lib/usage";
 
@@ -14,7 +15,7 @@ export default async function BillingPage({ params, searchParams }: PageProps<"/
   const { lang } = await loadLocale(params);
   const user = await requireUser(lang);
   const [ledger, orders, refunds, sp] = await Promise.all([listLedger(user.id, 200), listPayments(user.id), listRefundRequests(user.id), searchParams]);
-  const topup = Number(sp.topup);
+  const topup = typeof sp.topup === "string" ? parseTopUpUsd(sp.topup) : null;
   return (
     <Billing
       ledger={ledger.map((l) => ({ id: l.id, kind: l.kind, usd: l.amountMicros / 1_000_000, at: l.createdAt.getTime(), note: l.note }))}
@@ -31,7 +32,7 @@ export default async function BillingPage({ params, searchParams }: PageProps<"/
       email={user.email}
       emailVerified={user.emailVerified}
       justVerified={sp.verified === "1"}
-      initialTopUpUsd={Number.isFinite(topup) && topup > 0 ? topup : undefined}
+      initialTopUpUsd={topup ?? undefined}
       initialMethod={typeof sp.method === "string" ? sp.method : undefined}
     />
   );

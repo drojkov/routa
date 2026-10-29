@@ -99,7 +99,8 @@ export const de: Dictionary = {
     invoice: "Firmenrechnung",
     pay: "Weiter – {amount}",
     invoiceCta: "Rechnung anfordern",
-    min: "Feste Pakete von {min} bis {max} · Gutschrift nach Zahlungseingang",
+    min: "Beliebiger Betrag von {min} bis {max} · Gutschrift nach Zahlungseingang",
+    amount: "Betrag in USD",
     chargedIn: "Das Guthaben wird in USD geführt. Beträge in anderen Währungen werden zum Tageskurs umgerechnet.",
   },
   faq: {
@@ -372,14 +373,15 @@ export const de: Dictionary = {
     },
     topup: {
       title: "Guthaben aufladen",
-      packages: "Paket wählen",
+      amount: "Betrag in USD",
+      presets: "Schnellauswahl",
       method: "Zahlungsmethode",
       waiver:
         "Ich verlange, dass mit der Leistung sofort begonnen wird, und nehme zur Kenntnis, dass ich mein 14-tägiges Widerrufsrecht für das bereits genutzte Guthaben verliere.",
       terms: "Mit dem Fortfahren stimmst du den {terms} und der {refunds} zu.",
       continue: "Weiter zur Zahlung",
       creating: "Bestellung wird erstellt…",
-      errorPackage: "Bitte wähle eines der Pakete.",
+      errorAmount: "Gib einen Betrag von {min} bis {max} ein, höchstens zwei Nachkommastellen.",
       errorWaiver: "Bitte bestätige das Kontrollkästchen, um fortzufahren.",
       errorUnverified: "Bestätige deine E-Mail-Adresse, bevor du Guthaben auflädst.",
       errorTooMany: "Zu viele Bestellungen in kurzer Zeit. Bitte schließe offene Bestellungen ab oder warte, und versuche es später erneut.",

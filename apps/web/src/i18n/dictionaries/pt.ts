@@ -99,7 +99,8 @@ export const pt: Dictionary = {
     invoice: "Fatura para empresa",
     pay: "Continuar — {amount}",
     invoiceCta: "Solicitar fatura",
-    min: "Pacotes fixos de {min} a {max} · creditado após a confirmação do pagamento",
+    min: "Qualquer valor de {min} a {max} · creditado após a confirmação do pagamento",
+    amount: "Valor em USD",
     chargedIn: "O saldo é mantido em USD. Valores em outras moedas são convertidos pela cotação do dia.",
   },
   faq: {
@@ -372,14 +373,15 @@ export const pt: Dictionary = {
     },
     topup: {
       title: "Recarregar saldo",
-      packages: "Escolha um pacote",
+      amount: "Valor em USD",
+      presets: "Valores rápidos",
       method: "Forma de pagamento",
       waiver:
         "Peço que o serviço comece imediatamente e entendo que perco meu direito de desistência de 14 dias sobre o crédito já utilizado.",
       terms: "Ao continuar, você concorda com os {terms} e a {refunds}.",
       continue: "Ir para o pagamento",
       creating: "Criando pedido…",
-      errorPackage: "Escolha um dos pacotes.",
+      errorAmount: "Informe um valor de {min} a {max}, com no máximo duas casas decimais.",
       errorWaiver: "Marque a caixa para continuar.",
       errorUnverified: "Confirme seu e-mail antes de recarregar.",
       errorTooMany: "Muitos pedidos em pouco tempo. Conclua ou aguarde seus pedidos em aberto e tente novamente mais tarde.",

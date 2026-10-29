@@ -57,20 +57,31 @@ The Service operates on a prepaid basis. Your balance is held in US dollars (USD
 
 ### 5.2 Top-ups
 
-- You can top up by card in USD, EUR, GBP, CNY, JPY, INR, BRL or HKD. A single top-up may add no more than **USD 10,000**, or its equivalent, to your paid balance.
+- You can top up by any amount you choose in US dollars, to the cent, from **USD 1** to **USD 10,000** per top-up. The amount you enter is the amount credited to your balance. You can pay by card in USD, EUR, GBP, CNY, JPY, INR, BRL or HKD.
+- You must confirm your email address before you can top up.
 - If you pay in a currency other than USD, we will show you the exchange rate and the resulting USD top-up amount before you confirm payment. We will also show the total amount payable in your selected payment currency.
 - Any applicable taxes, including VAT or GST where relevant, will be displayed on the payment page and included in the total amount shown before you select **Buy** or otherwise confirm payment. The amount added to your balance and the total amount charged will be shown separately where tax applies.
 - Business users can request an invoice for a top-up. The corresponding balance is credited after payment is received.
 - Card payments are handled by a third-party payment service provider. We do not request or store your full payment-card number.
 - Your bank or card issuer may impose additional charges, such as foreign-transaction fees, under its own terms. Those charges are outside our control.
 
-### 5.3 Welcome credit
+### 5.3 Fraud prevention
+
+To protect cardholders and the Service from fraud, we:
+
+- limit how many top-up orders you can create in a short period, including the number of unpaid orders you can have open at once;
+- record the IP address, the approximate country derived from it, the browser and the time when you sign in and when you place an order, together with the time you gave any consent shown at checkout; and
+- may use these records to verify a payment, investigate suspected fraud or respond to a payment dispute or chargeback, including by sharing them with our payment service provider and card networks.
+
+We may refuse or cancel an order, or put a top-up on hold, if we reasonably suspect fraud or unauthorised use of a payment card. Section 11 explains when we may restrict an account. Our [Privacy Policy](/legal/privacy) explains how we handle this data.
+
+### 5.4 Welcome credit
 
 When you sign up, we may add a promotional welcome credit of **USD 1** to your balance. Welcome credit has no cash value, does not expire, cannot be refunded or transferred, and is used before your paid balance when you make a chargeable request. You may top up your paid balance at any time, including before you have used all of your welcome credit.
 
 Welcome credit is limited to one grant per person. We may withhold or remove it if we detect multiple accounts, automated sign-ups or other abuse. Unused welcome credit ends when your account is closed.
 
-### 5.4 How requests are charged
+### 5.5 How requests are charged
 
 Each API request is charged against your balance according to the published price for the selected model at the time you make the request. Pricing may depend on input and output tokens or other listed units, such as images. Your dashboard shows the charge for each request.
 
@@ -78,11 +89,11 @@ We may change model prices, including when a Model Provider changes its prices. 
 
 A request that fails because of an error on our side is not charged. If a Model Provider has processed a request, you may be charged for the units actually processed even if you cancel the request while it is streaming or the model refuses to provide the requested output. If we discover a billing error, we will correct it and adjust your balance accordingly.
 
-### 5.5 Balance expiry
+### 5.6 Balance expiry
 
-Your paid balance does not expire because of inactivity. Welcome credit also does not expire while your account remains open, subject to the abuse provisions in section 5.3.
+Your paid balance does not expire because of inactivity. Welcome credit also does not expire while your account remains open, subject to the abuse provisions in section 5.4.
 
-### 5.6 Refunds and withdrawal
+### 5.7 Refunds and withdrawal
 
 You may request a refund of your unused paid balance under our [Refund Policy](/legal/refunds). Any mandatory withdrawal or cancellation rights that apply to you, including applicable rights for consumers in the EU, EEA or UK, remain unaffected by these Terms.
 

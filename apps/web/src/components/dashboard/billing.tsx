@@ -4,10 +4,11 @@ import { ArrowRight, Building2, CreditCard, Loader2, MailCheck, Smartphone } fro
 import Link from "next/link";
 import * as React from "react";
 import { MerchantInfo } from "@/components/site/merchant-info";
+import { TopUpAmount } from "@/components/site/topup-amount";
 import { fmtNodes } from "@/i18n/fmt";
 import { useI18n } from "@/i18n/provider";
 import { createTopUp, requestRefund, resendVerification } from "@/lib/actions/dashboard";
-import { nearestPackage, TOPUP_PACKAGES_USD } from "@/lib/billing";
+import { MAX_TOPUP_USD, MIN_TOPUP_USD, parseTopUpUsd } from "@/lib/billing";
 import { cn } from "@/lib/utils";
 import { PageTitle, Panel } from "./ui";
 
@@ -123,12 +124,13 @@ function VerifyEmail({ email }: { email: string }) {
   );
 }
 
-/* ——— Пополнение: только фиксированные пакеты ——— */
+/* ——— Пополнение: любая сумма в USD до цента ——— */
 export function TopUp({ initialUsd, initialMethod }: { initialUsd?: number; initialMethod?: string }) {
-  const { dict, href, money, currency, locale } = useI18n();
+  const { dict, href, money, currency, locale, t } = useI18n();
   const p = dict.pricing;
   const tp = dict.dashboard.topup;
-  const [usd, setUsd] = React.useState<number>(initialUsd ? nearestPackage(initialUsd) : 25);
+  const [amount, setAmount] = React.useState(String(initialUsd ?? 25));
+  const usd = parseTopUpUsd(amount);
   const [method, setMethod] = React.useState(initialMethod ?? "card");
   const [waiver, setWaiver] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -140,10 +142,12 @@ export function TopUp({ initialUsd, initialMethod }: { initialUsd?: number; init
     { k: "invoice", t: p.invoice, i: Building2 },
   ];
   const active = methods.some((m) => m.k === method) ? method : "card";
-  const errors = { package: tp.errorPackage, waiver: tp.errorWaiver, unverified: tp.errorUnverified, too_many: tp.errorTooMany };
+  const errorAmount = t(tp.errorAmount, { min: money(MIN_TOPUP_USD), max: money(MAX_TOPUP_USD) });
+  const errors = { amount: errorAmount, waiver: tp.errorWaiver, unverified: tp.errorUnverified, too_many: tp.errorTooMany };
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (usd === null) return setError(errorAmount);
     if (!waiver) return setError(tp.errorWaiver);
     setError(null);
     start(async () => {
@@ -161,25 +165,16 @@ export function TopUp({ initialUsd, initialMethod }: { initialUsd?: number; init
   return (
     <Panel id="topup" title={tp.title}>
       <form onSubmit={onSubmit}>
-        <p className="text-4xl font-semibold tracking-tight">{money(usd)}</p>
-        <p className="mt-4 text-xs text-muted-foreground">{tp.packages}</p>
-        <div className="mt-1.5 grid grid-cols-3 gap-2" role="radiogroup" aria-label={tp.packages}>
-          {TOPUP_PACKAGES_USD.map((v) => (
-            <button
-              type="button"
-              role="radio"
-              aria-checked={usd === v}
-              key={v}
-              onClick={() => setUsd(v)}
-              className={cn(
-                "rounded-xl border py-2 text-sm font-medium transition",
-                usd === v ? "border-foreground bg-foreground text-background" : "border-border hover:border-foreground/30",
-              )}
-            >
-              {money(v, { compact: true })}
-            </button>
-          ))}
-        </div>
+        <TopUpAmount
+          value={amount}
+          onChange={(v) => {
+            setAmount(v);
+            setError(null);
+          }}
+          label={tp.amount}
+          presetsLabel={tp.presets}
+          invalid={amount !== "" && usd === null}
+        />
 
         <p className="mt-4 text-xs text-muted-foreground">{tp.method}</p>
         <div className="mt-1.5 grid grid-cols-3 gap-2 text-xs">
