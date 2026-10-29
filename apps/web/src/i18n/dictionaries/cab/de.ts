@@ -72,6 +72,8 @@ export const cabDe: CabDictionary = {
     edit: "Bearbeiten",
     disable: "Pausieren",
     enable: "Fortsetzen",
+    blocked: "Von Harvanera gesperrt",
+    blockedHint: "Dieser Schlüssel wurde von Harvanera gesperrt und kann nicht verwendet werden. Kontakt: info@harvanera.com.",
     disabled: "Pausiert",
     revoked: "Widerrufen",
     revoke: "Widerrufen",
@@ -150,9 +152,12 @@ export const cabDe: CabDictionary = {
       errorNothing: "Es gibt kein bezahltes Guthaben, das erstattet werden kann.",
       requests: "Erstattungsanträge",
       status: { pending: "In Prüfung", approved: "Erstattet", rejected: "Abgelehnt" },
+      approx: "ca. {amount}",
+      note: "Hinweis des Supports: {note}",
       policy: "So funktionieren Erstattungen",
     },
   },
+  notices: { label: "Mitteilungen", dismiss: "Ausblenden" },
   settings: {
     title: "Einstellungen", profile: "Profil", name: "Name", email: "E-Mail",
     logging: {

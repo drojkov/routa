@@ -21,7 +21,7 @@ const TABS = [
   { path: "/settings", key: "settings" },
 ] as const;
 
-const LEGAL_LINKS = ["terms", "privacy", "refunds", "acceptable-use"] as const;
+const LEGAL_LINKS = ["terms", "privacy", "cookies", "refunds", "acceptable-use"] as const;
 
 /** Каркас кабинета: шапка с балансом и вкладки разделов. */
 export function CabinetShell({ email, balanceUsd, children }: { email: string; balanceUsd: number; children: React.ReactNode }) {

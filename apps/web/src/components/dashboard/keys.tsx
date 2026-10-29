@@ -19,6 +19,8 @@ export type KeyRow = {
   createdAt: number;
   lastUsedAt: number | null;
   disabled: boolean;
+  /** Заблокирован поддержкой (scripts/account.mjs block-key) — владелец снять не может. */
+  blocked: boolean;
   revoked: boolean;
   spendUsd: number;
   requests: number;
@@ -261,14 +263,19 @@ function KeyItem({ k: key }: { k: KeyRow }) {
   }
 
   return (
-    <li className={cn("grid gap-3 py-4 sm:grid-cols-[1fr_auto] sm:items-center", key.disabled && "opacity-70")}>
+    <li className={cn("grid gap-3 py-4 sm:grid-cols-[1fr_auto] sm:items-center", (key.disabled || key.blocked) && "opacity-70")}>
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
           <KeyRound className="size-4 text-muted-foreground" />
           <span className="font-medium">{key.name}</span>
           <span className="font-mono text-xs text-muted-foreground">{key.prefix}</span>
-          {key.disabled && <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-800">{k.disabled}</span>}
+          {key.blocked ? (
+            <span className="rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-medium text-red-800">{k.blocked}</span>
+          ) : (
+            key.disabled && <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-800">{k.disabled}</span>
+          )}
         </div>
+        {key.blocked && <p className="mt-1 text-xs text-red-700">{k.blockedHint}</p>}
         <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
           <span>{key.limitUsd != null ? t(k.ofLimit, { spent: money(key.spendUsd), limit: money(key.limitUsd) }) : t(k.spendMonth, { amount: money(key.spendUsd) })}</span>
           <span>{t(k.requests, { n: key.requests })}</span>
@@ -284,12 +291,14 @@ function KeyItem({ k: key }: { k: KeyRow }) {
       </div>
       <div className="flex flex-wrap items-center gap-1">
         <ActionBtn onClick={() => setEditing(true)} icon={Pencil} label={k.edit} />
-        <ActionBtn
-          onClick={() => start(async () => void (await updateApiKey({ id: key.id, disabled: !key.disabled })))}
-          icon={pending ? Loader2 : key.disabled ? Play : Pause}
-          label={key.disabled ? k.enable : k.disable}
-          spin={pending}
-        />
+        {!key.blocked && (
+          <ActionBtn
+            onClick={() => start(async () => void (await updateApiKey({ id: key.id, disabled: !key.disabled })))}
+            icon={pending ? Loader2 : key.disabled ? Play : Pause}
+            label={key.disabled ? k.enable : k.disable}
+            spin={pending}
+          />
+        )}
         <ActionBtn
           onClick={() => {
             if (confirm(k.revokeConfirm)) start(() => revokeApiKey(key.id));

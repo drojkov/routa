@@ -185,6 +185,15 @@ try {
     assert.equal((await chat(rich.plain, { model: OPEN, messages })).status, 200);
   });
 
+  await test("ключ заблокирован поддержкой → 403 key_blocked, после снятия → 200", async () => {
+    db.prepare("update api_key set blocked_at = ? where id = ?").run(Date.now(), rich.keyId);
+    const r = await chat(rich.plain, { model: OPEN, messages });
+    assert.equal(r.status, 403);
+    assert.equal((await r.json()).error.code, "key_blocked");
+    db.prepare("update api_key set blocked_at = null where id = ?").run(rich.keyId);
+    assert.equal((await chat(rich.plain, { model: OPEN, messages })).status, 200);
+  });
+
   await test("чат кабинета без входа → 401", async () => {
     const r = await fetch(`${BASE}/api/playground/chat`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ model: OPEN, messages }) });
     assert.equal(r.status, 401);

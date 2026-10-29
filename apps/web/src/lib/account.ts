@@ -61,6 +61,7 @@ export function listKeys(userId: string) {
       createdAt: schema.apiKey.createdAt,
       lastUsedAt: schema.apiKey.lastUsedAt,
       disabledAt: schema.apiKey.disabledAt,
+      blockedAt: schema.apiKey.blockedAt,
       allowedModels: schema.apiKey.allowedModels,
       revokedAt: schema.apiKey.revokedAt,
     })

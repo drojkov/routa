@@ -1,6 +1,6 @@
 # Terms of Service
 
-**Effective date: 30 September 2026**
+**Effective date: 29 October 2026**
 
 These Terms of Service ("Terms") form an agreement between you and **Harvanera Limited**, a private company limited by shares incorporated in Hong Kong (registration number **81275806**), with its registered office at Unit 704C, 7/F, Block 3, Nan Fung Industrial City, 18 Tin Hau Road, Tuen Mun, N.T., Hong Kong ("Harvanera", "we", "us" or "our"). They govern your use of our website, dashboard and application programming interface (together, the "Service").
 
@@ -22,6 +22,8 @@ We do not build or train these models. We do not control their behaviour, their 
 
 The Service is unavailable to persons located in, ordinarily resident in or organised under the laws of the following countries or territories: Afghanistan, Algeria, American Samoa, Angola, Belarus, Bolivia, Bosnia and Herzegovina, British Virgin Islands, Bulgaria, Cameroon, Central African Republic, China, Côte d'Ivoire, Cuba, Democratic Republic of the Congo, Guatemala, Guinea, Guinea-Bissau, Haiti, Iran, Iraq, Kenya, Kuwait, Laos, Lebanon, Libya, Mali, Monaco, Myanmar, Namibia, Nepal, Nicaragua, Niger, North Korea, Papua New Guinea, Russia, Somalia, South Sudan, Sudan, Syria, Tunisia, Türkiye, United States of America, Venezuela, Vietnam, Yemen and Zimbabwe. The Service is also unavailable in Crimea, Sevastopol, Donetsk, Luhansk, Zaporizhzhia and Kherson.
 
+We apply these restrictions using IP-based location checks and the confirmation you give when you sign up, and, where available, checks by our payment service provider. IP-based checks cannot reliably distinguish every region within a country, so you remain responsible for not using the Service from, or for a person in, a restricted location.
+
 This is a list of locations where we do not offer the Service; it does not mean that every location listed is subject to comprehensive sanctions. Individual models may be unavailable in additional locations because of a Model Provider's restrictions.
 
 ## 3. Consumers and business users
@@ -37,7 +39,7 @@ Nothing in these Terms removes any consumer right that applicable law does not a
 
 ### 4.1 Creating an account
 
-You can sign up with an email address and password. You must provide accurate information and keep it up to date.
+You can sign up with an email address and password. You must provide accurate information and keep it up to date. To change the name or email address on your account, or to regain access to it, contact us at [info@harvanera.com](mailto:info@harvanera.com); we may ask you to verify your identity first.
 
 ### 4.2 Keeping your account secure
 
@@ -53,14 +55,14 @@ You can create multiple API keys and set an optional monthly spending limit for 
 
 ### 5.1 Prepaid balance
 
-The Service operates on a prepaid basis. Your balance is held in US dollars (USD). You need a positive balance to make paid API requests. A balance can be used only for the Service and cannot be transferred to another user.
+The Service operates on a prepaid basis. Your balance is held in US dollars (USD). Before we process a paid API request, your balance must be sufficient to cover its estimated maximum cost, based on the input you send and the maximum output length you request (or our default limit if you do not set one). A balance can be used only for the Service and cannot be transferred to another user.
 
 ### 5.2 Top-ups
 
 - You can top up by any amount you choose in US dollars, to the cent, from **USD 1** to **USD 10,000** per top-up. The amount you enter is the amount credited to your balance. You can pay by card in USD, EUR, GBP, CNY, JPY, INR, BRL or HKD.
 - You must confirm your email address before you can top up.
 - If you pay in a currency other than USD, we will show you the exchange rate and the resulting USD top-up amount before you confirm payment. We will also show the total amount payable in your selected payment currency.
-- Any applicable taxes, including VAT or GST where relevant, will be displayed on the payment page and included in the total amount shown before you select **Buy** or otherwise confirm payment. The amount added to your balance and the total amount charged will be shown separately where tax applies.
+- Any applicable taxes, including VAT or GST where relevant, will be displayed on the payment page and included in the total amount shown before you confirm payment. The amount added to your balance and the total amount charged will be shown separately where tax applies.
 - Business users can request an invoice for a top-up. The corresponding balance is credited after payment is received.
 - Card payments are handled by a third-party payment service provider. We do not request or store your full payment-card number.
 - Your bank or card issuer may impose additional charges, such as foreign-transaction fees, under its own terms. Those charges are outside our control.
@@ -85,7 +87,7 @@ Welcome credit is limited to one grant per person. We may withhold or remove it 
 
 Each API request is charged against your balance according to the published price for the selected model at the time you make the request. Pricing may depend on input and output tokens or other listed units, such as images. Your dashboard shows the charge for each request.
 
-We may change model prices, including when a Model Provider changes its prices. We publish updated prices before they apply. A changed price applies only to requests made after the new price is published; it does not change charges for earlier requests. We do not provide a separate advance notice for each price change unless applicable law requires one. You can stop making requests and seek a refund of your unused paid balance under our [Refund Policy](/legal/refunds).
+We may change model prices, including when a Model Provider changes its prices. A changed price takes effect when we publish it in our catalogue and applies only to requests made after publication; it does not change charges for earlier requests. We do not provide a separate advance notice for each price change unless applicable law requires one. You can stop making requests and seek a refund of your unused paid balance under our [Refund Policy](/legal/refunds).
 
 A request that fails because of an error on our side is not charged. If a Model Provider has processed a request, you may be charged for the units actually processed even if you cancel the request while it is streaming or the model refuses to provide the requested output. If we discover a billing error, we will correct it and adjust your balance accordingly.
 

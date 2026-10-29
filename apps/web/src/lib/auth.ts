@@ -1,7 +1,7 @@
 import "server-only";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { APIError } from "better-auth/api";
+import { APIError, createAuthMiddleware } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
@@ -62,14 +62,14 @@ export const auth = betterAuth({
   databaseHooks: {
     session: {
       create: {
-        // Закрытый или заблокированный поддержкой аккаунт войти не может (Terms §11).
+        // Закрытый или заблокированный поддержкой аккаунт войти не может (Terms §11). code читает auth-card.tsx.
         before: async (sess) => {
           const u = await db.query.user.findFirst({
             columns: { suspendedAt: true, closedAt: true },
             where: eq(schema.user.id, sess.userId),
           });
-          if (u?.closedAt) throw new APIError("FORBIDDEN", { message: "This account has been closed." });
-          if (u?.suspendedAt) throw new APIError("FORBIDDEN", { message: "This account is suspended. Contact info@harvanera.com." });
+          if (u?.closedAt) throw new APIError("FORBIDDEN", { message: "This account has been closed.", code: "ACCOUNT_CLOSED" });
+          if (u?.suspendedAt) throw new APIError("FORBIDDEN", { message: "This account is suspended. Contact info@harvanera.com.", code: "ACCOUNT_SUSPENDED" });
         },
         // Журнал входов для разбора чарджбэков (сессии удаляются при выходе, журнал — нет).
         after: async (sess) => {
@@ -101,6 +101,17 @@ export const auth = betterAuth({
         },
       },
     },
+  },
+  // Согласия при регистрации (Terms, 18+, не из закрытой страны) проверяются и на сервере,
+  // иначе прямой запрос к API регистрирует без них. Флаги шлёт auth-card.tsx.
+  hooks: {
+    before: createAuthMiddleware(async (ctx) => {
+      if (ctx.path !== "/sign-up/email") return;
+      const c = ctx.body?.consents;
+      if (!c || c.terms !== true || c.adult !== true || c.location !== true) {
+        throw new APIError("BAD_REQUEST", { message: "You must accept the Terms, confirm your age and confirm you are not in a restricted location.", code: "CONSENTS_REQUIRED" });
+      }
+    }),
   },
   // Регистрации — не больше 3 в час с одного IP (Privacy §4: автоматические сигналы подозрительных регистраций).
   rateLimit: { enabled: true, window: 60, max: 30, customRules: { "/sign-up/email": { window: 3600, max: 3 } } },

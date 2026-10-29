@@ -74,6 +74,8 @@ export const cabEn = {
     edit: "Edit",
     disable: "Pause",
     enable: "Resume",
+    blocked: "Blocked by Harvanera",
+    blockedHint: "This key has been blocked by Harvanera and can't be used. Contact info@harvanera.com.",
     disabled: "Paused",
     revoked: "Revoked",
     revoke: "Revoke",
@@ -152,9 +154,12 @@ export const cabEn = {
       errorNothing: "There's no paid balance to refund.",
       requests: "Refund requests",
       status: { pending: "In review", approved: "Refunded", rejected: "Declined" },
+      approx: "approx. {amount}",
+      note: "Note from support: {note}",
       policy: "How refunds work",
     },
   },
+  notices: { label: "Notices", dismiss: "Dismiss" },
   settings: {
     title: "Settings", profile: "Profile", name: "Name", email: "Email",
     logging: {

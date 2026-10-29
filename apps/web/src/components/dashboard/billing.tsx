@@ -14,7 +14,7 @@ import { PageTitle, Panel } from "./ui";
 
 type Entry = { id: string; kind: "bonus" | "topup" | "debit" | "refund" | "adjust"; usd: number; at: number; note: string | null };
 type Order = { id: string; status: "pending" | "paid" | "failed" | "canceled"; usd: number; at: number; currency: string; amountMinor: number };
-type Refund = { id: string; usd: number; status: "pending" | "approved" | "rejected"; at: number };
+type Refund = { id: string; usd: number; status: "pending" | "approved" | "rejected"; at: number; note: string | null };
 
 export function Billing({
   ledger,
@@ -244,8 +244,11 @@ export function TopUp({ initialUsd, initialMethod }: { initialUsd?: number; init
 
 /* ——— Возврат неиспользованного оплаченного баланса (Refund Policy §2) ——— */
 function RefundPanel({ refundableUsd, refunds }: { refundableUsd: number; refunds: Refund[] }) {
-  const { dict, money, t, href, date } = useI18n();
+  const { dict, money, t, href, date, currency } = useI18n();
   const r = dict.cab.billing.refund;
+  // Возврат идёт в USD (Refund Policy) — сумма всегда в долларах; пересчёт в выбранную валюту — только справочно.
+  const usd = (v: number) => `$${v.toFixed(2)}`;
+  const approx = (v: number) => (currency === "USD" ? null : t(r.approx, { amount: money(v) }));
   const [open, setOpen] = React.useState(false);
   const [reason, setReason] = React.useState("");
   const [msg, setMsg] = React.useState<{ ok: boolean; text: string } | null>(null);
@@ -254,7 +257,8 @@ function RefundPanel({ refundableUsd, refunds }: { refundableUsd: number; refund
   const tone = { pending: "bg-amber-100 text-amber-800", approved: "bg-emerald-100 text-emerald-800", rejected: "bg-muted text-muted-foreground" };
 
   function submit() {
-    if (!window.confirm(t(r.confirm, { amount: money(refundableUsd) }))) return;
+    const a = approx(refundableUsd);
+    if (!window.confirm(t(r.confirm, { amount: a ? `${usd(refundableUsd)} (${a})` : usd(refundableUsd) }))) return;
     start(async () => {
       const res = await requestRefund({ reason });
       if (res.ok) {
@@ -278,7 +282,8 @@ function RefundPanel({ refundableUsd, refunds }: { refundableUsd: number; refund
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-xs text-muted-foreground">{r.available}</p>
-          <p className="text-xl font-semibold tabular-nums">{money(refundableUsd)}</p>
+          <p className="text-xl font-semibold tabular-nums">{usd(refundableUsd)}</p>
+          {approx(refundableUsd) && <p className="text-[11px] text-muted-foreground">{approx(refundableUsd)}</p>}
         </div>
         {!open && refundableUsd >= 0.01 && !inReview && (
           <button
@@ -328,11 +333,15 @@ function RefundPanel({ refundableUsd, refunds }: { refundableUsd: number; refund
           <p className="text-xs text-muted-foreground">{r.requests}</p>
           <ul className="mt-1 divide-y divide-border text-sm">
             {refunds.map((x) => (
-              <li key={x.id} className="flex items-center justify-between gap-3 py-2">
-                <span className="tabular-nums">
-                  {money(x.usd)} <span className="ml-1 text-xs text-muted-foreground">{date(x.at, { day: "numeric", month: "short" })}</span>
-                </span>
-                <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-medium", tone[x.status])}>{r.status[x.status]}</span>
+              <li key={x.id} className="py-2">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="tabular-nums">
+                    {usd(x.usd)} <span className="ml-1 text-xs text-muted-foreground">{date(x.at, { day: "numeric", month: "short" })}</span>
+                  </span>
+                  <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-medium", tone[x.status])}>{r.status[x.status]}</span>
+                </div>
+                {/* Комментарий поддержки: причина отказа или частичное одобрение (scripts/refund.mjs). */}
+                {x.note && <p className="mt-1 text-xs text-muted-foreground">{t(r.note, { note: x.note })}</p>}
               </li>
             ))}
           </ul>

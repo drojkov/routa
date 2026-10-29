@@ -1,6 +1,6 @@
 # Cookie Policy
 
-*Effective date: 30 September 2026*
+*Effective date: 29 October 2026*
 
 This policy explains how Harvanera Limited ("we", "Harvanera") uses cookies and similar technologies (such as local storage) on our website and dashboard. For how we handle personal data in general, see our [Privacy Policy](/legal/privacy).
 
@@ -14,10 +14,13 @@ Cookies are small text files that a website stores in your browser. They let the
 
 | **Name** | **Purpose** | **Set by** | **Duration** |
 | --- | --- | --- | --- |
-| `better-auth.session_token` | Keeps you signed in and protects your session | Harvanera (first party) | Until you sign out or the session expires |
-| `NEXT_LOCALE` | Remembers the language you chose | Harvanera (first party) | Until the cookie expires or you delete it |
-| `currency` | Remembers the currency you chose for displaying prices | Harvanera (first party) | Until the cookie expires or you delete it |
+| `better-auth.session_token` | Keeps you signed in and protects your session | Harvanera (first party) | 7 days, renewed while you use the site; deleted when you sign out |
+| `NEXT_LOCALE` | Remembers the language you chose | Harvanera (first party) | 12 months |
+| `currency` | Remembers the currency you chose for displaying prices | Harvanera (first party) | 12 months |
 | `cookie_consent` | Stores your cookie choices so we don't ask again on every visit | Harvanera (first party) | 6 months |
+| `better-auth.message` (local storage) | Keeps your sign-in state in sync across open tabs, for example signing you out in every tab when you sign out in one | Harvanera (first party) | Until you delete it in your browser |
+
+Our hosting and security provider, Cloudflare, may set a strictly necessary security cookie (such as `__cf_bm` or `cf_clearance`) if it needs to check that traffic is not automated. Members of our team may also receive a technical cookie, `geo_bypass` (12 months), used only for internal testing of regional restrictions; it is never set for other visitors.
 
 We do not use cookies to track you across other websites.
 
@@ -39,7 +42,7 @@ If we decide to add such tools in the future:
 ## 4. Your choices
 
 - **Cookie banner.** When you first visit, you can accept or reject optional categories. Rejecting is as easy as accepting.
-- **Changing your mind.** You can change your choice at any time through the "Cookie settings" link in the website footer. Withdrawing consent does not affect anything that happened before.
+- **Changing your mind.** You can change your choice at any time through the "Cookie settings" link in the footer of the website, the sign-in pages and your dashboard. Withdrawing consent does not affect anything that happened before.
 - **Global Privacy Control.** If your browser sends a Global Privacy Control (GPC) signal, we treat it as a refusal of analytics and marketing cookies and as an opt-out of any sale or sharing of personal data.
 - **Browser settings.** You can also delete or block cookies in your browser settings. Blocking strictly necessary cookies will stop parts of the site from working.
 

@@ -25,10 +25,14 @@ export function AuthCard({ mode, next }: { mode: "sign-in" | "sign-up"; next?: s
   const [error, setError] = React.useState<string | null>(null);
   const [consent, setConsent] = React.useState(false);
   const [adult, setAdult] = React.useState(false);
-  const consentsOk = !signUp || (consent && adult);
+  const [location, setLocation] = React.useState(false);
+  const consentsOk = !signUp || (consent && adult && location);
 
-  function errorText(code?: string) {
+  function errorText(code?: string, status?: number) {
     if (code === "INVALID_EMAIL_OR_PASSWORD") return a.errors.invalid;
+    // Блокировка и закрытие — хук session.create в lib/auth.ts (403).
+    if (code === "ACCOUNT_CLOSED") return a.errors.closed;
+    if (code === "ACCOUNT_SUSPENDED" || status === 403) return a.errors.suspended;
     if (code === "USER_ALREADY_EXISTS" || code === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL") return a.errors.exists;
     if (code === "PASSWORD_TOO_SHORT") return a.errors.weak;
     return a.errors.generic;
@@ -42,19 +46,22 @@ export function AuthCard({ mode, next }: { mode: "sign-in" | "sign-up"; next?: s
     const password = String(f.get("password"));
     setBusy("email");
     setError(null);
+    // Сервер проверяет согласия сам (lib/auth.ts, hooks.before); поле вне типов клиента — через переменную.
+    const signUpBody = {
+      email,
+      password,
+      name: String(f.get("name")) || email.split("@")[0],
+      consents: { terms: consent, adult, location },
+      // Ссылка из письма подтверждения ведёт в «Баланс»: без подтверждения пополнение закрыто.
+      callbackURL: href("/dashboard/billing?verified=1"),
+    };
     const res = signUp
-      ? await authClient.signUp.email({
-          email,
-          password,
-          name: String(f.get("name")) || email.split("@")[0],
-          // Ссылка из письма подтверждения ведёт в «Баланс»: без подтверждения пополнение закрыто.
-          callbackURL: href("/dashboard/billing?verified=1"),
-        })
+      ? await authClient.signUp.email(signUpBody)
       : // Всегда «запомнить»: cookie dont_remember нет в Cookie Policy.
         await authClient.signIn.email({ email, password, rememberMe: true });
     if (res.error) {
       setBusy(null);
-      return setError(errorText(res.error.code));
+      return setError(errorText(res.error.code, res.error.status));
     }
     router.push(target);
     router.refresh();
@@ -135,6 +142,10 @@ export function AuthCard({ mode, next }: { mode: "sign-in" | "sign-up"; next?: s
             </Check>
             <Check checked={adult} onChange={setAdult}>
               {a.age}
+            </Check>
+            {/* Terms §2: закрытые страны — тот же список, что BLOCKED_COUNTRIES в lib/geo.ts. */}
+            <Check checked={location} onChange={setLocation}>
+              {fmtNodes(a.location, { terms: legalLink("terms") })}
             </Check>
           </div>
         ) : null}

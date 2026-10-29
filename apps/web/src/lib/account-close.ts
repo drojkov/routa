@@ -1,5 +1,5 @@
 import "server-only";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, isNull, or, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { createRefundRequest, notifyRefundRequest } from "@/lib/refunds";
 
@@ -9,7 +9,7 @@ import { createRefundRequest, notifyRefundRequest } from "@/lib/refunds";
  *
  * 1. Неиспользованный оплаченный баланс сразу уходит в заявку на возврат (сумма замораживается).
  * 2. Ключи отзываются, сессии и пароль удаляются (войти больше нельзя), сохранённые тексты запросов стираются.
- * 3. Email и имя обезличиваются — сразу или, если есть заявка на возврат в работе, после её решения
+ * 3. Email и имя обезличиваются (и в обращениях из формы /contact) — сразу или, если есть заявка на возврат в работе, после её решения
  *    (scripts/refund.mjs): до этого email нужен, чтобы связаться с клиентом по возврату.
  *
  * Та же логика для закрытия по письму — `npm run account close <email>` (scripts/account.mjs).
@@ -36,7 +36,7 @@ export async function closeAccount(userId: string, ip: string | null) {
 /** Обезличить закрытый аккаунт, если по нему не осталось заявок на возврат в работе. */
 export function anonymizeIfSettled(userId: string) {
   db.transaction((tx) => {
-    const u = tx.select({ closedAt: schema.user.closedAt }).from(schema.user).where(eq(schema.user.id, userId)).get();
+    const u = tx.select({ closedAt: schema.user.closedAt, email: schema.user.email }).from(schema.user).where(eq(schema.user.id, userId)).get();
     if (!u?.closedAt) return;
     const pending = tx
       .select({ id: schema.refundRequest.id })
@@ -44,9 +44,12 @@ export function anonymizeIfSettled(userId: string) {
       .where(and(eq(schema.refundRequest.userId, userId), eq(schema.refundRequest.status, "pending")))
       .get();
     if (pending) return;
-    tx.update(schema.user)
-      .set({ email: `closed-${userId}@closed.invalid`, name: "Closed account", image: null, emailVerified: false })
-      .where(eq(schema.user.id, userId))
+    const closedEmail = `closed-${userId}@closed.invalid`;
+    // Обращения из формы /contact — и привязанные к аккаунту, и отправленные гостем с того же email.
+    tx.update(schema.contactMessage)
+      .set({ name: "Closed account", email: closedEmail, userId })
+      .where(or(eq(schema.contactMessage.userId, userId), sql`lower(${schema.contactMessage.email}) = lower(${u.email})`))
       .run();
+    tx.update(schema.user).set({ email: closedEmail, name: "Closed account", image: null, emailVerified: false }).where(eq(schema.user.id, userId)).run();
   });
 }

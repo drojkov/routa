@@ -72,6 +72,8 @@ export const cabFr: CabDictionary = {
     edit: "Modifier",
     disable: "Pause",
     enable: "Réactiver",
+    blocked: "Bloquée par Harvanera",
+    blockedHint: "Cette clé a été bloquée par Harvanera et ne peut pas être utilisée. Contactez info@harvanera.com.",
     disabled: "En pause",
     revoked: "Révoquée",
     revoke: "Révoquer",
@@ -150,9 +152,12 @@ export const cabFr: CabDictionary = {
       errorNothing: "Aucun solde payé n’est remboursable.",
       requests: "Demandes de remboursement",
       status: { pending: "En cours d’examen", approved: "Remboursée", rejected: "Refusée" },
+      approx: "env. {amount}",
+      note: "Note du support : {note}",
       policy: "Comment fonctionnent les remboursements",
     },
   },
+  notices: { label: "Avis", dismiss: "Masquer" },
   settings: {
     title: "Paramètres", profile: "Profil", name: "Nom", email: "E-mail",
     logging: {

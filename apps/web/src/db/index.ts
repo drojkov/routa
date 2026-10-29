@@ -28,8 +28,13 @@ function open() {
 
 /** Тексты запросов храним 30 дней (Privacy §7; CONTENT_RETENTION_DAYS в lib/request-content.ts). */
 const CONTENT_RETENTION_MS = 30 * 86_400_000;
-/** Неоплаченный заказ закрывается через сутки (Terms §5.3 — лимит открытых заказов, ORDER_LIMITS). */
+/**
+ * Неоплаченный заказ закрывается через сутки (Terms §5.3 — лимит открытых заказов, ORDER_LIMITS).
+ * Счета для компаний (method = 'invoice') не закрываются: банковский перевод идёт дольше суток.
+ */
 export const ORDER_TTL_MS = 24 * 3_600_000;
+/** Privacy §7: 24 месяца — журнал входов, сообщения из формы, IP/страна/браузер в заказах и журнале запросов. */
+const LOG_RETENTION_MS = 730 * 86_400_000;
 
 /**
  * Плановая чистка: при открытии базы и затем раз в час. Работает в процессе сервера, без внешнего cron.
@@ -40,7 +45,15 @@ function scheduleMaintenance(sqlite: Database.Database) {
     try {
       const now = Date.now();
       sqlite.prepare("delete from request_content where created_at < ?").run(now - CONTENT_RETENTION_MS);
-      sqlite.prepare("update payment set status = 'canceled', updated_at = ? where status = 'pending' and created_at < ?").run(now, now - ORDER_TTL_MS);
+      sqlite.prepare("update payment set status = 'canceled', updated_at = ? where status = 'pending' and method != 'invoice' and created_at < ?").run(now, now - ORDER_TTL_MS);
+      // Privacy §7: 24 месяца. Сами заказы, проводки и request_log остаются (бухгалтерия — 7 лет).
+      const logCutoff = now - LOG_RETENTION_MS;
+      sqlite.prepare("delete from login_event where created_at < ?").run(logCutoff);
+      sqlite.prepare("delete from contact_message where created_at < ?").run(logCutoff);
+      sqlite
+        .prepare("update payment set ip_address = null, country = null, user_agent = null where created_at < ? and (ip_address is not null or country is not null or user_agent is not null)")
+        .run(logCutoff);
+      sqlite.prepare("update request_log set ip_address = null where created_at < ? and ip_address is not null").run(logCutoff);
     } catch (e) {
       console.error("[db] maintenance failed", e);
     }

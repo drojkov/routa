@@ -1,5 +1,6 @@
 import "server-only";
 import { AuthCard } from "@/components/site/auth-card";
+import { LegalMiniFooter } from "@/components/site/legal-mini-footer";
 import { LocaleSwitcher } from "@/components/site/locale-switcher";
 import { Logo } from "@/components/site/nav";
 
@@ -14,6 +15,7 @@ export function AuthPage(props: React.ComponentProps<typeof AuthCard>) {
         <LocaleSwitcher dark />
       </div>
       <AuthCard {...props} />
+      <LegalMiniFooter dark className="absolute bottom-5" />
     </div>
   );
 }

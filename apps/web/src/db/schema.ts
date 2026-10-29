@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { index, integer, primaryKey, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 const now = sql`(unixepoch() * 1000)`;
 const createdAt = () => integer("created_at", { mode: "timestamp_ms" }).notNull().default(now);
@@ -198,6 +198,8 @@ export const refundRequest = sqliteTable(
     amountMicros: integer("amount_micros").notNull(),
     status: text("status", { enum: ["pending", "approved", "rejected"] }).notNull().default("pending"),
     reason: text("reason"),
+    /** Комментарий поддержки к решению (причина отказа, частичное одобрение) — виден клиенту в кабинете. */
+    decisionNote: text("decision_note"),
     ipAddress: text("ip_address"),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
@@ -215,8 +217,39 @@ export const contactMessage = sqliteTable("contact_message", {
   topic: text("topic").notNull(),
   message: text("message").notNull(),
   ipAddress: text("ip_address"),
+  /** Обработано поддержкой (scripts/contact.mjs done); null — ждёт ответа. */
+  handledAt: integer("handled_at", { mode: "timestamp_ms" }),
   createdAt: createdAt(),
 });
+
+/**
+ * Уведомления в кабинете (Terms §17, §19 — «notify you by email or in the dashboard»).
+ * userId = null — всем. Добавляет поддержка: scripts/notice.mjs. Текст — на английском, как ввели.
+ */
+export const notice = sqliteTable("notice", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").references(() => user.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  body: text("body").notNull(),
+  /** null — бессрочно. */
+  expiresAt: integer("expires_at", { mode: "timestamp_ms" }),
+  createdAt: createdAt(),
+});
+
+/** Кто скрыл уведомление (без cookie — Cookie Policy их не упоминает). */
+export const noticeDismissal = sqliteTable(
+  "notice_dismissal",
+  {
+    noticeId: text("notice_id")
+      .notNull()
+      .references(() => notice.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    createdAt: createdAt(),
+  },
+  (t) => [primaryKey({ columns: [t.noticeId, t.userId] })],
+);
 
 /**
  * Журнал запросов к шлюзу (SPEC §5 п.5): метаданные без текста промптов.

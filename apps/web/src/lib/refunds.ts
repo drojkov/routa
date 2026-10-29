@@ -48,6 +48,7 @@ export function listRefundRequests(userId: string) {
       amountMicros: schema.refundRequest.amountMicros,
       status: schema.refundRequest.status,
       createdAt: schema.refundRequest.createdAt,
+      decisionNote: schema.refundRequest.decisionNote,
     })
     .from(schema.refundRequest)
     .where(eq(schema.refundRequest.userId, userId))
@@ -79,7 +80,11 @@ export function createRefundRequest(userId: string, reason: string | null, ipAdd
   });
 }
 
-/** Письма: поддержке — заявка в работу, клиенту — подтверждение получения (Refund Policy §2). */
+/**
+ * Письма: поддержке — заявка в работу, клиенту — подтверждение получения (Refund Policy §2).
+ * Вызывается только для заявок из кабинета (клиент вошёл в аккаунт — подтверждать с почты не нужно);
+ * заявки по письму создаёт поддержка (scripts/refund.mjs create) и отвечает клиенту сама.
+ */
 export async function notifyRefundRequest(input: { id: string; email: string; amountMicros: number; reason: string | null }) {
   const amount = `USD ${(input.amountMicros / 1_000_000).toFixed(2)}`;
   const ref = input.id.slice(0, 8).toUpperCase();
@@ -95,7 +100,7 @@ export async function notifyRefundRequest(input: { id: string; email: string; am
     `Request: #${ref}`,
     `Amount: ${amount}`,
     "",
-    "This amount is now on hold and can't be spent while we process the request. We refund to the original payment method within 10 business days of approval. We may ask you to confirm the request from this email address.",
+    "This amount is now on hold and can't be spent while we process the request. We refund to the original payment method within 10 business days of approval.",
     "",
     `Questions: ${COMPANY.email}. ${COMPANY.legalName}, ${COMPANY.address}.`,
   ].join("\n");

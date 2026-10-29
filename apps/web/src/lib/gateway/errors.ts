@@ -6,6 +6,7 @@ export const ERRORS = {
   invalid_request: { status: 400, type: "invalid_request_error", message: "Invalid request body." },
   model_not_allowed: { status: 403, type: "permission_error", message: "This key is not allowed to use this model." },
   model_blocked: { status: 403, type: "permission_error", message: "This model is not available for your account. Contact support." },
+  key_blocked: { status: 403, type: "permission_error", message: "This API key has been blocked by Harvanera. Contact info@harvanera.com." },
   account_suspended: { status: 403, type: "permission_error", message: "Your account is suspended or closed. Contact info@harvanera.com." },
   model_not_found: { status: 404, type: "invalid_request_error", message: "Model not found. See GET /v1/models." },
   rate_limited: { status: 429, type: "rate_limit_error", message: "Too many requests. Slow down and retry." },

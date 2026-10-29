@@ -88,6 +88,8 @@ Errors use the OpenAI format: `{"error": {"message": "...", "type": "...", "code
 | 402 | `insufficient_balance` | Top up the balance or lower `max_tokens`. |
 | 402 | `key_limit_exceeded` | The key reached its monthly limit — raise it on the API keys page. |
 | 403 | `model_not_allowed` | The key is restricted to other models. |
+| 403 | `key_blocked` | The key was blocked by Harvanera. Contact info@harvanera.com. |
+| 403 | `account_suspended` | The account is suspended or closed. Contact info@harvanera.com. |
 | 404 | `model_not_found` | Check the model ID against `GET /v1/models`. |
 | 429 | `rate_limited` | Too many requests — retry after the `Retry-After` header. |
 | 429 | `key_paused` | The key is paused after many failed requests in a row; wait and fix the requests. |

@@ -35,22 +35,19 @@ export async function accountState(userId: string) {
 
 /**
  * Authorization: Bearer sk-harvanera-… → активный ключ (не отозван, не выключен владельцем, не заблокирован поддержкой).
- * null — ключа нет; "suspended" — аккаунт заблокирован или закрыт.
+ * null — ключа нет; "suspended" — аккаунт заблокирован или закрыт; "key_blocked" — ключ заблокирован поддержкой.
  */
-export async function authenticate(request: Request): Promise<Actor | "suspended" | null> {
+export async function authenticate(request: Request): Promise<Actor | "suspended" | "key_blocked" | null> {
   const header = request.headers.get("authorization") ?? "";
   const plain = header.replace(/^Bearer\s+/i, "").trim();
   if (!plain.startsWith(KEY_PREFIX)) return null;
   const key = await db.query.apiKey.findFirst({
-    columns: { id: true, userId: true, limitMicros: true, lastUsedAt: true, allowedModels: true },
-    where: and(
-      eq(schema.apiKey.hash, hashKey(plain)),
-      isNull(schema.apiKey.revokedAt),
-      isNull(schema.apiKey.disabledAt),
-      isNull(schema.apiKey.blockedAt),
-    ),
+    columns: { id: true, userId: true, limitMicros: true, lastUsedAt: true, allowedModels: true, blockedAt: true },
+    where: and(eq(schema.apiKey.hash, hashKey(plain)), isNull(schema.apiKey.revokedAt), isNull(schema.apiKey.disabledAt)),
   });
   if (!key) return null;
+  // Блокировку поддержкой показываем явно (403 key_blocked), а не как неверный ключ.
+  if (key.blockedAt) return "key_blocked";
   const state = await accountState(key.userId);
   if (!state) return "suspended";
   // last_used_at с точностью до минуты — не пишем в БД на каждый запрос.

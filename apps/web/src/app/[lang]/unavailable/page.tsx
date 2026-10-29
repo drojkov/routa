@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { LegalMiniFooter } from "@/components/site/legal-mini-footer";
 import { Nav } from "@/components/site/nav";
 import { fmtNodes } from "@/i18n/fmt";
 import { useI18n } from "@/i18n/provider";
@@ -30,6 +31,7 @@ export default function Unavailable() {
           {u.models}
         </Link>
       </main>
+      <LegalMiniFooter className="pb-8" />
     </>
   );
 }

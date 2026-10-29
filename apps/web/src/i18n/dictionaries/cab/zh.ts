@@ -72,6 +72,8 @@ export const cabZh: CabDictionary = {
     edit: "编辑",
     disable: "暂停",
     enable: "恢复",
+    blocked: "已被 Harvanera 封禁",
+    blockedHint: "此密钥已被 Harvanera 封禁，无法使用。请联系 info@harvanera.com。",
     disabled: "已暂停",
     revoked: "已撤销",
     revoke: "撤销",
@@ -150,9 +152,12 @@ export const cabZh: CabDictionary = {
       errorNothing: "没有可退款的已付款余额。",
       requests: "退款申请",
       status: { pending: "审核中", approved: "已退款", rejected: "已拒绝" },
+      approx: "约 {amount}",
+      note: "客服备注：{note}",
       policy: "退款规则说明",
     },
   },
+  notices: { label: "通知", dismiss: "关闭" },
   settings: {
     title: "设置", profile: "个人资料", name: "姓名", email: "邮箱",
     logging: {

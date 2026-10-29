@@ -58,7 +58,8 @@ async function sendTopUpConfirmation(paymentId: string) {
   const site = siteUrl();
   const refunds = `${site}/en/legal/refunds`;
   const terms = `${site}/en/legal/terms`;
-  const waiver = en.dashboard.topup.waiver;
+  // Цитируем ровно тот текст, который клиент видел при заказе; у старых заказов его нет — английский.
+  const waiver = p.waiverText || en.dashboard.topup.waiver;
   const seller = `${COMPANY.legalName}, registration number ${COMPANY.crNumber}, ${COMPANY.address}`;
 
   const text = [

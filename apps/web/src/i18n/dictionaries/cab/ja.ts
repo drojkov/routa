@@ -72,6 +72,8 @@ export const cabJa: CabDictionary = {
     edit: "編集",
     disable: "一時停止",
     enable: "再開",
+    blocked: "Harvanera によりブロック",
+    blockedHint: "このキーは Harvanera によりブロックされているため使用できません。info@harvanera.com までご連絡ください。",
     disabled: "一時停止中",
     revoked: "無効化済み",
     revoke: "無効化",
@@ -150,9 +152,12 @@ export const cabJa: CabDictionary = {
       errorNothing: "返金できる有料残高がありません。",
       requests: "返金リクエスト",
       status: { pending: "審査中", approved: "返金済み", rejected: "却下" },
+      approx: "約 {amount}",
+      note: "サポートからのメモ：{note}",
       policy: "返金の仕組み",
     },
   },
+  notices: { label: "お知らせ", dismiss: "閉じる" },
   settings: {
     title: "設定", profile: "プロフィール", name: "名前", email: "メール",
     logging: {

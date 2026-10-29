@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Effective date: 30 September 2026**
+**Effective date: 29 October 2026**
 
 This Privacy Policy explains how **Harvanera Limited** ("Harvanera", "we", "us" or "our") handles personal data when you visit our website, create an account, make a payment, contact us or use our dashboard and API (together, the "Service"). Please read it together with our [Terms of Service](/legal/terms), [Cookie Policy](/legal/cookies).
 
@@ -34,14 +34,14 @@ When you select a model, we transmit the content of your request to the provider
 
 **By default, we do not store the content of your prompts or responses as a request history.** We store request metadata for billing, account history, security and support. If you enable request logging in your dashboard, we store the content of requests and responses so you can review it. Turning logging off stops the creation of new content logs; it does not by itself change how a Model Provider handles data it has already received. 
 
-We do not use your prompts or responses to train models. A Model Provider may process or retain request content under its own terms, for example to operate its model, prevent abuse or meet legal obligations. Review the information about the selected provider before sending sensitive content. Do not include another person's sensitive personal data unless you have a lawful basis and a need to submit it.
+We do not use your prompts or responses to train models. A Model Provider may process or retain request content under its own terms, for example to operate its model, prevent abuse or meet legal obligations. Section 5 identifies the provider that processes requests for the models on the Service; review its information before sending sensitive content. Do not include another person's sensitive personal data unless you have a lawful basis and a need to submit it.
 
 ## 4. Why we use personal data
 
 We use personal data to:
 
 - register and authenticate accounts, manage API keys and settings, forward requests to the selected Model Provider and return responses;
-- display usage, calculate charges, process top-ups and refunds, and issue receipts or invoices;
+- display usage, calculate charges, process top-ups and refunds, provide transaction records in your dashboard and issue invoices on request;
 - answer questions, investigate support requests and communicate service or account changes;
 - keep the Service secure, detect fraud or abuse, enforce our Terms and comply with applicable sanctions and other legal requirements, including by determining your approximate country from your IP address to apply the location restrictions in our Terms;
 - verify payments and respond to payment disputes and chargebacks, including by providing order, consent and sign-in records to our payment service provider and card networks;
@@ -58,7 +58,7 @@ Where EU or UK data protection law applies to processing for which we are the co
 | Request content logging that you choose to enable | Providing the logging feature you request as part of the Service |
 | Optional cookies or direct marketing, if introduced and where consent is required | Your consent, which you can withdraw |
 
-When we process a business customer's end-user data on its behalf, that customer is responsible for identifying the legal basis for its own use of the data and for giving any required notices to its users. Our processing for that customer is subject to the applicable data-processing arrangements.
+When we process a business customer's end-user data on its behalf, that customer is responsible for identifying the legal basis for its own use of the data and for giving any required notices to its users. A business customer that needs a data processing agreement for that processing can request one from [info@harvanera.com](mailto:info@harvanera.com) before submitting such data.
 
 We may use automated signals to identify suspicious sign-ups, payments or requests. Our payment service provider may separately decide whether to accept a payment. If an automated check affects your access to the Service, contact [info@harvanera.com](mailto:info@harvanera.com). Any right to contest a decision made solely by automated means under applicable law remains unaffected.
 
@@ -76,7 +76,7 @@ We do not sell personal data or disclose it for cross-context behavioural advert
 
 ## 6. Processing outside Hong Kong
 
-Harvanera is based in Hong Kong. The Model Provider you choose and the companies supporting our website, payments and communications may process data in other countries. Depending on the selected model and the services involved, these may include the United States, mainland China and other locations. The Service is unavailable to customers in the locations listed in our [Terms of Service](/legal/terms); this does not mean that a provider located in one of those places cannot receive a request where lawful and disclosed here.
+Harvanera is based in Hong Kong. Our servers, including our database and email server, are hosted in Finland (European Union). Website and API traffic passes through Cloudflare, Inc. (United States), which provides network security and content delivery. Request content is processed by DeepInfra, Inc. in the United States. Our payment service provider may process payment data in other countries under its own privacy notice. The Service is unavailable to customers in the locations listed in our [Terms of Service](/legal/terms); this does not mean that a provider located in one of those places cannot receive a request where lawful and disclosed here.
 
 Different countries have different data protection laws. We take account of the laws that apply to a transfer and of the recipient's role and protections. If EU or UK transfer rules apply, an applicable legal transfer mechanism and any required safeguards must be in place. You can ask [info@harvanera.com](mailto:info@harvanera.com) for information about the arrangements relevant to a particular provider or transfer.
 
@@ -86,11 +86,12 @@ We keep personal data for the time needed for the purpose for which it was colle
 
 | Data | Retention approach |
 | --- | --- |
-| Account information and settings | While the account is open, then only as long as needed to complete closure, resolve outstanding matters or meet a legal duty |
+| Account information and settings | While the account is open. When you close your account, we delete your password, sessions and saved request content and revoke your API keys; we anonymise your name and email address once any outstanding refund is resolved |
 | Request metadata | As needed to show usage, calculate charges, investigate errors or abuse and handle disputes; no longer than necessary for those purposes |
 | Request content when logging is off | Processed to fulfil the request; not stored by us as a request history |
-| Request content when logging is on | Kept for **30 days**, then deleted automatically; we may keep limited information for an unresolved security or legal matter where permitted |
-| Security logs, sign-in history, order and consent records, and support communications | For as long as needed to investigate security events, respond to you, resolve payment disputes and chargebacks or protect legal rights |
+| Request content when logging is on | Kept for **30 days**, then deleted automatically from our live database. Copies may remain in routine backups for up to **14 further days** until those backups are overwritten. We may keep limited information for an unresolved security or legal matter where permitted |
+| Sign-in history, support communications, and IP addresses and browser information in order, consent and request records | Up to **24 months** after they are created, then deleted or anonymised automatically. We may keep specific records longer only while they are needed for an unresolved security investigation, payment dispute, chargeback or legal claim |
+| Database backups | Kept for up to **14 days**, then overwritten |
 | Business and accounting records | For at least seven years after the transactions they document where Hong Kong record-keeping law applies, and longer only if another legal duty or unresolved claim requires it |
 
 Model Providers and payment service providers have their own retention practices. Their privacy notices may apply to information they receive. Turning off request logging or closing your Harvanera account does not itself delete records held by those independent providers.
@@ -103,7 +104,7 @@ Keep your password and API keys confidential. If you suspect a key has leaked, r
 
 ## 9. Your choices and rights
 
-You can turn request logging on or off in your dashboard, manage your API keys and spending limits, and ask to close your account. You can also contact us about access to, or correction of, personal data we hold about you.
+You can turn request logging on or off in your dashboard, delete saved request content, download a copy of your account data, manage your API keys and spending limits, and close your account in your dashboard settings. You can also contact us about access to, or correction of, personal data we hold about you.
 
 The rights available to you depend on the law that applies. They may include the rights to access and correct data; request deletion, restriction or portability; object to certain processing; and withdraw consent where consent is the basis for processing. Withdrawal does not affect processing already carried out lawfully. Some requests may be limited where we must retain records or another legal exception applies.
 

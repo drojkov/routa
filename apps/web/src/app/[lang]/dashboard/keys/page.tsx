@@ -27,6 +27,7 @@ export default async function KeysPage({ params, searchParams }: PageProps<"/[la
         createdAt: k.createdAt.getTime(),
         lastUsedAt: k.lastUsedAt?.getTime() ?? null,
         disabled: !!k.disabledAt,
+        blocked: !!k.blockedAt,
         revoked: !!k.revokedAt,
         spendUsd: (spend.get(k.id)?.costMicros ?? 0) / 1_000_000,
         requests: spend.get(k.id)?.requests ?? 0,

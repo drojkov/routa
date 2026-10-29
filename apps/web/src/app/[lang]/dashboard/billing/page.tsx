@@ -27,7 +27,7 @@ export default async function BillingPage({ params, searchParams }: PageProps<"/
         currency: o.currency,
         amountMinor: o.amountMinor,
       }))}
-      refunds={refunds.map((r) => ({ id: r.id, usd: r.amountMicros / 1_000_000, status: r.status, at: r.createdAt.getTime() }))}
+      refunds={refunds.map((r) => ({ id: r.id, usd: r.amountMicros / 1_000_000, status: r.status, at: r.createdAt.getTime(), note: r.decisionNote }))}
       refundableUsd={getRefundableMicros(user.id) / 1_000_000}
       email={user.email}
       emailVerified={user.emailVerified}

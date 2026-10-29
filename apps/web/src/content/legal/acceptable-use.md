@@ -1,6 +1,6 @@
 # Acceptable Use Policy
 
-*Effective date: 30 September 2026*
+*Effective date: 29 October 2026*
 
 This policy sets out what you may not do with Harvanera's Service. It forms part of our [Terms of Service](/legal/terms) and applies to everyone who uses the Service, including anyone using a product you build on top of it.
 
@@ -19,7 +19,7 @@ You must not use the Service to create, request or distribute content, or to car
 
 ### 2.1 Harm people
 
-- sexualise or exploit children in any way, including child sexual abuse material (we report such material to the relevant authorities);
+- sexualise or exploit children in any way, including child sexual abuse material (when we become aware of such material, we preserve the relevant records and report it to the relevant authorities);
 - promote, incite or facilitate violence, terrorism or violent extremism;
 - threaten, harass, bully, stalk or intimidate anyone;
 - promote self-harm or suicide, or give instructions for it;
@@ -51,7 +51,7 @@ You must not use the Service to create, request or distribute content, or to car
 
 - create malware, ransomware or tools for unauthorised access, or attack any system or network;
 - test the security of the Service without our written permission (please report vulnerabilities to [info@harvanera.com](mailto:info@harvanera.com));
-- overload the Service, bypass rate limits, spending limits, content filters or safety measures of the Service or of any model;
+- overload the Service, or bypass rate limits, spending limits or other technical restrictions of the Service, or safety measures built into any model;
 - attempt to "jailbreak" models to produce content prohibited by this policy;
 - share API keys publicly, sell or rent accounts or keys, or create multiple accounts to obtain welcome credit;
 - send spam or bulk unsolicited messages;
@@ -67,12 +67,12 @@ If you let other people use a product built on Harvanera:
 
 ## 4. What we do about breaches
 
-We do not read your requests by default and do not pre-screen content. We may act when we receive a report, detect abnormal use in request metadata, or are notified by a model provider, payment processor or authority.
+We do not read your requests by default and do not pre-screen content. We may act when we receive a report, see unusual patterns in request metadata (such as request volume, error rates or spending), or are notified by a model provider, payment processor or authority.
 
 Depending on how serious the breach is, we may:
 
 - warn you and ask you to fix the problem;
-- block specific requests, models or API keys;
+- block specific API keys or your access to specific models;
 - suspend or close your account, as described in the [Terms of Service](/legal/terms);
 - report illegal content or activity to the relevant authorities.
 

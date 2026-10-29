@@ -10,6 +10,11 @@
  *   npm run account block-model <email> <model-id>     # закрыть модель этому аккаунту
  *   npm run account unblock-model <email> <model-id>
  *   npm run account credit <email> <usd> <reason>      # исправить ошибку списания: зачислить на баланс
+ *   npm run account debit <email> <usd> <reason>       # исправить ошибку в пользу клиента: списать (не ниже нуля)
+ *   npm run account verify-email <email>               # отметить email подтверждённым (пока письма не уходят)
+ *   npm run account rename <email> <new name>          # исправить имя по просьбе клиента (Privacy §9)
+ *   npm run account set-email <email> <new email>      # сменить email: подтверждение сбрасывается
+ *   npm run account export <email> > data.json         # выгрузка данных, как /api/account/export (запрос по почте)
  *   npm run account close <email>                      # закрыть по письму клиента (как кнопка в кабинете)
  *   npm run account invoices                           # запрошенные счета для компаний (Terms §5.2)
  *   npm run account invoice-paid <payment-id>          # деньги по счёту пришли: зачислить и отправить подтверждение
@@ -56,6 +61,21 @@ function refundable(userId) {
     userId,
   );
   return Math.max(0, Math.min(balance, paid + refunded + back));
+}
+/** Строка SQLite → как в выгрузке через Drizzle: camelCase, даты ISO, JSON-поля разобраны, флаги — boolean. */
+const BOOL = new Set(["email_verified", "log_content", "stream", "estimated"]);
+const JSON_COLS = new Set(["allowed_models", "blocked_models"]);
+function row(r) {
+  const out = {};
+  for (const [k, v] of Object.entries(r)) {
+    const key = k.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+    if (v == null) out[key] = v;
+    else if (k.endsWith("_at")) out[key] = new Date(v);
+    else if (BOOL.has(k)) out[key] = !!v;
+    else if (JSON_COLS.has(k)) out[key] = JSON.parse(v);
+    else out[key] = v;
+  }
+  return out;
 }
 function models(u) {
   return u.blocked_models ? JSON.parse(u.blocked_models) : [];
@@ -127,6 +147,77 @@ const commands = {
     );
     console.log(`Credited USD ${usd(micros)} to ${u.email} (refundable as paid balance).`);
   },
+  debit() {
+    const u = userByEmail(args[0]);
+    const amount = Number(args[1]);
+    const reason = args.slice(2).join(" ");
+    if (!(amount > 0) || !reason) die("Usage: debit <email> <usd> <reason>");
+    const micros = Math.round(amount * 1_000_000);
+    const res = db.transaction(() => {
+      const balance = sum("select coalesce(sum(amount_micros),0) v from ledger where user_id = ?", u.id);
+      if (balance - micros < 0) return { error: `Balance is USD ${usd(balance)} — a debit of USD ${usd(micros)} would make it negative. Debit at most the balance.` };
+      // ref не 'correction:' — списание считается расходом, а не уменьшением оплаченного (refundable в lib/refunds.ts).
+      db.prepare("insert into ledger (id, user_id, kind, amount_micros, ref, note, created_at) values (?, ?, 'adjust', ?, ?, ?, ?)").run(
+        randomUUID(),
+        u.id,
+        -micros,
+        `debit-correction:${randomUUID()}`,
+        `Billing correction: ${reason}`.slice(0, 200),
+        now,
+      );
+      return { balance: balance - micros };
+    })();
+    if (res.error) die(res.error);
+    console.log(`Debited USD ${usd(micros)} from ${u.email}. Balance now USD ${usd(res.balance)}. Tell the customer why.`);
+  },
+  "verify-email"() {
+    const u = userByEmail(args[0]);
+    db.prepare("update user set email_verified = 1, updated_at = ? where id = ?").run(now, u.id);
+    console.log(`Email ${u.email} marked as verified.`);
+  },
+  rename() {
+    const u = userByEmail(args[0]);
+    const name = args.slice(1).join(" ").trim();
+    if (!name) die("Usage: rename <email> <new name>");
+    db.prepare("update user set name = ?, updated_at = ? where id = ?").run(name.slice(0, 100), now, u.id);
+    console.log(`Renamed ${u.email}: "${u.name}" → "${name.slice(0, 100)}".`);
+  },
+  "set-email"() {
+    const u = userByEmail(args[0]);
+    const email = (args[1] ?? "").trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) die("Usage: set-email <email> <new email>");
+    if (db.prepare("select 1 from user where lower(email) = ? and id != ?").get(email, u.id)) die(`Email ${email} is already used by another account.`);
+    db.prepare("update user set email = ?, email_verified = 0, updated_at = ? where id = ?").run(email, now, u.id);
+    console.log(`Email changed: ${u.email} → ${email}. Not verified — confirm ownership, then npm run account verify-email ${email}`);
+  },
+  export() {
+    // Копия /api/account/export (app/api/account/export/route.ts): правки вносить в оба места.
+    const u = userByEmail(args[0]);
+    const all = (sql, ...p) => db.prepare(sql).all(...p).map(row);
+    const cutoff = now - 30 * 86_400_000; // CONTENT_RETENTION_DAYS (lib/request-content.ts)
+    const data = {
+      exportedAt: new Date(now),
+      profile: row(u),
+      signInMethods: all("select provider_id as provider, created_at from account where user_id = ?", u.id),
+      activeSessions: all("select created_at, expires_at, ip_address, user_agent from session where user_id = ?", u.id),
+      apiKeys: all(
+        "select name, prefix, limit_micros, allowed_models, created_at, last_used_at, disabled_at, blocked_at, revoked_at from api_key where user_id = ?",
+        u.id,
+      ),
+      ledger: all("select * from ledger where user_id = ? order by created_at desc", u.id),
+      payments: all("select * from payment where user_id = ? order by created_at desc", u.id),
+      refundRequests: all("select * from refund_request where user_id = ? order by created_at desc", u.id),
+      signInHistory: all("select * from login_event where user_id = ? order by created_at desc", u.id),
+      requestLog: all("select * from request_log where user_id = ? order by created_at desc", u.id),
+      contactMessages: all("select * from contact_message where user_id = ? order by created_at desc", u.id),
+      requestContent: all(
+        "select id as request_id, request, response, created_at from request_content where user_id = ? and created_at >= ? order by created_at desc",
+        u.id,
+        cutoff,
+      ),
+    };
+    process.stdout.write(JSON.stringify(data, null, 2) + "\n");
+  },
   close() {
     const u = userByEmail(args[0]);
     if (u.closed_at) die("Account is already closed.");
@@ -146,7 +237,9 @@ const commands = {
       db.prepare("delete from session where user_id = ?").run(u.id);
       db.prepare("delete from account where user_id = ?").run(u.id);
       if (!pending && !refund) {
-        db.prepare("update user set email = ?, name = 'Closed account', image = null, email_verified = 0 where id = ?").run(`closed-${u.id}@closed.invalid`, u.id);
+        const closed = `closed-${u.id}@closed.invalid`;
+        db.prepare("update contact_message set name = 'Closed account', email = ?, user_id = ? where user_id = ? or lower(email) = lower(?)").run(closed, u.id, u.id, u.email);
+        db.prepare("update user set email = ?, name = 'Closed account', image = null, email_verified = 0 where id = ?").run(closed, u.id);
       }
       return { refund, pending };
     })();

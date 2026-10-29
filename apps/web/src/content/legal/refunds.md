@@ -1,6 +1,6 @@
 # Refund Policy
 
-*Effective date: 30 September 2026*
+*Effective date: 29 October 2026*
 
 This policy explains when and how you can get money back from Harvanera Limited ("Harvanera"). It forms part of our [Terms of Service](/legal/terms).
 
@@ -22,7 +22,7 @@ You can ask us to refund the part of your paid balance that you have not used, w
 - **Review:** We confirm receipt by email and review each request within 3 business days. We may decline or delay a request while a payment is disputed, or where we reasonably suspect fraud or a breach of our Terms; we will tell you why, unless the law prevents us.
 - **Deductions:** We do not deduct our payment processing fees from the refund. Any amount we are legally required to withhold or permitted to apply because of fraud, a chargeback or a serious breach is governed by the [Terms of Service](/legal/terms) and applicable law.
 - **Timing:** We send an approved refund within 10 business days of approval. Your payment provider may take additional time to show it.
-- **Method and currency:** We refund only to the original payment method, in the currency of the original payment. If that is no longer possible (for example, the card has been closed), we will agree another method with you after verifying your identity. For details about a particular refund, email [info@harvanera.com](mailto:info@harvanera.com).
+- **Method and currency:** We refund only to the original payment method. Your balance and refund amounts are calculated in US dollars (USD), and the dashboard shows the refundable amount in USD. If you paid in another currency, we refund in that currency at the exchange rate shown on the order page for that top-up; your card issuer may apply its own conversion. If that is no longer possible (for example, the card has been closed), we will agree another method with you after verifying your identity. For details about a particular refund, email [info@harvanera.com](mailto:info@harvanera.com).
 - **Invoiced top-ups:** We normally refund by bank transfer to the account from which the payment came.
 
 ## 3. 14-day right of withdrawal (EU, EEA and UK consumers)

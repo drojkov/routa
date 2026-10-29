@@ -72,6 +72,8 @@ export const cabPt: CabDictionary = {
     edit: "Editar",
     disable: "Pausar",
     enable: "Retomar",
+    blocked: "Bloqueada pela Harvanera",
+    blockedHint: "A Harvanera bloqueou esta chave e ela não pode ser usada. Escreva para info@harvanera.com.",
     disabled: "Pausada",
     revoked: "Revogada",
     revoke: "Revogar",
@@ -150,9 +152,12 @@ export const cabPt: CabDictionary = {
       errorNothing: "Não há saldo pago para reembolsar.",
       requests: "Pedidos de reembolso",
       status: { pending: "Em análise", approved: "Reembolsado", rejected: "Recusado" },
+      approx: "aprox. {amount}",
+      note: "Nota do suporte: {note}",
       policy: "Como funcionam os reembolsos",
     },
   },
+  notices: { label: "Avisos", dismiss: "Dispensar" },
   settings: {
     title: "Configurações", profile: "Perfil", name: "Nome", email: "E-mail",
     logging: {

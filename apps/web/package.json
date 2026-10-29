@@ -13,6 +13,8 @@
     "evidence": "node scripts/evidence.mjs",
     "refund": "node scripts/refund.mjs",
     "account": "node scripts/account.mjs",
+    "contact": "node scripts/contact.mjs",
+    "notice": "node scripts/notice.mjs",
     "db:backup": "node scripts/db-backup.mjs"
   },
   "dependencies": {

@@ -15,6 +15,7 @@ import { notifyInvoiceRequest } from "@/lib/payments";
 import { clientIp, countryOf } from "@/lib/geo";
 import { creditPayment, demoPaymentsEnabled } from "@/lib/payments";
 import { createRefundRequest, notifyRefundRequest } from "@/lib/refunds";
+import { dismissNoticeFor } from "@/lib/notices";
 import { getRequestContent } from "@/lib/request-content";
 import { MODELS } from "@/lib/site";
 
@@ -90,6 +91,8 @@ export async function updateApiKey(input: {
     }
   }
   if (input.disabled !== undefined) set.disabledAt = input.disabled ? new Date() : null;
+  // Ключ, заблокированный поддержкой, владелец не ставит на паузу и не включает (снимает только поддержка).
+  const notBlocked = input.disabled !== undefined ? isNull(schema.apiKey.blockedAt) : undefined;
   if (input.allowedModels !== undefined) {
     if (input.allowedModels === null) set.allowedModels = null;
     else {
@@ -103,7 +106,7 @@ export async function updateApiKey(input: {
   const res = await db
     .update(schema.apiKey)
     .set(set)
-    .where(and(eq(schema.apiKey.id, input.id), eq(schema.apiKey.userId, userId), isNull(schema.apiKey.revokedAt)))
+    .where(and(eq(schema.apiKey.id, input.id), eq(schema.apiKey.userId, userId), isNull(schema.apiKey.revokedAt), notBlocked))
     .returning({ id: schema.apiKey.id });
   if (!res.length) return { ok: false, error: "not_found" };
   revalidatePath("/[lang]/dashboard", "layout");
@@ -252,4 +255,12 @@ export async function closeMyAccount(lang: string) {
   if (!session) throw new Error("Unauthorized");
   await closeAccount(session.user.id, clientIp(h));
   redirect(`/${isLocale(lang) ? lang : "en"}`);
+}
+
+/** Скрыть уведомление в кабинете (хранится в notice_dismissal, без cookie). */
+export async function dismissNotice(id: string) {
+  const userId = await currentUserId();
+  if (typeof id !== "string" || !dismissNoticeFor(userId, id)) return { ok: false as const };
+  revalidatePath("/[lang]/dashboard", "layout");
+  return { ok: true as const };
 }
