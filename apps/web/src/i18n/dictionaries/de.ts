@@ -152,6 +152,7 @@ export const de: Dictionary = {
     support: "Support",
     contactUs: "Kontakt",
     cookieSettings: "Cookie-Einstellungen",
+    withdraw: "Aufladung widerrufen",
     rights: "© {year} {company}. Alle Rechte vorbehalten.",
     registered: "Eingetragen in {jurisdiction}.",
     geo: "IP-Geolokalisierung von {dbip}",

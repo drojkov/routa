@@ -41,13 +41,13 @@ We make the refund without undue delay and within **14 days** of receiving your 
 
 ### 3.3 How to withdraw
 
-Send a clear statement that you wish to withdraw by emailing [info@harvanera.com](mailto:info@harvanera.com) or writing to Harvanera Limited, Unit 704C, 7/F, Block 3, Nan Fung Industrial City, 18 Tin Hau Road, Tuen Mun, N.T., Hong Kong.
+The easiest way is to sign in and press **Withdraw from contract here** next to the top-up in the Billing section of your dashboard (also linked as "Withdraw from a top-up" in the website footer), then confirm. You can also send a clear statement that you wish to withdraw by emailing [info@harvanera.com](mailto:info@harvanera.com) or writing to Harvanera Limited, Unit 704C, 7/F, Block 3, Nan Fung Industrial City, 18 Tin Hau Road, Tuen Mun, N.T., Hong Kong.
 
 You may use this wording, but you do not have to:
 
 > To Harvanera Limited, Unit 704C, 7/F, Block 3, Nan Fung Industrial City, 18 Tin Hau Road, Tuen Mun, N.T., Hong Kong, [info@harvanera.com](mailto:info@harvanera.com): I hereby give notice that I withdraw from my contract for the following top-up: [top-up date, amount, transaction ID]. Name: […] Account email: […] Date: […]
 
-It is enough to send your notice before the 14-day period ends. We will confirm receipt by email without delay.
+It is enough to send your notice before the 14-day period ends. We will confirm receipt by email without delay, stating the content of your notice and the date and time we received it.
 
 ### 3.4 Confirmation of your purchase
 

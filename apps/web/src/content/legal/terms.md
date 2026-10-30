@@ -59,12 +59,12 @@ The Service operates on a prepaid basis. Your balance is held in US dollars (USD
 
 ### 5.2 Top-ups
 
-- You can top up by any amount you choose in US dollars, to the cent, from **USD 1** to **USD 10,000** per top-up. The amount you enter is the amount credited to your balance. You can pay by card in USD, EUR, GBP, CNY, JPY, INR, BRL or HKD.
+- You can top up by any amount you choose in US dollars, to the cent, from **USD 1** to **USD 10,000** per top-up. The amount you enter is the amount credited to your balance. You can pay by card or digital wallet (Apple Pay or Google Pay, where your device supports it) in USD, EUR, GBP, CNY, JPY, INR, BRL or HKD.
 - You must confirm your email address before you can top up.
 - If you pay in a currency other than USD, we will show you the exchange rate and the resulting USD top-up amount before you confirm payment. We will also show the total amount payable in your selected payment currency.
 - Any applicable taxes, including VAT or GST where relevant, will be displayed on the payment page and included in the total amount shown before you confirm payment. The amount added to your balance and the total amount charged will be shown separately where tax applies.
 - Business users can request an invoice for a top-up. The corresponding balance is credited after payment is received.
-- Card payments are handled by a third-party payment service provider. We do not request or store your full payment-card number.
+- Card and wallet payments are handled by a third-party payment service provider. We do not request or store your full payment-card number.
 - Your bank or card issuer may impose additional charges, such as foreign-transaction fees, under its own terms. Those charges are outside our control.
 
 ### 5.3 Fraud prevention
@@ -89,7 +89,7 @@ Each API request is charged against your balance according to the published pric
 
 We may change model prices, including when a Model Provider changes its prices. A changed price takes effect when we publish it in our catalogue and applies only to requests made after publication; it does not change charges for earlier requests. We do not provide a separate advance notice for each price change unless applicable law requires one. You can stop making requests and seek a refund of your unused paid balance under our [Refund Policy](/legal/refunds).
 
-A request that fails because of an error on our side is not charged. If a Model Provider has processed a request, you may be charged for the units actually processed even if you cancel the request while it is streaming or the model refuses to provide the requested output. If we discover a billing error, we will correct it and adjust your balance accordingly.
+A request that fails because of an error on our side is not charged. If a Model Provider has processed a request, you may be charged for the units actually processed even if you cancel the request while it is streaming, the stream is interrupted or the model refuses to provide the requested output. If a streamed response ends before the Model Provider reports the units processed, we charge an estimate based on your input and the output already delivered to you, and mark the charge as estimated in your dashboard. If we discover a billing error, we will correct it and adjust your balance accordingly.
 
 ### 5.6 Balance expiry
 

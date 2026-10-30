@@ -197,6 +197,12 @@ export const refundRequest = sqliteTable(
       .references(() => user.id, { onDelete: "cascade" }),
     amountMicros: integer("amount_micros").notNull(),
     status: text("status", { enum: ["pending", "approved", "rejected"] }).notNull().default("pending"),
+    /**
+     * refund — возврат неиспользованного баланса (Refund Policy §2);
+     * withdrawal — отзыв пополнения в 14 дней (§3, ст. 11a CRD), тогда paymentId — какое пополнение.
+     */
+    kind: text("kind", { enum: ["refund", "withdrawal"] }).notNull().default("refund"),
+    paymentId: text("payment_id").references(() => payment.id, { onDelete: "set null" }),
     reason: text("reason"),
     /** Комментарий поддержки к решению (причина отказа, частичное одобрение) — виден клиенту в кабинете. */
     decisionNote: text("decision_note"),

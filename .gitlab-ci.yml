@@ -125,7 +125,18 @@ support:
     # Аргументы разбирает shell на сервере — кавычки работают; ; | & ` $ < > запрещены.
     - |
       case "$SUPPORT_CMD" in *[\;\|\&\`\$\<\>]*) echo "SUPPORT_CMD: запрещённые символы"; exit 1 ;; esac
-    - ssh deploy "cd '$DEPLOY_PATH' && sh -s -- $SUPPORT_CMD" < deploy/support.sh
+    # Вывод (email, IP, журнал входов клиентов) — не в лог задачи, который хранится бессрочно,
+    # а в артефакт support-output.txt, он удаляется через 7 дней (Privacy §7). Скачать: страница задачи → Job artifacts.
+    - |
+      set +e
+      ssh deploy "cd '$DEPLOY_PATH' && sh -s -- $SUPPORT_CMD" < deploy/support.sh > support-output.txt 2>&1
+      code=$?
+      echo "Готово (код $code), строк вывода: $(wc -l < support-output.txt). Результат — в артефакте support-output.txt (хранится 7 дней)."
+      exit $code
+  artifacts:
+    when: always
+    paths: [support-output.txt]
+    expire_in: 7 days
   rules:
     - if: $SUPPORT_CMD && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 

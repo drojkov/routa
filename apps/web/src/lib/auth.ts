@@ -3,15 +3,17 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { APIError, createAuthMiddleware } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
-import { eq } from "drizzle-orm";
+import { and, eq, gte, ne } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { SIGNUP_BONUS_USD } from "@/lib/billing";
 import { escapeHtml, sendEmail } from "@/lib/email";
-import { CLIENT_IP_HEADER, CLIENT_IP_HEADERS, countryOf } from "@/lib/geo";
+import { CLIENT_IP_HEADER, CLIENT_IP_HEADERS, clientIp, countryOf } from "@/lib/geo";
 
 const env = process.env;
 
 const SITE_URL = "https://harvanera.com";
+/** Окно, в котором второй аккаунт с того же IP не получает бонус. */
+const BONUS_IP_WINDOW_MS = 30 * 86_400_000;
 const PROD_ORIGINS = [SITE_URL, "https://www.harvanera.com"];
 
 export const auth = betterAuth({
@@ -86,7 +88,21 @@ export const auth = betterAuth({
     user: {
       create: {
         // Бонус на тест — одна проводка на пользователя (ref уникален).
-        after: async (u) => {
+        // Terms §5.4 / AUP §2.5: один бонус на человека — если с этого IP за 30 дней уже входил
+        // другой аккаунт, бонус не даём (защита от мультиаккаунтов ради $1).
+        after: async (u, ctx) => {
+          const headers = ctx?.request?.headers ?? ctx?.headers;
+          const ip = headers ? clientIp(headers) : null;
+          if (ip) {
+            const seen = await db.query.loginEvent.findFirst({
+              columns: { id: true },
+              where: and(eq(schema.loginEvent.ipAddress, ip), ne(schema.loginEvent.userId, u.id), gte(schema.loginEvent.createdAt, new Date(Date.now() - BONUS_IP_WINDOW_MS))),
+            });
+            if (seen) {
+              console.warn(`[auth] welcome credit withheld for ${u.id}: IP already used by another account in 30 days`);
+              return;
+            }
+          }
           await db
             .insert(schema.ledger)
             .values({

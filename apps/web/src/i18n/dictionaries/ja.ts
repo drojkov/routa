@@ -152,6 +152,7 @@ export const ja: Dictionary = {
     support: "サポート",
     contactUs: "お問い合わせ",
     cookieSettings: "Cookie 設定",
+    withdraw: "チャージの撤回",
     rights: "© {year} {company}. All rights reserved.",
     registered: "{jurisdiction} にて登記。",
     geo: "IP ジオロケーション: {dbip}",

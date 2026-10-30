@@ -462,6 +462,12 @@ export function CtaFooter() {
                   </Link>
                 </li>
               ))}
+              {/* Функция отзыва (ст. 11a CRD) — на виду всё время; без входа ведёт через страницу входа. */}
+              <li>
+                <Link href={href("/dashboard/billing#withdraw")} className="hover:text-white">
+                  {f.withdraw}
+                </Link>
+              </li>
               <li>
                 <button type="button" onClick={() => window.dispatchEvent(new Event(OPEN_COOKIE_SETTINGS))} className="hover:text-white">
                   {f.cookieSettings}

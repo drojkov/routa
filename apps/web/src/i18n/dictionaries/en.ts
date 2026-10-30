@@ -154,6 +154,7 @@ export const en = {
     support: "Support",
     contactUs: "Contact us",
     cookieSettings: "Cookie settings",
+    withdraw: "Withdraw from a top-up",
     rights: "© {year} {company}. All rights reserved.",
     registered: "Registered in {jurisdiction}.",
     geo: "IP geolocation by {dbip}",

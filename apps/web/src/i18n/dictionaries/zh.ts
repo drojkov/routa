@@ -152,6 +152,7 @@ export const zh: Dictionary = {
     support: "支持",
     contactUs: "联系我们",
     cookieSettings: "Cookie 设置",
+    withdraw: "撤回充值",
     rights: "© {year} {company}。保留所有权利。",
     registered: "注册于 {jurisdiction}。",
     geo: "IP 地理位置数据来自 {dbip}",

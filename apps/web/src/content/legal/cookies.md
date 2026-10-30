@@ -20,7 +20,7 @@ Cookies are small text files that a website stores in your browser. They let the
 | `cookie_consent` | Stores your cookie choices so we don't ask again on every visit | Harvanera (first party) | 6 months |
 | `better-auth.message` (local storage) | Keeps your sign-in state in sync across open tabs, for example signing you out in every tab when you sign out in one | Harvanera (first party) | Until you delete it in your browser |
 
-Our hosting and security provider, Cloudflare, may set a strictly necessary security cookie (such as `__cf_bm` or `cf_clearance`) if it needs to check that traffic is not automated. Members of our team may also receive a technical cookie, `geo_bypass` (12 months), used only for internal testing of regional restrictions; it is never set for other visitors.
+Our network security provider, Cloudflare, may set a strictly necessary security cookie (such as `__cf_bm` or `cf_clearance`) if it needs to check that traffic is not automated. Members of our team may also receive a technical cookie, `geo_bypass` (12 months), used only for internal testing of regional restrictions; it is never set for other visitors.
 
 We do not use cookies to track you across other websites.
 

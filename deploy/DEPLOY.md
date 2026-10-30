@@ -44,15 +44,34 @@ Cloudflare — сайт берёт `CF-Connecting-IP`, иначе ему не в
 
 ## Почта
 
-Письма с сервера не уходят. `mail.harvanera.com` резолвится в `37.27.228.25` — это и внешний IP самого сервера
-витрин (он за NAT, внутренний адрес `192.168.32.3`). Снаружи почтовый сервер отвечает на 587/465/25
-(`220 mail.dev-store.info`), изнутри — timeout: NAT не пускает к собственному внешнему адресу.
+Письма уходят с 2026-10-29: приложение ходит к почтовику по внутреннему адресу `192.168.32.4`
+(задан в `docker-compose.yml`, переопределить — `EMAIL_HOST_INTERNAL`). Снаружи `mail.harvanera.com`
+= `37.27.228.25`, изнутри этот адрес недоступен (NAT без hairpin). Диагностика — ручные задачи `mail-check`, `mail-fix`.
 
-**Нужно от девопса:** внутренний адрес почтового сервера и доступ к нему с сервера витрин по 587 —
-тогда `EMAIL_HOST=<внутренний адрес>` в `.env` (проверка сертификата и так выключена,
-`EMAIL_TLS_REJECT_UNAUTHORIZED=false`). Либо включить hairpin NAT на шлюзе `192.168.32.1`.
-Проверка — ручная задача `mail-check` в пайплайне `dev`. Отдельно нужен SPF для harvanera.com:
-TXT `v=spf1 a mx ~all` (DNS в Cloudflare).
+### DNS для доставки (Cloudflare, зона harvanera.com) — сделать человеку с доступом к зоне
+
+Без SPF и DMARC письма с info@harvanera.com (подтверждение email — без него нельзя пополнить баланс,
+чеки, возвраты) Gmail и Outlook кладут в спам или отклоняют. Сейчас (проверено 2026-10-29) нет ни того, ни другого.
+Записи — по образцу соседней витрины dev-store.info на том же почтовике (`v=spf1 a mx -all`, `p=quarantine`):
+
+| Тип | Имя | Значение | Прокси |
+|---|---|---|---|
+| TXT | `harvanera.com` (@) | `v=spf1 mx ip4:37.27.228.25 ~all` | — |
+| TXT | `_dmarc` | `v=DMARC1; p=none; rua=mailto:info@harvanera.com; adkim=r; aspf=r` | — |
+
+- В SPF не `a`, а `mx` + IP: корень harvanera.com проксирует Cloudflare, `a` дал бы адреса Cloudflare.
+- `mx` → `mail.harvanera.com` → `37.27.228.25` — запись `mail` должна оставаться **DNS only** (серое облако).
+- DKIM (`mail._domainkey`) уже есть. Через 1–2 недели без жалоб в отчётах DMARC — ужесточить:
+  SPF `-all`, DMARC `p=quarantine` (как у dev-store.info).
+- Проверка после правки: `dig +short TXT harvanera.com`, `dig +short TXT _dmarc.harvanera.com`,
+  и письмо на Gmail → «Показать оригинал»: SPF, DKIM и DMARC — PASS.
+
+### Сертификат почтовика
+
+По прошлой диагностике (`mail-check`) сертификат почтового сервера выписан на чужое имя и истёк в 2026-07, поэтому в приложении
+проверка TLS выключена (`EMAIL_TLS_REJECT_UNAUTHORIZED=false`). Это сервер компании, не наш: попросить
+девопса выпустить сертификат (Let's Encrypt) с именами `mail.dev-store.info` и `mail.harvanera.com`.
+После этого убрать `EMAIL_TLS_REJECT_UNAUTHORIZED=false` из `.env` (CI-переменная `ENV_FILE`).
 
 ## Бэкапы
 

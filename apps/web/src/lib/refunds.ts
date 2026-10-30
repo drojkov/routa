@@ -47,6 +47,7 @@ export function listRefundRequests(userId: string) {
       id: schema.refundRequest.id,
       amountMicros: schema.refundRequest.amountMicros,
       status: schema.refundRequest.status,
+      kind: schema.refundRequest.kind,
       createdAt: schema.refundRequest.createdAt,
       decisionNote: schema.refundRequest.decisionNote,
     })

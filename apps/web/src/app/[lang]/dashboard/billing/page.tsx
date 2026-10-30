@@ -5,6 +5,7 @@ import { listLedger, requireUser } from "@/lib/account";
 import { parseTopUpUsd } from "@/lib/billing";
 import { getRefundableMicros, listRefundRequests } from "@/lib/refunds";
 import { listPayments } from "@/lib/usage";
+import { listWithdrawable } from "@/lib/withdrawal";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/dashboard/billing">): Promise<Metadata> {
   const { dict } = await loadLocale(params);
@@ -27,7 +28,15 @@ export default async function BillingPage({ params, searchParams }: PageProps<"/
         currency: o.currency,
         amountMinor: o.amountMinor,
       }))}
-      refunds={refunds.map((r) => ({ id: r.id, usd: r.amountMicros / 1_000_000, status: r.status, at: r.createdAt.getTime(), note: r.decisionNote }))}
+      refunds={refunds.map((r) => ({ id: r.id, kind: r.kind, usd: r.amountMicros / 1_000_000, status: r.status, at: r.createdAt.getTime(), note: r.decisionNote }))}
+      withdrawable={listWithdrawable(user.id).map((w) => ({
+        paymentId: w.paymentId,
+        paidAt: w.paidAt.getTime(),
+        usd: w.amountMicros / 1_000_000,
+        currency: w.currency,
+        amountMinor: w.amountMinor,
+      }))}
+      userName={user.name}
       refundableUsd={getRefundableMicros(user.id) / 1_000_000}
       email={user.email}
       emailVerified={user.emailVerified}

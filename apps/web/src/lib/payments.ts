@@ -74,7 +74,7 @@ async function sendTopUpConfirmation(paymentId: string) {
     `When you topped up, you confirmed: "${waiver}"`,
     "",
     "Right of withdrawal (consumers in the EU, EEA and UK)",
-    `You may withdraw from this top-up within 14 days of payment without giving a reason. To withdraw, email ${COMPANY.email} or write to ${COMPANY.legalName}, ${COMPANY.address}, with the order ID above. We refund the amount you paid, less any amount the law allows us to charge for service already provided, within 14 days of your notice, to the original payment method. Details: ${refunds}`,
+    `You may withdraw from this top-up within 14 days of payment without giving a reason. To withdraw, press "Withdraw from contract here" on the Billing page of your dashboard (${site}/en/dashboard/billing#withdraw), email ${COMPANY.email} or write to ${COMPANY.legalName}, ${COMPANY.address}, with the order ID above. We refund the amount you paid, less any amount the law allows us to charge for service already provided, within 14 days of your notice, to the original payment method. Details: ${refunds}`,
     "",
     `You can also ask for a refund of your unused paid balance at any time under our Refund Policy: ${refunds}`,
     `Terms of Service: ${terms}`,
@@ -95,7 +95,7 @@ async function sendTopUpConfirmation(paymentId: string) {
 <h3 style="font-size:14px;margin:20px 0 4px">Your request to start immediately</h3>
 <p style="margin:0">When you topped up, you confirmed: “${h(waiver)}”</p>
 <h3 style="font-size:14px;margin:20px 0 4px">Right of withdrawal (consumers in the EU, EEA and UK)</h3>
-<p style="margin:0">You may withdraw from this top-up within 14 days of payment without giving a reason. To withdraw, email ${link(`mailto:${COMPANY.email}`, COMPANY.email)} or write to ${h(COMPANY.legalName)}, ${h(COMPANY.address)}, with the order ID above. We refund the amount you paid, less any amount the law allows us to charge for service already provided, within 14 days of your notice, to the original payment method. ${link(refunds, "Refund Policy")}.</p>
+<p style="margin:0">You may withdraw from this top-up within 14 days of payment without giving a reason. To withdraw, press ${link(`${site}/en/dashboard/billing#withdraw`, "Withdraw from contract here")} on the Billing page of your dashboard, email ${link(`mailto:${COMPANY.email}`, COMPANY.email)} or write to ${h(COMPANY.legalName)}, ${h(COMPANY.address)}, with the order ID above. We refund the amount you paid, less any amount the law allows us to charge for service already provided, within 14 days of your notice, to the original payment method. ${link(refunds, "Refund Policy")}.</p>
 <p>You can also ask for a refund of your unused paid balance at any time. ${link(terms, "Terms of Service")}.</p>
 <p style="color:#666;font-size:12px">Seller: ${h(seller)}. Questions: ${h(COMPANY.email)}</p>
 </div>`;

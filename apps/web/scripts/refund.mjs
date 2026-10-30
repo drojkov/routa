@@ -109,15 +109,16 @@ if (cmd === "create") {
 if (cmd === "list") {
   const rows = db
     .prepare(
-      `select r.id, r.amount_micros, r.created_at, r.reason, u.email from refund_request r join user u on u.id = r.user_id
+      `select r.id, r.kind, r.amount_micros, r.created_at, r.reason, u.email from refund_request r join user u on u.id = r.user_id
         where r.status = 'pending' order by r.created_at`,
     )
     .all();
   if (!rows.length) console.log("No pending refund requests.");
   for (const r of rows) {
-    const due = addBusinessDays(r.created_at, 3);
+    // Отзыв (14 дней, Refund Policy §3): деньги вернуть в 14 календарных дней; возврат — решение за 3 рабочих.
+    const due = r.kind === "withdrawal" ? new Date(r.created_at + 14 * 86_400_000) : addBusinessDays(r.created_at, 3);
     const late = due.getTime() < Date.now() ? "  OVERDUE" : "";
-    console.log(`${r.id}  USD ${usd(r.amount_micros)}  ${new Date(r.created_at).toISOString().slice(0, 10)}  review by ${due.toISOString().slice(0, 10)}${late}  ${r.email}  ${r.reason ?? ""}`);
+    console.log(`${r.kind === "withdrawal" ? "[WITHDRAWAL] " : ""}${r.id}  USD ${usd(r.amount_micros)}  ${new Date(r.created_at).toISOString().slice(0, 10)}  review by ${due.toISOString().slice(0, 10)}${late}  ${r.email}  ${r.reason ?? ""}`);
   }
   process.exit(0);
 }
@@ -149,6 +150,7 @@ const run = db.transaction(() => {
   if (partial !== null && partial > r.amount_micros) throw new Error(`The request is for USD ${usd(r.amount_micros)} — can't approve more.`);
   const now = Date.now();
   const release = (amount, ledgerNote) =>
+    amount > 0 &&
     db.prepare("insert into ledger (id, user_id, kind, amount_micros, ref, note, created_at) values (?, ?, 'adjust', ?, ?, ?, ?)").run(
       randomUUID(),
       r.user_id,
@@ -176,7 +178,9 @@ try {
   const { r, approved, rest: released } = run();
   if (cmd === "approve") {
     console.log(`Approved: ${id}, USD ${usd(approved)}${released > 0 ? ` (USD ${usd(released)} of the hold returned to the balance)` : ""}`);
-    console.log(`Send the refund by ${addBusinessDays(Date.now(), 10).toISOString().slice(0, 10)} (10 business days, Refund Policy §2).`);
+    if (r.kind === "withdrawal")
+      console.log(`Withdrawal: send the refund by ${new Date(r.created_at + 14 * 86_400_000).toISOString().slice(0, 10)} (14 days from the notice, Refund Policy §3.2).`);
+    else console.log(`Send the refund by ${addBusinessDays(Date.now(), 10).toISOString().slice(0, 10)} (10 business days, Refund Policy §2).`);
   } else {
     console.log(`Rejected: ${id}, USD ${usd(r.amount_micros)} returned to the balance. Reason shown to the customer: ${note}`);
   }

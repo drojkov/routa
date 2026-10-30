@@ -15,6 +15,7 @@ import { notifyInvoiceRequest } from "@/lib/payments";
 import { clientIp, countryOf } from "@/lib/geo";
 import { creditPayment, demoPaymentsEnabled } from "@/lib/payments";
 import { createRefundRequest, notifyRefundRequest } from "@/lib/refunds";
+import { createWithdrawal, notifyWithdrawal } from "@/lib/withdrawal";
 import { dismissNoticeFor } from "@/lib/notices";
 import { getRequestContent } from "@/lib/request-content";
 import { MODELS } from "@/lib/site";
@@ -209,6 +210,22 @@ export async function requestRefund(input: { reason: string }): Promise<RefundAc
   const res = createRefundRequest(session.user.id, reason, clientIp(h));
   if (!res.ok) return res;
   void notifyRefundRequest({ id: res.id, email: session.user.email, amountMicros: res.amountMicros, reason });
+  revalidatePath("/[lang]/dashboard", "layout");
+  return { ok: true };
+}
+
+export type WithdrawActionResult = { ok: true } | { ok: false; error: "not_found" | "expired" | "name" };
+
+/** Отзыв пополнения в 14 дней (Refund Policy §3, ст. 11a CRD): второй шаг — «Confirm withdrawal». */
+export async function withdrawTopUp(input: { paymentId: string; name: string }): Promise<WithdrawActionResult> {
+  const h = await headers();
+  const session = await auth.api.getSession({ headers: h });
+  if (!session) throw new Error("Unauthorized");
+  const name = input.name.trim().slice(0, 200);
+  if (!name) return { ok: false, error: "name" };
+  const res = createWithdrawal(session.user.id, String(input.paymentId), name, clientIp(h));
+  if (!res.ok) return res;
+  void notifyWithdrawal({ id: res.id, email: session.user.email, name, res });
   revalidatePath("/[lang]/dashboard", "layout");
   return { ok: true };
 }

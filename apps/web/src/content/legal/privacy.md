@@ -2,7 +2,7 @@
 
 **Effective date: 29 October 2026**
 
-This Privacy Policy explains how **Harvanera Limited** ("Harvanera", "we", "us" or "our") handles personal data when you visit our website, create an account, make a payment, contact us or use our dashboard and API (together, the "Service"). Please read it together with our [Terms of Service](/legal/terms), [Cookie Policy](/legal/cookies).
+This Privacy Policy explains how **Harvanera Limited** ("Harvanera", "we", "us" or "our") handles personal data when you visit our website, create an account, make a payment, contact us or use our dashboard and API (together, the "Service"). Please read it together with our [Terms of Service](/legal/terms) and [Cookie Policy](/legal/cookies).
 
 ## 1. Who is responsible for your data
 
@@ -15,7 +15,7 @@ We decide how and why we process information about visitors, account holders and
 | Category | What it may include | How we receive it |
 | --- | --- | --- |
 | Account and sign-in information | Email address, account identifier, authentication information, and any name or profile details you provide | From you |
-| Billing and transaction information | Top-up amount and payment currency, resulting USD balance, exchange rate shown at checkout, payment status, transaction references, refund requests and invoice details | From you, our payment service provider and our own transaction records |
+| Billing and transaction information | Top-up amount and payment currency, resulting USD balance, exchange rate shown at checkout, payment status, transaction references, refund and withdrawal requests (including the IP address the request was sent from) and invoice details | From you, our payment service provider and our own transaction records |
 | Order and consent records | For each top-up order: the IP address, approximate country derived from it, browser information and the time you gave the consent shown at checkout | Generated when you place an order |
 | API request metadata | Model selected, usage units such as input and output tokens, charge, timestamp, API key identifier, IP address and request status | Generated when you use the Service |
 | Technical and security information | IP address, approximate country derived from the IP address, browser or device information, session information and security events | From your device and our systems |
@@ -67,7 +67,7 @@ We may use automated signals to identify suspicious sign-ups, payments or reques
 We disclose personal data only as needed for the purposes above, to the following classes of recipients:
 
 - **Model Providers:** the provider of the model you select receives request content and the technical information needed to process it. Currently this is DeepInfra, Inc. (United States), which runs the models available on the Service. We will update this list before any other provider receives request content. A provider's own terms and privacy notice may govern some of its processing.
-- **Service providers:** companies that provide hosting, technical infrastructure, payment processing, authentication, email delivery or customer-support services. They receive only the information needed for their role.
+- **Service providers:** companies that provide hosting, technical infrastructure, payment processing, authentication, email delivery, software deployment or customer-support services. They receive only the information needed for their role.
 - **Payment service provider and card networks:** where a payment is disputed or a chargeback is raised, the order, consent and sign-in records needed to respond to it.
 - **Professional advisers and transaction parties:** lawyers, accountants, auditors and, if relevant, a purchaser or successor to our business, subject to appropriate protections.
 - **Public authorities and other parties:** where disclosure is required by law, necessary to protect legal rights or needed to respond to a valid legal request.
@@ -76,7 +76,7 @@ We do not sell personal data or disclose it for cross-context behavioural advert
 
 ## 6. Processing outside Hong Kong
 
-Harvanera is based in Hong Kong. Our servers, including our database and email server, are hosted in Finland (European Union). Website and API traffic passes through Cloudflare, Inc. (United States), which provides network security and content delivery. Request content is processed by DeepInfra, Inc. in the United States. Our payment service provider may process payment data in other countries under its own privacy notice. The Service is unavailable to customers in the locations listed in our [Terms of Service](/legal/terms); this does not mean that a provider located in one of those places cannot receive a request where lawful and disclosed here.
+Harvanera is based in Hong Kong. Our servers, including our database and email server, are hosted by Hetzner Online GmbH in Finland (European Union). The internal tools our team uses to deploy the Service and run support look-ups are hosted by Hetzner Online GmbH in Germany (European Union). Website and API traffic passes through Cloudflare, Inc. (United States), which provides network security and content delivery. Request content is processed by DeepInfra, Inc. in the United States. Our payment service provider may process payment data in other countries under its own privacy notice. The Service is unavailable to customers in the locations listed in our [Terms of Service](/legal/terms); this does not mean that a provider located in one of those places cannot receive a request where lawful and disclosed here.
 
 Different countries have different data protection laws. We take account of the laws that apply to a transfer and of the recipient's role and protections. If EU or UK transfer rules apply, an applicable legal transfer mechanism and any required safeguards must be in place. You can ask [info@harvanera.com](mailto:info@harvanera.com) for information about the arrangements relevant to a particular provider or transfer.
 
@@ -87,12 +87,15 @@ We keep personal data for the time needed for the purpose for which it was colle
 | Data | Retention approach |
 | --- | --- |
 | Account information and settings | While the account is open. When you close your account, we delete your password, sessions and saved request content and revoke your API keys; we anonymise your name and email address once any outstanding refund is resolved |
-| Request metadata | As needed to show usage, calculate charges, investigate errors or abuse and handle disputes; no longer than necessary for those purposes |
+| Request metadata | Kept with your billing records (see "Business and accounting records" below), because each request is a charge to your balance. The IP address in each record is removed after **24 months** |
 | Request content when logging is off | Processed to fulfil the request; not stored by us as a request history |
 | Request content when logging is on | Kept for **30 days**, then deleted automatically from our live database. Copies may remain in routine backups for up to **14 further days** until those backups are overwritten. We may keep limited information for an unresolved security or legal matter where permitted |
-| Sign-in history, support communications, and IP addresses and browser information in order, consent and request records | Up to **24 months** after they are created, then deleted or anonymised automatically. We may keep specific records longer only while they are needed for an unresolved security investigation, payment dispute, chargeback or legal claim |
+| Sign-in history, messages sent through our contact form, and IP addresses and browser information in order, consent, refund and request records | Up to **24 months** after they are created, then deleted or anonymised automatically. We may keep specific records longer only while they are needed for an unresolved security investigation, payment dispute, chargeback or legal claim |
+| Sign-in sessions and email-confirmation links | Until they expire or you sign out; expired ones are deleted automatically |
+| Emails in our support mailbox | Up to **24 months** after they are received; we delete older messages from the mailbox periodically, except where a message is needed for an unresolved dispute or legal claim |
+| Results of look-ups made by our support staff in internal tools | Up to **7 days** |
 | Database backups | Kept for up to **14 days**, then overwritten |
-| Business and accounting records | For at least seven years after the transactions they document where Hong Kong record-keeping law applies, and longer only if another legal duty or unresolved claim requires it |
+| Business and accounting records, including top-up orders, balance transactions, invoices and refund and withdrawal requests (with the name given in a withdrawal notice) | For at least seven years after the transactions they document where Hong Kong record-keeping law applies, and longer only if another legal duty or unresolved claim requires it |
 
 Model Providers and payment service providers have their own retention practices. Their privacy notices may apply to information they receive. Turning off request logging or closing your Harvanera account does not itself delete records held by those independent providers.
 

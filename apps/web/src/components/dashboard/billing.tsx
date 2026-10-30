@@ -7,20 +7,23 @@ import { MerchantInfo } from "@/components/site/merchant-info";
 import { TopUpAmount } from "@/components/site/topup-amount";
 import { fmtNodes } from "@/i18n/fmt";
 import { useI18n } from "@/i18n/provider";
-import { createTopUp, requestRefund, resendVerification } from "@/lib/actions/dashboard";
+import { createTopUp, requestRefund, resendVerification, withdrawTopUp } from "@/lib/actions/dashboard";
 import { MAX_TOPUP_USD, MIN_TOPUP_USD, parseTopUpUsd } from "@/lib/billing";
 import { cn } from "@/lib/utils";
 import { PageTitle, Panel } from "./ui";
 
 type Entry = { id: string; kind: "bonus" | "topup" | "debit" | "refund" | "adjust"; usd: number; at: number; note: string | null };
 type Order = { id: string; status: "pending" | "paid" | "failed" | "canceled"; usd: number; at: number; currency: string; amountMinor: number };
-type Refund = { id: string; usd: number; status: "pending" | "approved" | "rejected"; at: number; note: string | null };
+type Withdrawable = { paymentId: string; paidAt: number; usd: number; currency: string; amountMinor: number };
+type Refund = { id: string; kind: "refund" | "withdrawal"; usd: number; status: "pending" | "approved" | "rejected"; at: number; note: string | null };
 
 export function Billing({
   ledger,
   orders,
   refunds,
   refundableUsd,
+  withdrawable,
+  userName,
   email,
   emailVerified,
   justVerified,
@@ -31,6 +34,8 @@ export function Billing({
   orders: Order[];
   refunds: Refund[];
   refundableUsd: number;
+  withdrawable: Withdrawable[];
+  userName: string;
   email: string;
   emailVerified: boolean;
   justVerified?: boolean;
@@ -54,6 +59,7 @@ export function Billing({
           <Orders orders={orders} />
         </div>
         <div className="space-y-4 lg:col-span-3">
+          <WithdrawPanel items={withdrawable} userName={userName} email={email} />
           <RefundPanel refundableUsd={refundableUsd} refunds={refunds} />
           <History ledger={ledger} />
         </div>
@@ -242,6 +248,113 @@ export function TopUp({ initialUsd, initialMethod }: { initialUsd?: number; init
   );
 }
 
+/* ——— Отзыв пополнения в 14 дней (Refund Policy §3, ст. 11a CRD): кнопка → подтверждение → письмо ——— */
+function WithdrawPanel({ items, userName, email }: { items: Withdrawable[]; userName: string; email: string }) {
+  const { dict, t, href, date } = useI18n();
+  const w = dict.cab.billing.withdraw;
+  const [selected, setSelected] = React.useState<Withdrawable | null>(null);
+  const [name, setName] = React.useState(userName);
+  const [msg, setMsg] = React.useState<{ ok: boolean; text: string } | null>(null);
+  const [pending, start] = React.useTransition();
+  const paid = (x: Withdrawable) =>
+    new Intl.NumberFormat("en", { style: "currency", currency: x.currency }).format(x.amountMinor / (x.currency === "JPY" ? 1 : 100));
+  const until = (x: Withdrawable) => date(x.paidAt + 14 * 86_400_000, { day: "numeric", month: "short", year: "numeric" });
+  const orderNo = (x: Withdrawable) => `#${x.paymentId.slice(0, 8).toUpperCase()}`;
+
+  function confirm() {
+    if (!selected) return;
+    start(async () => {
+      const res = await withdrawTopUp({ paymentId: selected.paymentId, name });
+      if (res.ok) {
+        setMsg({ ok: true, text: t(w.done, { email }) });
+        setSelected(null);
+      } else setMsg({ ok: false, text: res.error === "name" ? w.errorName : res.error === "expired" ? w.errorExpired : w.errorNotFound });
+    });
+  }
+
+  return (
+    <div id="withdraw" className="scroll-mt-24">
+      <Panel
+        title={w.title}
+        action={
+          <Link href={href("/legal/refunds")} target="_blank" className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground">
+            {w.policy}
+          </Link>
+        }
+      >
+        <p className="text-sm text-muted-foreground">{w.text}</p>
+        {items.length === 0 && !msg && <p className="mt-2 text-xs text-muted-foreground">{w.none}</p>}
+        {!selected && items.length > 0 && (
+          <ul className="mt-3 divide-y divide-border text-sm">
+            {items.map((x) => (
+              <li key={x.paymentId} className="flex flex-wrap items-center justify-between gap-2 py-2">
+                <span>
+                  <span className="tabular-nums">{orderNo(x)} · {paid(x)}</span>
+                  <span className="ml-2 text-xs text-muted-foreground">{t(w.until, { date: until(x) })}</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMsg(null);
+                    setSelected(x);
+                  }}
+                  className="inline-flex h-9 items-center rounded-full border border-border px-4 text-sm font-medium hover:bg-muted"
+                >
+                  {w.button}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        {selected && (
+          <div className="mt-3 space-y-3 rounded-2xl border border-border p-4">
+            <p className="text-sm font-medium">{w.confirmTitle}</p>
+            <dl className="space-y-1 text-sm">
+              <div className="flex justify-between gap-4">
+                <dt className="text-muted-foreground">{w.contract}</dt>
+                <dd className="text-right tabular-nums">{orderNo(selected)} · {paid(selected)} · {date(selected.paidAt, { day: "numeric", month: "short", year: "numeric" })}</dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-muted-foreground">{w.email}</dt>
+                <dd className="text-right">{email}</dd>
+              </div>
+            </dl>
+            <label className="block text-xs text-muted-foreground">
+              {w.name}
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                maxLength={200}
+                className="mt-1 h-9 w-full rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none focus:border-brand focus:ring-3 focus:ring-brand/20"
+              />
+            </label>
+            <p className="text-xs text-muted-foreground">{w.confirmText}</p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                disabled={pending}
+                onClick={confirm}
+                className="inline-flex h-9 items-center gap-1.5 rounded-full bg-foreground px-4 text-sm font-medium text-background disabled:opacity-70"
+              >
+                {pending && <Loader2 className="size-4 animate-spin" />}
+                {w.confirm}
+              </button>
+              <button type="button" onClick={() => setSelected(null)} className="inline-flex h-9 items-center rounded-full px-4 text-sm text-muted-foreground hover:bg-muted">
+                {w.cancel}
+              </button>
+            </div>
+          </div>
+        )}
+        {msg && (
+          <p role="status" className={cn("mt-3 rounded-lg px-3 py-2 text-xs", msg.ok ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-700")}>
+            {msg.text}
+          </p>
+        )}
+      </Panel>
+    </div>
+  );
+}
+
 /* ——— Возврат неиспользованного оплаченного баланса (Refund Policy §2) ——— */
 function RefundPanel({ refundableUsd, refunds }: { refundableUsd: number; refunds: Refund[] }) {
   const { dict, money, t, href, date, currency } = useI18n();
@@ -338,7 +451,10 @@ function RefundPanel({ refundableUsd, refunds }: { refundableUsd: number; refund
                   <span className="tabular-nums">
                     {usd(x.usd)} <span className="ml-1 text-xs text-muted-foreground">{date(x.at, { day: "numeric", month: "short" })}</span>
                   </span>
-                  <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-medium", tone[x.status])}>{r.status[x.status]}</span>
+                  <span className="flex items-center gap-1.5">
+                    {x.kind === "withdrawal" && <span className="text-[11px] text-muted-foreground">{dict.cab.billing.withdraw.kind}</span>}
+                    <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-medium", tone[x.status])}>{r.status[x.status]}</span>
+                  </span>
                 </div>
                 {/* Комментарий поддержки: причина отказа или частичное одобрение (scripts/refund.mjs). */}
                 {x.note && <p className="mt-1 text-xs text-muted-foreground">{t(r.note, { note: x.note })}</p>}

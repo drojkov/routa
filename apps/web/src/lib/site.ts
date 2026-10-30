@@ -21,7 +21,7 @@ export const CONTACT_TOPICS = ["general", "billing", "refund", "technical", "abu
 export type ContactTopic = (typeof CONTACT_TOPICS)[number];
 
 /** Дата вступления юридических документов в силу. */
-export const LEGAL_EFFECTIVE_DATE = "30 September 2026";
+export const LEGAL_EFFECTIVE_DATE = "29 October 2026";
 
 export const LEGAL_DOCS = [
   "terms",
