@@ -194,7 +194,7 @@ export const cabDe: CabDictionary = {
   docs: {
     title: "Dokumentation",
     onThisPage: "Auf dieser Seite",
-    englishNote: "Die Dokumentation ist auf Englisch und Russisch verfügbar. Die Codebeispiele sind in allen Sprachen gleich.",
+    englishNote: "Die Dokumentation ist auf Englisch verfügbar. Die Codebeispiele sind in allen Sprachen gleich.",
   },
   model: {
     back: "Alle Modelle",

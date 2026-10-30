@@ -194,7 +194,7 @@ export const cabZh: CabDictionary = {
   docs: {
     title: "文档",
     onThisPage: "本页内容",
-    englishNote: "文档提供英文和俄文版本。代码示例在所有语言中都相同。",
+    englishNote: "文档提供英文版本。代码示例在所有语言中都相同。",
   },
   model: {
     back: "全部模型",

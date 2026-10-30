@@ -196,7 +196,7 @@ export const cabEn = {
   docs: {
     title: "Documentation",
     onThisPage: "On this page",
-    englishNote: "The documentation is available in English and Russian. Code samples are the same in every language.",
+    englishNote: "The documentation is available in English. Code samples are the same in every language.",
   },
   model: {
     back: "All models",

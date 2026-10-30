@@ -194,7 +194,7 @@ export const cabJa: CabDictionary = {
   docs: {
     title: "ドキュメント",
     onThisPage: "このページの内容",
-    englishNote: "ドキュメントは英語とロシア語で提供しています。コード例はどの言語でも同じです。",
+    englishNote: "ドキュメントは英語で提供しています。コード例はどの言語でも同じです。",
   },
   model: {
     back: "すべてのモデル",
