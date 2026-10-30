@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Building2, CreditCard, Loader2, MailCheck, Smartphone } from "lucide-react";
+import { ArrowRight, Building2, CreditCard, Loader2, MailCheck } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 import { MerchantInfo } from "@/components/site/merchant-info";
@@ -145,7 +145,6 @@ export function TopUp({ initialUsd, initialMethod }: { initialUsd?: number; init
 
   const methods = [
     { k: "card", t: p.card, i: CreditCard },
-    { k: "wallet", t: p.wallet, i: Smartphone },
     { k: "invoice", t: p.invoice, i: Building2 },
   ];
   const active = methods.some((m) => m.k === method) ? method : "card";
@@ -185,7 +184,7 @@ export function TopUp({ initialUsd, initialMethod }: { initialUsd?: number; init
         />
 
         <p className="mt-4 text-xs text-muted-foreground">{tp.method}</p>
-        <div className="mt-1.5 grid grid-cols-3 gap-2 text-xs">
+        <div className="mt-1.5 grid grid-cols-2 gap-2 text-xs">
           {methods.map(({ k, t: label, i: Icon }) => (
             <button
               type="button"

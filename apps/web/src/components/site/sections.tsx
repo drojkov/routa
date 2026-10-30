@@ -11,7 +11,6 @@ import {
 
   ReceiptText,
   RefreshCw,
-  Smartphone,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -311,7 +310,6 @@ export function Pricing() {
   const [method, setMethod] = React.useState<string>("card");
   const methods = [
     { k: "card", t: p.card, i: CreditCard },
-    { k: "wallet", t: p.wallet, i: Smartphone },
     { k: "invoice", t: p.invoice, i: Building2 },
   ] as const;
   const active = methods.some((m) => m.k === method) ? method : "card";
@@ -351,7 +349,7 @@ export function Pricing() {
             </p>
           )}
 
-          <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
+          <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
             {methods.map(({ k, t: label, i: Icon }) => (
               <button
                 type="button"

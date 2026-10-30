@@ -95,7 +95,6 @@ export const ja: Dictionary = {
     formLabel: "残高をチャージ",
     approx: "≈ {model} で {n} 回答",
     card: "カード",
-    wallet: "Apple / Google Pay",
     invoice: "法人請求書",
     pay: "次へ — {amount}",
     invoiceCta: "請求書を依頼",

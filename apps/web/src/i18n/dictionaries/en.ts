@@ -97,7 +97,6 @@ export const en = {
     formLabel: "Top up balance",
     approx: "≈ {n} answers from {model}",
     card: "Card",
-    wallet: "Apple / Google Pay",
     invoice: "Company invoice",
     pay: "Continue — {amount}",
     invoiceCta: "Request an invoice",

@@ -95,7 +95,6 @@ export const zh: Dictionary = {
     formLabel: "充值余额",
     approx: "≈ {model} 的 {n} 次回答",
     card: "银行卡",
-    wallet: "Apple / Google Pay",
     invoice: "企业发票",
     pay: "继续 — {amount}",
     invoiceCta: "申请发票",

@@ -95,7 +95,6 @@ export const pt: Dictionary = {
     formLabel: "Recarregar saldo",
     approx: "≈ {n} respostas do {model}",
     card: "Cartão",
-    wallet: "Apple / Google Pay",
     invoice: "Fatura para empresa",
     pay: "Continuar — {amount}",
     invoiceCta: "Solicitar fatura",

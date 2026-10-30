@@ -23,7 +23,8 @@ export function parseTopUpUsd(v: unknown): number | null {
  * Неоплаченный заказ закрывается сам через сутки (db/index.ts, ORDER_TTL_MS).
  */
 export const ORDER_LIMITS = { openPending: 5, perTenMinutes: 3 };
-export const PAYMENT_METHODS = ["card", "wallet", "invoice"] as const;
+// "wallet" (Apple/Google Pay) убран 2026-10-30: в политике юриста только карта; в схеме БД значение оставлено для старых заказов.
+export const PAYMENT_METHODS = ["card", "invoice"] as const;
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 export const isPaymentMethod = (v: unknown): v is PaymentMethod => (PAYMENT_METHODS as readonly unknown[]).includes(v);
 
