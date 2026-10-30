@@ -59,12 +59,12 @@ The Service operates on a prepaid basis. Your balance is held in US dollars (USD
 
 ### 5.2 Top-ups
 
-- You can top up by any amount you choose in US dollars, to the cent, from **USD 1** to **USD 10,000** per top-up. The amount you enter is the amount credited to your balance. You can pay by card or digital wallet (Apple Pay or Google Pay, where your device supports it) in USD, EUR, GBP, CNY, JPY, INR, BRL or HKD.
+- You can top up by any amount you choose in US dollars, to the cent, from **USD 1** to **USD 10,000** per top-up. The amount you enter is the amount credited to your balance. You can pay by card in USD, EUR, GBP, CNY, JPY, INR, BRL or HKD.
 - You must confirm your email address before you can top up.
 - If you pay in a currency other than USD, we will show you the exchange rate and the resulting USD top-up amount before you confirm payment. We will also show the total amount payable in your selected payment currency.
 - Any applicable taxes, including VAT or GST where relevant, will be displayed on the payment page and included in the total amount shown before you confirm payment. The amount added to your balance and the total amount charged will be shown separately where tax applies.
 - Business users can request an invoice for a top-up. The corresponding balance is credited after payment is received.
-- Card and wallet payments are handled by a third-party payment service provider. We do not request or store your full payment-card number.
+- Card payments are handled by a third-party payment service provider. We do not request or store your full payment-card number.
 - Your bank or card issuer may impose additional charges, such as foreign-transaction fees, under its own terms. Those charges are outside our control.
 
 ### 5.3 Fraud prevention
